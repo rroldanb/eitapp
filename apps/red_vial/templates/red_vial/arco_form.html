@@ -1,0 +1,25 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="section-header">
+    <h3>{% if arco %}Editar Arco{% else %}Nuevo Arco{% endif %}</h3>
+    <a href="{% url 'proyecto_arcos' proyecto.id %}" class="btn btn-secondary">Volver</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{% url 'proyecto_arcos' proyecto.id %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

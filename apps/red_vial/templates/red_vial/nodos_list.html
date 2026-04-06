@@ -1,0 +1,58 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="section-header">
+    <h3>Nodos del Proyecto</h3>
+    <a href="{% url 'nodo_create' proyecto.id %}" class="btn btn-primary">
+        + Agregar Nodo
+    </a>
+</div>
+
+<div class="row">
+    {% if nodos %}
+        {% for nodo in nodos %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Nodo {{ nodo.numero }}</h5>
+                    <p class="card-text text-muted">{{ nodo.interseccion|default:"Sin intersección" }}</p>
+
+                    <ul class="list-unstyled mt-3">
+                        {% if nodo.calle_1 %}
+                        <li><small class="text-muted">Calle 1:</small> {{ nodo.calle_1.nombre }}</li>
+                        {% endif %}
+                        {% if nodo.calle_2 %}
+                        <li><small class="text-muted">Calle 2:</small> {{ nodo.calle_2.nombre }}</li>
+                        {% endif %}
+                    </ul>
+
+                    <div class="mt-3">
+                        {% if nodo.plano %}
+                        <a href="{{ nodo.plano }}" target="_blank" class="btn btn-sm btn-outline-info">Ver Plano</a>
+                        {% endif %}
+                        {% if nodo.imagen %}
+                        <a href="{{ nodo.imagen }}" target="_blank" class="btn btn-sm btn-outline-secondary">Ver Foto</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'nodo_update' nodo.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                    <a href="{% url 'nodo_delete' nodo.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este nodo?')">Eliminar</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <p class="text-muted mb-3">No hay nodos registrados.</p>
+            <a href="{% url 'nodo_create' proyecto.id %}" class="btn btn-primary">
+                Agregar primer nodo
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

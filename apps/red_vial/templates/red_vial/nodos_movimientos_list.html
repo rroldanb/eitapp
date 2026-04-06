@@ -1,0 +1,52 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="section-header">
+    <h3>Nodos-Movimientos</h3>
+    <a href="{% url 'nodo_movimiento_create' proyecto.id %}" class="btn btn-primary">+ Agregar Configuración</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if nodos_movimientos %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nodo</th>
+                        <th>Movimiento</th>
+                        <th>Arco Entrada</th>
+                        <th>Arco Salida</th>
+                        <th>Prioridad</th>
+                        <th>Regulación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for nm in nodos_movimientos %}
+                    <tr>
+                        <td>{{ nm.nodo.numero }}</td>
+                        <td>{{ nm.movimiento.codigo }}</td>
+                        <td>{{ nm.arco_entrada.nodo_origen.numero }} → {{ nm.arco_entrada.nodo_destino.numero }}</td>
+                        <td>{{ nm.arco_salida.nodo_origen.numero }} → {{ nm.arco_salida.nodo_destino.numero }}</td>
+                        <td>{{ nm.get_tipo_prioridad_display }}</td>
+                        <td>{{ nm.regulacion|default:"-" }}</td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-primary">Editar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted mb-3">No hay configuraciones registradas.</p>
+            <a href="{% url 'nodo_movimiento_create' proyecto.id %}" class="btn btn-primary">Agregar primera configuración</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

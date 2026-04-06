@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="container">
+    <div class="row">
+        <div class="col-md-4 offset-md-4 mt-5 card card-detail">
+
+            <h1 class="text-center">Task Details</h1>
+            {% if task.is_important %}
+                            {% comment %} <strong>Important:</strong> {% endcomment %}
+                            <h3 class="text-danger text-center">{{ task.title }}</h3>
+                        {% else %}
+                            <h3 class="text-success text-center">{{ task.title }}</h3>
+                        {% endif %} 
+            {% comment %} <p>Description: {{ task.description }}</p>
+            <p>Assigned to: {{ task.user.username }}</p>
+            <p>Status: {{ task.is_completed|yesno:"Completed,Incomplete" }}</p> {% endcomment %}
+            
+            {{ error }}
+            
+            
+            <form method="POST">
+                {% csrf_token %}
+                {{ form }}
+                <button type="submit" class="btn btn-dark w-100 mt-1">Update</button>
+            </form>
+            <div class="d-flex justify-content-around mt-2">
+                <form action="{% url 'delete_task' task.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger w-100">Delete</button>
+                </form>
+                
+                <form action="{% url 'complete_task' task.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary w-100">Complete</button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</main>
+
+
+
+{% endblock %}

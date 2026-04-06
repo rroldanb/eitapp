@@ -1,0 +1,68 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<!-- Cover Content -->
+<div class="bg-light p-4 rounded">
+    <h3 class="mb-4">Detalles del Proyecto</h3>
+
+
+    <p><strong>Estado:</strong> {% if proyecto.is_completed %}Completado{% else %}En progreso{% endif %}</p>
+
+    {{ error }}
+
+    <form method="POST" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <textarea id="paste-area" class="form-control" rows="2" placeholder="Pega aquí una nueva imagen (Ctrl+V)"></textarea>
+        </div>
+
+        <input type="hidden" name="image_file" id="image_file">
+        <img id="preview" class="mb-3" style="max-width: 200px; display:none;" />
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-dark w-100 mt-1">Actualizar</button>
+    </form>
+
+    <div class="d-flex justify-content-around mt-3">
+        <form action="{% url 'proyecto_delete' proyecto.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100">Eliminar Proyecto</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById("paste-area").addEventListener("paste", async (event) => {
+        const items = event.clipboardData.items;
+
+        for (let item of items) {
+            if (item.type.indexOf("image") !== -1) {
+                const file = item.getAsFile();
+
+                // Preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById("preview").src = e.target.result;
+                    document.getElementById("preview").style.display = "block";
+                };
+                reader.readAsDataURL(file);
+
+                // Guardar en input hidden como base64
+                const base64 = await toBase64(file);
+                document.getElementById("image_file").value = base64;
+            }
+        }
+    });
+
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+</script>
+
+{% endblock %}

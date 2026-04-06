@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+    <section class="card card-body">
+        <h1 class="display-1 text-center bg-secondary" >Gestor de medición de tránsito EIT</h1>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio optio est consequatur esse quae unde autem, molestiae dignissimos quasi nulla recusandae repudiandae officia iusto asperiores, accusantium voluptatibus aliquid? Ratione at ab possimus soluta! Fuga laboriosam ad aspernatur? Consequatur nam sint minima porro officiis illo dolorem fugit assumenda aliquam dignissimos asperiores tempore repudiandae consectetur aperiam animi ad, magnam optio recusandae id quibusdam soluta commodi iste harum? Eaque cupiditate non itaque numquam repudiandae iure iusto aliquid id vitae magni! Tempore at tempora mollitia dolor laborum sunt fuga voluptatem, culpa eligendi maxime facere totam aliquam dolorum voluptatum sed aliquid ut nulla iste sit.</p>
+
+
+        {% if user.is_authenticated %}
+            <div class="text-center">
+                    <a href="/logout" class="btn btn-danger">Logout</a>
+            </div>
+        {% else %}
+            <div class="text-center">
+                <a href="/signin" class="btn btn-dark">Login</a>
+            </div>
+        {% endif %}
+    </section>
+</main>
+
+{% endblock %}

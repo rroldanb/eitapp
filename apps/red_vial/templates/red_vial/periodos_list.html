@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Períodos de Medición</h3>
+        <a href="{% url 'periodo_create' %}" class="btn btn-primary">+ Agregar Período</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if periodos %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Tipo de Día</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for periodo in periodos %}
+                    <tr>
+                        <td>{{ periodo.codigo }}</td>
+                        <td>{{ periodo.nombre }}</td>
+                        <td>{{ periodo.get_tipo_dia_display }}</td>
+                        <td>
+                            <a href="{% url 'periodo_update' periodo.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="{% url 'periodo_delete' periodo.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este período?')">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">No hay períodos registrados.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

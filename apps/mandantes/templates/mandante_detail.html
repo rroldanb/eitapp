@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block content %}
+
+<main class="container">
+  <div class="row">
+    <div class="mt-5 bg-light p-4 rounded">
+      <h2 class="text-center">Detalles del Mandante</h2>
+      <h3 class="text-success text-center">{{ mandante.name }}</h3>
+      {% comment %}
+      <p>Ubicación: {{ mandante.location }}</p>
+      <p>Detalles: {{ mandante.details }}</p>
+      <p>Contactos:</p>
+      {% endcomment %} 
+      {{ error }}
+
+      <form method="POST">
+        {% csrf_token %} {{ form }}
+
+        <div class="container-fluid mt-3">
+          <div class="row">
+            <div class="col-md-12">
+              <h4>Contactos asociados:</h4>
+              <div class="rounded-3 border mb-3">
+                <ul>
+                  {% for contacto in contactos %}
+                  <a
+                    href="{% url 'contacto_detail' contacto.id %}"
+                    class="text-decoration-none"
+                  >
+                    <li>{{ contacto.name }} - {{ contacto.position }}</li>
+                  </a>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <a
+          class="btn btn-primary w-100 {% if request.resolver_match.url_name == 'contacto_create' %}active{% endif %}"
+          href="{% url 'contacto_create' mandante.id %}"
+        >
+          Agregar contacto
+        </a>
+        <button type="submit" class="btn btn-dark w-100 mt-1">
+          Actualizar
+        </button>
+      </form>
+      <div class="d-flex justify-content-around mt-2">
+        <form action="{% url 'mandante_delete' mandante.id %}" method="POST">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger w-100">Eliminar</button>
+        </form>
+
+        <a
+          href="{% url 'mandantes' %}"
+          class="btn btn-secondary w-100 ms-1 mb-2"
+          >Volver</a
+        >
+      </div>
+    </div>
+  </div>
+</main>
+
+{% endblock %}

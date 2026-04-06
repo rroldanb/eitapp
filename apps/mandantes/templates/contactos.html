@@ -1,0 +1,30 @@
+
+{% block content %}
+
+<main class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 mt-5">
+            <h1 class="text-center">{{ list_title }}</h1>
+            <ul class="list-group">
+                {% if contactos %}
+                    {% for contacto in contactos %}
+                        <a href="{% url 'contacto_detail' contacto.id %}" class="text-decoration-none">
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <h5>{{ contacto.name }}</h5>
+                                    <p>{{ contacto.location }}</p>
+                                </div>
+                                <p>Descripción: {{ contacto.details }}</p>
+                            </li>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center">No hay contactos registrados.</p>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</main>
+
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="container">
+    <div class="row">
+        <div class="mt-5 bg-light p-4 rounded">
+            <h1 class="text-center">{{ list_title }}</h1>
+            <ul class="list-group">
+                {% if mandantes %}
+                    {% for mandante in mandantes %}
+                        <a href="{% url 'mandante_detail' mandante.id %}" class="text-decoration-none">
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <h5>{{ mandante.name }}</h5>
+                                    <p>{{ mandante.location }}</p>
+                                </div>
+                                <p>Descripción: {{ mandante.details }}</p>
+                            </li>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center">No hay mandantes registrados.</p>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</main>
+
+
+
+
+
+
+{% endblock %}

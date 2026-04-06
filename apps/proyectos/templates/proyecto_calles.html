@@ -1,0 +1,83 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="section-header">
+    <h3>Calles del Proyecto</h3>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCalleModal">
+        + Agregar Calle
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if calles %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Nombre</th>
+                        <th>Nodos Asociados</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for calle in calles %}
+                    <tr>
+                        <td>{{ calle.numero }}</td>
+                        <td>{{ calle.nombre }}</td>
+                        <td>
+                            {% with nodos_count=calle.nodos_calle_1.count|add:calle.nodos_calle_2.count %}
+                            {{ nodos_count }} nodo(s)
+                            {% endwith %}
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted mb-3">No hay calles registradas en este proyecto.</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCalleModal">
+                Agregar primera calle
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para agregar calle -->
+<div class="modal fade" id="addCalleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Calle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="calleForm">
+                    <div class="mb-3">
+                        <label class="form-label">Número de Calle</label>
+                        <input type="number" class="form-control" name="numero" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" name="nombre" placeholder="ej: Av. Huasco" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

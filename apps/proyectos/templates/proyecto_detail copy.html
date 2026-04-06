@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="container">
+    <div class="">
+        <div class="bg-light p-4 rounded">
+            <h1 class="text-center">{{ proyecto.title }}</h1>
+            <div class="d-flex justify-content-between mb-3">
+                <p class="">{{ proyecto.mandante }}</p>
+                <p> by: {{ proyecto.user.username }}</p>
+            </div>
+
+            
+            {% if proyecto.image_url %}
+            
+                <img src="{{ proyecto.image_url }}" alt="Imagen del proyecto" class="w-100 mb-3">
+            {% else %}
+                <p class="text-muted">Sin imagen</p>
+            {% endif %}
+            
+            {{ error }}
+            
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <textarea id="paste-area" class="w-100" rows="1" placeholder="Pega aquí una nueva imagen (Ctrl+V)"></textarea>
+                <input type="hidden" name="image_file" id="image_file">
+                <img id="preview" style="max-width: 200px; display:none;" />
+                {{ form }}
+                <button type="submit" class="btn btn-dark w-100 mt-1">Actualizar</button>
+            </form>
+            <div class="d-flex justify-content-around mt-2">
+                <form action="{% url 'proyecto_delete' proyecto.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger w-100">Eliminar</button>
+                </form>
+   
+                <a href="{% url 'proyectos' %}" class="btn btn-secondary w-100 ms-1 mb-2">Volver</a>
+
+
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById("paste-area").addEventListener("paste", async (event) => {
+        const items = event.clipboardData.items;
+    
+        for (let item of items) {
+            if (item.type.indexOf("image") !== -1) {
+                const file = item.getAsFile();
+    
+                // Preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById("preview").src = e.target.result;
+                    document.getElementById("preview").style.display = "block";
+                };
+                reader.readAsDataURL(file);
+    
+                // Guardar en input hidden como base64
+                const base64 = await toBase64(file);
+                document.getElementById("image_file").value = base64;
+            }
+        }
+    });
+    
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+    </script>
+</main>
+
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="section-header">
+    <h3>Flujos de Movimiento</h3>
+    <a href="{% url 'flujo_create' proyecto.id %}" class="btn btn-primary">+ Agregar Flujo</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if flujos %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nodo-Movimiento</th>
+                        <th>Período</th>
+                        <th>Hora</th>
+                        <th>Flujo (veh/h)</th>
+                        <th>Flujo (VEQ/h)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for flujo in flujos %}
+                    <tr>
+                        <td>{{ flujo.nodo_movimiento }}</td>
+                        <td>{{ flujo.periodo.codigo }}</td>
+                        <td>{{ flujo.hora|time:"H:i" }}</td>
+                        <td>{{ flujo.flujo_veh_hora|default:"-" }}</td>
+                        <td>{{ flujo.flujo_veq_hora|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'flujo_update' flujo.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="{% url 'flujo_delete' flujo.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este flujo?')">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted mb-3">No hay flujos registrados.</p>
+            <a href="{% url 'flujo_create' proyecto.id %}" class="btn btn-primary">Agregar primer flujo</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

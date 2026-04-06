@@ -1,0 +1,241 @@
+{% extends "base.html" %} {% block content %}
+
+
+
+<div class="d-flex">
+  <!-- Sidebar -->
+  <nav id="projectSidebar" class="sidebar expanded position-relative">
+    <button
+      class="sidebar-toggle"
+      onclick="toggleSidebar()"
+      title="Colapsar/Expandir"
+    >
+      <i class="bi bi-chevron-left">←</i>
+    </button>
+
+    <div class="p-3">
+      <h6 class="sidebar-header mb-3">
+        <i class="bi bi-folder"></i>
+        <span class="nav-link-text">{{ proyecto.title|truncatechars:20 }}</span>
+      </h6>
+
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if request.resolver_match.url_name == 'proyecto_detail' %}active{% endif %}"
+            href="{% url 'proyecto_detail' proyecto.id %}"
+          >
+            <i class="bi bi-house">🏠</i>
+            <span class="nav-link-text">Portada</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if request.resolver_match.url_name == 'proyecto_arcos' %}active{% endif %}"
+            href="{% url 'proyecto_arcos' proyecto.id %}"
+          >
+            <i class="bi bi-arrow-right">↔️</i>
+            <span class="nav-link-text">Arcos</span>
+            <span class="badge bg-primary ms-auto"
+              >{{ proyecto.arcos.count }}</span
+            >
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if request.resolver_match.url_name == 'proyecto_nodos' %}active{% endif %}"
+            href="{% url 'proyecto_nodos' proyecto.id %}"
+          >
+            <i class="bi bi-geo-alt">📍</i>
+            <span class="nav-link-text">Nodos</span>
+            <span class="badge bg-primary ms-auto"
+              >{{ proyecto.nodos.count }}</span
+            >
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if request.resolver_match.url_name == 'proyecto_calles' %}active{% endif %}"
+            href="{% url 'proyecto_calles' proyecto.id %}"
+          >
+            <i class="bi bi-signpost">🛣️</i>
+            <span class="nav-link-text">Calles</span>
+            <span class="badge bg-primary ms-auto"
+              >{{ proyecto.calles.count }}</span
+            >
+          </a>
+        </li>
+      </ul>
+
+      <hr class="my-3" />
+
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'proyectos' %}">
+            <i class="bi bi-arrow-return-left">⬅️</i>
+            <span class="nav-link-text">Volver a Proyectos</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+  
+    <div class="container">
+      <!-- Project Header -->
+      <div class="project-header">
+        <h1>{{ proyecto.title }}</h1>
+        <div class="d-flex justify-content-between mt-3">
+          <span><i class="bi bi-building"></i> {{ proyecto.mandante }}</span>
+          <span><i class="bi bi-person"></i> {{ proyecto.user.username }}</span>
+        </div>
+        {% if proyecto.image_url %}
+
+        <div id="viewer" class="viewer">
+          <img
+            id="image"
+            src="{{ proyecto.image_url }}"
+            alt="Imagen del proyecto"
+          />
+          <div class="mt-2 z-index-10 position-absolute bottom-0 end-0 p-2">
+            <button onclick="zoom(0.2)" class="btn btn-sm btn-primary">+</button>
+            <button onclick="zoom(-0.2)" class="btn btn-sm btn-secondary">
+              -
+            </button>
+            <button onclick="resetView()" class="btn btn-sm btn-light">
+              Reset
+            </button>
+          </div>
+        </div>
+
+
+        {% else %}
+        <p class="text-muted">Sin imagen</p>
+        {% endif %}
+      </div>
+      <!-- Section Content -->
+      <div class="container bg-light p-4 rounded">
+        {% block section_content %}{% endblock %}
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById("projectSidebar");
+    sidebar.classList.toggle("collapsed");
+    sidebar.classList.toggle("expanded");
+
+    // Save preference
+    const isCollapsed = sidebar.classList.contains("collapsed");
+    localStorage.setItem("sidebarCollapsed", isCollapsed);
+  }
+
+  // Restore sidebar state
+  document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("projectSidebar");
+    const isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+
+    if (isCollapsed) {
+      sidebar.classList.remove("expanded");
+      sidebar.classList.add("collapsed");
+    }
+  });
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const viewer = document.getElementById("viewer");
+    const img = document.getElementById("image");
+
+    if (!viewer || !img) return; // 🔥 evita errores si no hay imagen
+
+    let scale = 1;
+    let minScale = 1;
+    let maxScale = 5;
+
+    let pos = { x: 0, y: 0 };
+    let start = { x: 0, y: 0 };
+    let dragging = false;
+
+    img.onload = () => {
+        resetView();
+    };
+
+    function update() {
+        img.style.transform = `
+            translate(-50%, -50%)
+            translate(${pos.x}px, ${pos.y}px)
+            scale(${scale})
+        `;
+    }
+
+    viewer.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        zoom(delta);
+    });
+
+    function zoom(delta) {
+        const newScale = Math.min(maxScale, Math.max(minScale, scale + delta));
+        if (newScale === scale) return;
+
+        scale = newScale;
+        clampPosition();
+        update();
+    }
+
+    viewer.addEventListener("mousedown", (e) => {
+        dragging = true;
+        start.x = e.clientX - pos.x;
+        start.y = e.clientY - pos.y;
+        viewer.style.cursor = "grabbing";
+    });
+
+    window.addEventListener("mouseup", () => {
+        dragging = false;
+        viewer.style.cursor = "grab";
+    });
+
+    window.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+
+        pos.x = e.clientX - start.x;
+        pos.y = e.clientY - start.y;
+
+        clampPosition();
+        update();
+    });
+
+    function clampPosition() {
+        const rect = viewer.getBoundingClientRect();
+
+        const maxX = (img.naturalWidth * scale) / 2 - rect.width / 2;
+        const maxY = (img.naturalHeight * scale) / 2 - rect.height / 2;
+
+        pos.x = Math.max(-maxX, Math.min(maxX, pos.x));
+        pos.y = Math.max(-maxY, Math.min(maxY, pos.y));
+    }
+
+    function resetView() {
+        const rect = viewer.getBoundingClientRect();
+
+        const scaleX = rect.width / img.naturalWidth;
+        const scaleY = rect.height / img.naturalHeight;
+
+        scale = Math.min(scaleX, scaleY);
+        minScale = scale;
+
+        pos = { x: 0, y: 0 };
+
+        update();
+    }
+
+    window.zoom = zoom;
+    window.resetView = resetView;
+});
+</script>
+
+{% endblock %}

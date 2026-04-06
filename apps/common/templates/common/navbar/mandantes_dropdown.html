@@ -1,0 +1,22 @@
+<a class="nav-link dropdown-toggle {% if '/mandantes' in request.path %}active{% endif %}" href="#" id="mandantesDropdownMenu" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+    Mandantes
+</a>
+
+<ul class="dropdown-menu" aria-labelledby="mandantesDropdownMenu">
+    <li>
+        <a class="dropdown-item {% if request.resolver_match.url_name == 'mandantes' %}active{% endif %}" href="{% url 'mandantes' %}">
+            Listar Mandantes
+        </a>
+    </li>
+    <li>
+        <a class="dropdown-item {% if request.resolver_match.url_name == 'mandante_create' %}active{% endif %}" href="{% url 'mandante_create' %}">
+            Crear Mandantes
+        </a>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    {% comment %} <li>
+        <a class="dropdown-item {% if request.resolver_match.url_name == 'create_contacto' %}active{% endif %}" href="{% url 'create_contacto' %}">
+            Crear Contactos
+        </a>
+    </li> {% endcomment %}
+</ul>

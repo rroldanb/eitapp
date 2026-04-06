@@ -1,0 +1,59 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="section-header">
+    <h3>Conteos Vehiculares</h3>
+    <a href="{% url 'conteo_create' proyecto.id %}" class="btn btn-primary">+ Agregar Conteo</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if conteos %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nodo</th>
+                        <th>Período</th>
+                        <th>Hora</th>
+                        <th>VL</th>
+                        <th>TXC</th>
+                        <th>TXB</th>
+                        <th>C 2E</th>
+                        <th>C+2E</th>
+                        <th>VEQ Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for conteo in conteos %}
+                    <tr>
+                        <td>{{ conteo.nodo.numero }}</td>
+                        <td>{{ conteo.periodo.codigo }}</td>
+                        <td>{{ conteo.hora|time:"H:i" }}</td>
+                        <td>{{ conteo.vl|default:"-" }}</td>
+                        <td>{{ conteo.txc|default:"-" }}</td>
+                        <td>{{ conteo.txb|default:"-" }}</td>
+                        <td>{{ conteo.c_2e|default:"-" }}</td>
+                        <td>{{ conteo.c_mas_2e|default:"-" }}</td>
+                        <td>{{ conteo.vehiculos_equivalentes|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'conteo_update' conteo.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="{% url 'conteo_delete' conteo.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este conteo?')">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted mb-3">No hay conteos registrados.</p>
+            <a href="{% url 'conteo_create' proyecto.id %}" class="btn btn-primary">Agregar primer conteo</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,22 @@
+<a class="nav-link dropdown-toggle {% if '/tasks' in request.path %}active{% endif %}" href="#" id="tasksDropdownMenu" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+    Tasks
+</a>
+
+<ul class="dropdown-menu" aria-labelledby="tasksDropdownMenu">
+    <li>
+        <a class="dropdown-item {% if request.resolver_match.url_name == 'tasks' %}active{% endif %}" href="{% url 'tasks' %}">
+            Pending Tasks
+        </a>
+    </li>
+    <li>
+        <a class="dropdown-item {% if request.resolver_match.url_name == 'tasks_completed' %}active{% endif %}" href="{% url 'tasks_completed' %}">
+            Completed Tasks
+        </a>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li>
+        <a class="dropdown-item {% if request.resolver_match.url_name == 'create_task' %}active{% endif %}" href="{% url 'create_task' %}">
+            Create Task
+        </a>
+    </li>
+</ul>

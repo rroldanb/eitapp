@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="container">
+    {% comment %} <div class="row"> {% endcomment %}
+        <div class="bg-light p-4 rounded">
+            <form action="{% url 'proyecto_create' %}" method="POST" class="card card-body">
+                <h1 class="text-center">Nuevo Proyecto</h1>
+                {{ error }}
+                {% csrf_token %}
+
+
+                <img id="preview" style="display:none;" class=" w-100"/>
+                <textarea id="paste-area" placeholder="Pega aquí tu imagen (Ctrl+V)" rows="1"></textarea>
+                <input type="hidden" name="image_file" id="image_file">
+
+                {{ form}}
+                <button type="submit" class="btn btn-dark w-100 mt-2">Guardar</button>
+                <a href="{% url 'proyectos' %}" class="btn btn-secondary w-100 ">Volver</a>
+            </form>
+        </div>
+    {% comment %} </div> {% endcomment %}
+</main>
+
+<script>
+    document.getElementById("paste-area").addEventListener("paste", async (event) => {
+    const items = event.clipboardData.items;
+
+    for (let item of items) {
+        if (item.type.indexOf("image") !== -1) {
+            const file = item.getAsFile();
+
+            // Preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("preview").src = e.target.result;
+                document.getElementById("preview").style.display = "block";
+            };
+            reader.readAsDataURL(file);
+
+            // Guardar en input hidden como base64
+            const base64 = await toBase64(file);
+            document.getElementById("image_file").value = base64;
+        }
+    }
+});
+
+function toBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+</script>
+
+{% endblock %}

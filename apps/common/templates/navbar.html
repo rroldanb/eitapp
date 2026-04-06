@@ -1,0 +1,63 @@
+
+{% block rrnavbar %}
+
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">EITApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
+
+            </li>
+            {% if user.is_authenticated %}
+                {% comment %} <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/mandantes/' %}active{% endif %}" href="{% url 'tasks' %}">Mandantes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/contactos/' %}active{% endif %}" href="{% url 'tasks' %}">Contactos</a>
+                </li> {% endcomment %}
+
+
+                <li>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'proyectos' %}active{% endif %}" href="{% url 'proyectos' %}">
+                        Proyectos
+                    </a>
+                </li>
+
+
+
+                <li class="nav-item dropdown">
+
+                    {% include "common/navbar/mandantes_dropdown.html" %}
+
+                </li>
+                <li class="nav-item dropdown">
+
+                    {% include "common/navbar/tasks_dropdown.html" %}
+
+                </li>
+
+
+                <li class="nav-item">
+                    <a class="nav-link ms-5" href="{% url 'signout' %}">Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" {% if request.path == '/signup/' %}active{% endif %} href="{% url 'signup' %}">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" {% if request.path == '/signin/' %}active{% endif %} href="{% url 'signin' %}">Login</a>
+                </li>
+
+            {% endif %}            
+
+        </ul>
+        </div>
+    </div>
+</nav>
+
+{% endblock %}

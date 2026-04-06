@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 card card-body">
+    <h2>Nuevo Mandante</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+        <div class="align-items- d-flex justify-content-center mt-3">
+        
+            <button type="submit" class="btn btn-dark">
+                Guardar
+            </button>
+                    <a
+              href="{% url 'mandantes' %}"
+              class="btn btn-secondary  "
+              >Volver</a
+            >
+        </div>
+    </form>
+</div>
+
+{% endblock %}
