@@ -7,7 +7,7 @@ from apps.red_vial.forms import (
     CalleForm,
     NodoForm,
     ArcoForm,
-    MovimientoForm,
+    RegulacionForm,
     NodoMovimientoForm,
     CoeficienteCruceForm,
 )
@@ -30,8 +30,10 @@ def calles_list_view(request, proyecto_id):
 def calle_detail_view(request, calle_id):
     """Vista detalle de una calle"""
     calle = get_calle_by_id(calle_id)
+    # return redirect('calle_detail' , calle_id=calle_id)
     return render(request, 'red_vial/calle_detail.html', {
-        'calle': calle
+        'calle': calle,
+        'calle_id': calle_id
     })
 
 
@@ -39,21 +41,22 @@ def calle_detail_view(request, calle_id):
 def calle_create_view(request, proyecto_id):
     """Vista para crear una nueva calle"""
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-
     if request.method == 'POST':
-        form = CalleForm(request.POST)
+        form = CalleForm(request.POST, proyecto=proyecto)
         if form.is_valid():
             calle = form.save(commit=False)
             calle.proyecto = proyecto
             calle.save()
             return redirect('proyecto_calles', proyecto_id=proyecto_id)
     else:
-        form = CalleForm()
+        form = CalleForm(proyecto=proyecto)
 
-    return render(request, 'red_vial/calle_form.html', {
-        'proyecto': proyecto,
-        'form': form
-    })
+    return render(request, 'proyecto_calles.html', {
+    'form': form,
+    'proyecto': proyecto
+})
+
+
 
 
 @login_required
@@ -116,6 +119,7 @@ def nodo_create_view(request, proyecto_id):
 
     if request.method == 'POST':
         form = NodoForm(request.POST, proyecto=proyecto)
+
         if form.is_valid():
             nodo = form.save(commit=False)
             nodo.proyecto = proyecto
@@ -124,10 +128,15 @@ def nodo_create_view(request, proyecto_id):
     else:
         form = NodoForm(proyecto=proyecto)
 
-    return render(request, 'red_vial/nodo_form.html', {
+    return render(request, 'proyecto_nodos.html', {
         'proyecto': proyecto,
         'form': form
     })
+
+
+
+
+
 
 
 @login_required
@@ -185,7 +194,6 @@ def arco_detail_view(request, arco_id):
 def arco_create_view(request, proyecto_id):
     """Vista para crear un nuevo arco"""
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-
     if request.method == 'POST':
         form = ArcoForm(request.POST, proyecto=proyecto)
         if form.is_valid():
@@ -196,10 +204,7 @@ def arco_create_view(request, proyecto_id):
     else:
         form = ArcoForm(proyecto=proyecto)
 
-    return render(request, 'red_vial/arco_form.html', {
-        'proyecto': proyecto,
-        'form': form
-    })
+    return render(request, 'proyecto_arcos.html', proyecto_id=proyecto.id)
 
 
 @login_required
@@ -231,29 +236,29 @@ def arco_delete_view(request, arco_id):
     return redirect('proyecto_arcos', proyecto_id=proyecto_id)
 
 
-# ========== MOVIMIENTO VIEWS ==========
+# ========== REGULACIONES VIEWS ==========
 
 @login_required
-def movimientos_list_view(request):
-    """Vista de lista de tipos de movimiento"""
-    movimientos = get_all_movimientos()
-    return render(request, 'red_vial/movimientos_list.html', {
-        'movimientos': movimientos
+def regulaciones_list_view(request):
+    """Vista de lista de tipos de regulación"""
+    regulaciones = get_all_regulaciones()
+    return render(request, 'red_vial/regulaciones_list.html', {
+        'regulaciones': regulaciones
     })
 
 
 @login_required
-def movimiento_create_view(request):
-    """Vista para crear un nuevo tipo de movimiento"""
+def regulacion_create_view(request):
+    """Vista para crear un nuevo tipo de regulación"""
     if request.method == 'POST':
-        form = MovimientoForm(request.POST)
+        form = RegulacionForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('movimientos_list')
+            return redirect('regulaciones_list')
     else:
-        form = MovimientoForm()
+        form = RegulacionForm()
 
-    return render(request, 'red_vial/movimiento_form.html', {
+    return render(request, 'red_vial/regulacion_form.html', {
         'form': form
     })
 

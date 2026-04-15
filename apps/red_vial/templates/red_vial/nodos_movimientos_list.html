@@ -14,7 +14,7 @@
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        <th>Nodo</th>
+                        <th>PC</th>
                         <th>Movimiento</th>
                         <th>Arco Entrada</th>
                         <th>Arco Salida</th>
@@ -26,8 +26,8 @@
                 <tbody>
                     {% for nm in nodos_movimientos %}
                     <tr>
-                        <td>{{ nm.nodo.numero }}</td>
-                        <td>{{ nm.movimiento.codigo }}</td>
+                        <td>{{ nm.nodo.numero_pc }}</td>
+                        <td>{{ nm.movimiento }}</td>
                         <td>{{ nm.arco_entrada.nodo_origen.numero }} → {{ nm.arco_entrada.nodo_destino.numero }}</td>
                         <td>{{ nm.arco_salida.nodo_origen.numero }} → {{ nm.arco_salida.nodo_destino.numero }}</td>
                         <td>{{ nm.get_tipo_prioridad_display }}</td>

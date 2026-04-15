@@ -4,7 +4,7 @@
 
 <div class="section-header">
     <h3>{% if calle %}Editar Calle{% else %}Nueva Calle{% endif %}</h3>
-    <a href="{% url 'proyecto_calles' proyecto.id %}" class="btn btn-secondary">Volver</a>
+    {% comment %} <a href="{% url 'proyecto_calles' calle.proyecto.id %}" class="btn btn-secondary">Volver</a> {% endcomment %}
 </div>
 
 <div class="card">
@@ -17,7 +17,7 @@
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="{% url 'proyecto_calles' proyecto.id %}" class="btn btn-secondary">Cancelar</a>
+            {% comment %} <a href="{% url 'proyecto_calles' calle.proyecto.id %}" class="btn btn-secondary">Cancelar</a> {% endcomment %}
         </form>
     </div>
 </div>

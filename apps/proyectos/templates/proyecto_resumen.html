@@ -1,0 +1,246 @@
+{% extends "proyecto_base.html" %} {% block section_content %}
+
+
+<main class="container">
+    {% comment %} <div class="">
+        <div class="bg-light p-4 rounded">
+            <h1 class="text-center">{{ proyecto.title }}</h1>
+            <div class="d-flex justify-content-between mb-3">
+                <p class="">{{ proyecto.mandante }}</p>
+                <p> by: {{ proyecto.user.username }}</p>
+            </div>
+
+
+            {% if proyecto.image_url %}
+
+                <img src="{{ proyecto.image_url }}" alt="Imagen del proyecto" class="w-100 mb-3">
+            {% else %}
+                <p class="text-muted">Sin imagen</p>
+            {% endif %}
+
+            {{ error }}
+
+
+            <div class="d-flex justify-content-around mt-3">
+                <a href="{% url 'proyecto_detail' proyecto.id %}" class="preview-box">
+                    Detalles
+                </a>
+                <a href="{% url 'proyecto_calles' proyecto.id %}" class="preview-box">
+                    Calles
+                </a>
+                <a href="{% url 'proyecto_nodos' proyecto.id %}" class="preview-box">
+                    Nodos
+                </a>
+                <a href="{% url 'proyecto_arcos' proyecto.id %}" class="preview-box">
+                    Arcos
+                </a>
+                <a href="{% url 'proyecto_red_vial' proyecto.id %}" class="preview-box active">
+                    Red Vial
+                </a>
+            </div>
+        </div>
+    </div> {% endcomment %}
+
+    <!-- Preview Boxes Section -->
+    <div class="row mt-4">
+
+        <!-- Calles Preview Box -->
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'proyecto_calles' proyecto.id %}" class="text-decoration-none">
+                <div class="card preview-box-card h-100">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-signpost"></i> Calles</h5>
+                        <span class="badge bg-light text-primary">{{ calles|length }}</span>
+                    </div>
+                    <div class="card-body">
+                        {% if calles %}
+                            <ul class="list-unstyled mb-0">
+                                {% for calle in calles|slice:":5" %}
+                                    <li class="mb-2">
+                                        <small><strong>N°{{ calle.numero }}</strong> - {{ calle.nombre|truncatechars:25 }}</small>
+                                    </li>
+                                {% endfor %}
+                                {% if calles|length > 5 %}
+                                    <li class="text-muted"><small>+ {{ calles|length|add:"-5" }} más...</small></li>
+                                {% endif %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mb-0">No hay calles registradas</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-center">
+                        <span class="btn btn-sm btn-outline-primary">Ver y Editar Calles</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Nodos Preview Box -->
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'proyecto_nodos' proyecto.id %}" class="text-decoration-none">
+                <div class="card preview-box-card h-100">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Nodos</h5>
+                        <span class="badge bg-light text-success">{{ nodos|length }}</span>
+                    </div>
+                    <div class="card-body">
+                        {% if nodos %}
+                            <ul class="list-unstyled mb-0">
+                                {% for nodo in nodos|slice:":5" %}
+                                    <li class="mb-2">
+                                        <small>
+                                            <strong>Nodo {{ nodo.numero }}</strong>
+                                            {% if nodo.calle_1 %} - {{ nodo.calle_1.nombre|truncatechars:15 }}{% endif %}
+                                            {% if nodo.calle_2 %} - {{ nodo.calle_2.nombre|truncatechars:15 }}{% endif %}
+                                            {% if nodo.is_pc %}
+                                                <span class="badge bg-warning text-dark ms-1">PC</span>
+                                            {% endif %}
+                                        </small>
+                                    </li>
+                                {% endfor %}
+                                {% if nodos|length > 5 %}
+                                    <li class="text-muted"><small>+ {{ nodos|length|add:"-5" }} más...</small></li>
+                                {% endif %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mb-0">No hay nodos registrados</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-center">
+                        <span class="btn btn-sm btn-outline-success">Ver y Editar Nodos</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Arcos Preview Box -->
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'proyecto_arcos' proyecto.id %}" class="text-decoration-none">
+                <div class="card preview-box-card h-100">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-arrow-left-right"></i> Arcos</h5>
+                        <span class="badge bg-light text-info">{{ arcos|length }}</span>
+                    </div>
+                    <div class="card-body">
+                        {% if arcos %}
+                            <ul class="list-unstyled mb-0">
+                                {% for arco in arcos|slice:":5" %}
+                                    <li class="mb-2">
+                                        <small>
+                                            <strong>
+                                                Arco: {{ arco.codigo_arco }}
+                                            </strong>
+                                            Nodo {{ arco.nodo_origen.numero }} → Nodo{{ arco.nodo_destino.numero }}
+                                            {% if arco.longitud %}
+                                                <span class="text-muted">({{ arco.longitud }}m)</span>
+                                            {% endif %}
+                                        </small>
+                                    </li>
+                                {% endfor %}
+                                {% if arcos|length > 5 %}
+                                    <li class="text-muted"><small>+ {{ arcos|length|add:"-5" }} más...</small></li>
+                                {% endif %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mb-0">No hay arcos registrados</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-center">
+                        <span class="btn btn-sm btn-outline-info">Ver y Editar Arcos</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Portada Preview Box -->
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'proyecto_detail' proyecto.id %}" class="text-decoration-none">
+                <div class="card preview-box-card h-100">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-signpost"></i> Portada</h5>
+                    </div>
+                    <div class="card-body">
+                        <li class="mb-2">
+                            <small>Nombre proyecto: <strong>{{ proyecto.title|truncatechars:25 }}</strong> </small>
+                        </li>
+                        <li class="mb-2">
+                            <small>Mandante: <strong>{{ proyecto.mandante|truncatechars:25 }}</strong> </small>
+                        </li>
+                        <li class="mb-2">
+                            <small>Fecha de inicio : <strong>{{ proyecto.date_started|date:"d/m/Y" }}</strong> </small>
+                        </li>
+                        <li class="mb-2">
+                            <small>Fecha de finalización : <strong>{{ proyecto.date_completed|date:"d/m/Y" }}</strong> </small>
+                        </li>
+                    </div>
+                    <div class="card-footer text-center">
+                        <span class="btn btn-sm btn-outline-primary">Ver y Editar Detalles</span>
+                    </div>
+                </div>
+            </a>
+    </div>
+
+        </div>
+
+    <!-- Quick Stats Summary -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Resumen de Red Vial</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h3 class="text-primary">{{ calles|length }}</h3>
+                            <p class="text-muted">Calles</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="text-success">{{ nodos|length }}</h3>
+                            <p class="text-muted">Nodos</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="text-info">{{ arcos|length }}</h3>
+                            <p class="text-muted">Arcos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .preview-box-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+    .preview-box-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    .preview-box-card .card-header {
+        font-weight: 600;
+    }
+    .preview-box-card .card-footer {
+        background-color: rgba(0,0,0,0.02);
+    }
+    .preview-box-card:hover .card-footer .btn {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+    .preview-box-card:hover .card-footer .btn-outline-primary {
+        background-color: var(--bs-primary);
+    }
+    .preview-box-card:hover .card-footer .btn-outline-success {
+        background-color: var(--bs-success);
+    }
+    .preview-box-card:hover .card-footer .btn-outline-info {
+        background-color: var(--bs-info);
+    }
+    a.text-decoration-none:hover {
+        text-decoration: none;
+    }
+</style>
+
+{% endblock %}

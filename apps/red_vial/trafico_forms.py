@@ -20,7 +20,7 @@ class PeriodoForm(forms.ModelForm):
             }),
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: Pico Mañana Laboral'
+                'placeholder': 'Ej: Punta Mañana Laboral'
             }),
             'tipo_dia': forms.Select(attrs={'class': 'form-control'}),
         }
@@ -40,7 +40,7 @@ class ConteoVehicularForm(forms.ModelForm):
             'nodo', 'periodo', 'hora',
             'vl', 'txc', 'txb', 'c_2e', 'c_mas_2e',
             'peaton', 'ciclista', 'moto',
-            'proyecto'
+            
         ]
         widgets = {
             'nodo': forms.Select(attrs={'class': 'form-control'}),
@@ -89,7 +89,7 @@ class ConteoVehicularForm(forms.ModelForm):
                 'placeholder': 'Motocicletas',
                 'step': '0.1'
             }),
-            'proyecto': forms.HiddenInput(),
+            # 'proyecto': forms.HiddenInput(),
         }
         labels = {
             'nodo': 'Nodo',
@@ -119,7 +119,7 @@ class FlujoMovimientoForm(forms.ModelForm):
         fields = [
             'nodo_movimiento', 'periodo', 'hora',
             'flujo_veh_hora', 'flujo_veq_15min', 'flujo_veq_hora',
-            'proyecto'
+            
         ]
         widgets = {
             'nodo_movimiento': forms.Select(attrs={'class': 'form-control'}),
@@ -143,7 +143,7 @@ class FlujoMovimientoForm(forms.ModelForm):
                 'placeholder': 'VEQ / hora',
                 'step': '0.01'
             }),
-            'proyecto': forms.HiddenInput(),
+            # 'proyecto': forms.HiddenInput(),
         }
         labels = {
             'nodo_movimiento': 'Nodo-Movimiento',

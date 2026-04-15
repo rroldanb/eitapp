@@ -1,0 +1,65 @@
+{# Partial template for a single nodo row - used by HTMX #}
+<tr id="nodo-row-{{ nodo.id }}">
+  <form
+    id="updatableForm{{ nodo.id }}"
+    method="POST"
+    enctype="multipart/form-data"
+    action="{% url 'nodo_update' nodo.id %}"
+
+  >
+    {% csrf_token %}
+    <input type="hidden" name="htmx_request" value="true">
+
+    <td><input type="number" name="numero" class="form-control w-100" value="{{ nodo.numero }}" min="1" max="99"></td>
+    <td>
+      <select class="form-select" name="calle_1">
+        <option value="">Seleccionar calle...</option>
+        {% for calle in proyecto.calles.all %}
+        <option value="{{ calle.id }}" {% if nodo.calle_1.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td>
+      <select class="form-select" name="calle_2">
+        <option value="">Seleccionar calle...</option>
+        {% for calle in proyecto.calles.all %}
+        <option value="{{ calle.id }}" {% if nodo.calle_2.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    {% comment %} <td><input type="text" name="interseccion" class="form-control" value="{{ nodo.interseccion|default:'' }}" placeholder="Intersección"></td> {% endcomment %}
+    <td>
+      <div class="form-check">
+        <input class="form-check-input fs-4" type="checkbox" name="is_pc" id="is_pc_{{ nodo.id }}" {% if nodo.is_pc %}checked{% endif %}>
+        {% comment %} <label class="form-check-label" for="is_pc_{{ nodo.id }}">PC</label> {% endcomment %}
+        {% if nodo.is_pc %}
+        <input type="number" name="numero_pc" class="form-control w-50 mt-1" value="{{ nodo.numero_pc|default:'' }}" min="1" max="99">
+        {% endif %}
+      </div>
+    </td>
+    <td>
+
+    </td>
+    <td>
+      <button type="submit" class="btn btn-sm btn-outline-primary">
+        <span id="loading-{{ nodo.id }}"
+        class="htmx-indicator spinner-border spinner-border-sm me-1"
+        role="status"
+        aria-hidden="true"
+        style="display: none;"></span>
+        Actualizar
+      </button>
+  </form>
+      <a href="{% url 'nodo_delete' nodo.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+    </td>
+</tr>
+
+<style>
+  .htmx-request {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .table-success {
+    transition: background-color 0.5s ease;
+  }
+</style>

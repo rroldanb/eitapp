@@ -5,18 +5,17 @@
 <main class="container">
     <div class="row">
         <div class="mt-5 bg-light p-4 rounded">
-            <h1 class="text-center">{{ list_title }}</h1>
+            <h1 class="text-center project-header">{{ list_title }}</h1>
             <ul class="list-group">
                 {% if proyectos %}
                     {% for proyecto in proyectos %}
-                        <a href="{% url 'proyecto_detail' proyecto.id %}" class="text-decoration-none">
+                        <a href="{% url 'proyecto_resumen' proyecto.id %}" class="text-decoration-none">
                             <li class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5>{{ proyecto.title }}</h5>
                                     <p>{{ proyecto.mandante }}</p>
                                 </div>
                                 <p>Descripción: {{ proyecto.description }}</p>
-                                {% comment %} <p>by: {{ proyecto.user.username }}</p> {% endcomment %}
                             </li>
                         </a>
                     {% endfor %}

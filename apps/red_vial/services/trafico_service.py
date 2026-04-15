@@ -246,5 +246,5 @@ def get_nodos_con_mayor_flujo(proyecto_id, limit=10):
     return NodoMovimiento.objects.filter(
         proyecto_id=proyecto_id
     ).annotate(
-        flujo_total=Sum('flujos__flujo_veq_hora')
-    ).order_by('-flujo_total')[:limit]
+        flujos_totales=Sum('flujos__flujo_veq_hora')
+    ).order_by('-flujos_totales')[:limit]

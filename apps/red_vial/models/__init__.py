@@ -2,7 +2,7 @@ from .red_vial import (
     Calle,
     Nodo,
     Arco,
-    Movimiento,
+    Regulacion,
     NodoMovimiento,
     Coeficiente_Cruce,
 )

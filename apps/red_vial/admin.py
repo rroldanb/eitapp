@@ -21,9 +21,9 @@ class ArcoAdmin(admin.ModelAdmin):
     search_fields = ('nodo_origen__numero', 'nodo_destino__numero')
 
 
-class MovimientoAdmin(admin.ModelAdmin):
-    list_display = ('codigo', 'nombre', 'descripcion')
-    search_fields = ('codigo', 'nombre')
+class RegulacionAdmin(admin.ModelAdmin):
+    list_display = ('codigo', 'descripcion')
+    search_fields = ('codigo', 'descripcion')
 
 
 class NodoMovimientoAdmin(admin.ModelAdmin):
@@ -59,7 +59,7 @@ class FlujoMovimientoAdmin(admin.ModelAdmin):
 admin.site.register(Calle, CalleAdmin)
 admin.site.register(Nodo, NodoAdmin)
 admin.site.register(Arco, ArcoAdmin)
-admin.site.register(Movimiento, MovimientoAdmin)
+admin.site.register(Regulacion, RegulacionAdmin)
 admin.site.register(NodoMovimiento, NodoMovimientoAdmin)
 admin.site.register(Coeficiente_Cruce, CoeficienteCruceAdmin)
 admin.site.register(Periodo, PeriodoAdmin)

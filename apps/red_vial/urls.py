@@ -24,9 +24,9 @@ urlpatterns = [
     path("arco/<uuid:arco_id>/update/", arco_update_view, name="arco_update"),
     path("arco/<uuid:arco_id>/delete/", arco_delete_view, name="arco_delete"),
 
-    # ========== MOVIMIENTO URLs ==========
-    path("movimientos/", movimientos_list_view, name="movimientos_list"),
-    path("movimientos/create/", movimiento_create_view, name="movimiento_create"),
+    # ========== REGULACIÓN URLs ==========
+    path("regulaciones/", regulaciones_list_view, name="regulaciones_list"),
+    path("regulaciones/create/", regulacion_create_view, name="regulacion_create"),
 
     # ========== NODO MOVIMIENTO URLs ==========
     path("proyecto/<uuid:proyecto_id>/nodos-movimientos/", nodos_movimientos_list_view, name="nodos_movimientos_list"),

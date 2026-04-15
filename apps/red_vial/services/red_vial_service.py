@@ -2,7 +2,7 @@ from apps.red_vial.models import (
     Calle,
     Nodo,
     Arco,
-    Movimiento,
+    Regulacion,
     NodoMovimiento,
     Coeficiente_Cruce,
 )
@@ -15,21 +15,17 @@ def get_all_calles():
     """Obtener todas las calles"""
     return Calle.objects.all()
 
-
 def get_calles_by_proyecto(proyecto_id):
     """Obtener calles de un proyecto"""
     return Calle.objects.filter(proyecto_id=proyecto_id)
-
 
 def get_calle_by_id(calle_id):
     """Obtener calle por ID"""
     return Calle.objects.get(id=calle_id)
 
-
 def calle_create(data):
     """Crear una nueva calle"""
     return Calle.objects.create(**data)
-
 
 def calle_update(calle_id, data):
     """Actualizar una calle"""
@@ -39,12 +35,10 @@ def calle_update(calle_id, data):
     calle.save()
     return calle
 
-
 def calle_delete(calle_id):
     """Eliminar una calle"""
     calle = Calle.objects.get(id=calle_id)
     calle.delete()
-
 
 # ========== NODO SERVICES ==========
 
@@ -52,21 +46,17 @@ def get_all_nodos():
     """Obtener todos los nodos"""
     return Nodo.objects.all()
 
-
 def get_nodos_by_proyecto(proyecto_id):
     """Obtener nodos de un proyecto con calles relacionadas"""
     return Nodo.objects.filter(proyecto_id=proyecto_id).select_related('calle_1', 'calle_2')
-
 
 def get_nodo_by_id(nodo_id):
     """Obtener nodo por ID con calles relacionadas"""
     return Nodo.objects.select_related('calle_1', 'calle_2', 'proyecto').get(id=nodo_id)
 
-
 def nodo_create(data):
     """Crear un nuevo nodo"""
     return Nodo.objects.create(**data)
-
 
 def nodo_update(nodo_id, data):
     """Actualizar un nodo"""
@@ -76,12 +66,10 @@ def nodo_update(nodo_id, data):
     nodo.save()
     return nodo
 
-
 def nodo_delete(nodo_id):
     """Eliminar un nodo"""
     nodo = Nodo.objects.get(id=nodo_id)
     nodo.delete()
-
 
 # ========== ARCO SERVICES ==========
 
@@ -89,21 +77,17 @@ def get_all_arcos():
     """Obtener todos los arcos"""
     return Arco.objects.all()
 
-
 def get_arcos_by_proyecto(proyecto_id):
     """Obtener arcos de un proyecto con nodos relacionados"""
     return Arco.objects.filter(proyecto_id=proyecto_id).select_related('nodo_origen', 'nodo_destino')
-
 
 def get_arco_by_id(arco_id):
     """Obtener arco por ID con nodos relacionados"""
     return Arco.objects.select_related('nodo_origen', 'nodo_destino', 'proyecto').get(id=arco_id)
 
-
 def arco_create(data):
     """Crear un nuevo arco"""
     return Arco.objects.create(**data)
-
 
 def arco_update(arco_id, data):
     """Actualizar un arco"""
@@ -113,12 +97,10 @@ def arco_update(arco_id, data):
     arco.save()
     return arco
 
-
 def arco_delete(arco_id):
     """Eliminar un arco"""
     arco = Arco.objects.get(id=arco_id)
     arco.delete()
-
 
 def get_arcos_by_nodo(nodo_id):
     """Obtener arcos conectados a un nodo (origen o destino)"""
@@ -127,42 +109,41 @@ def get_arcos_by_nodo(nodo_id):
         Q(nodo_origen_id=nodo_id) | Q(nodo_destino_id=nodo_id)
     ).select_related('nodo_origen', 'nodo_destino')
 
+# ========== REGULACION SERVICES ==========
 
-# ========== MOVIMIENTO SERVICES ==========
-
-def get_all_movimientos():
-    """Obtener todos los tipos de movimiento"""
-    return Movimiento.objects.all()
-
-
-def get_movimiento_by_id(movimiento_id):
-    """Obtener movimiento por ID"""
-    return Movimiento.objects.get(id=movimiento_id)
+def get_all_regulaciones():
+    """Obtener todos los tipos de regulación"""
+    return Regulacion.objects.all()
 
 
-def get_movimiento_by_codigo(codigo):
-    """Obtener movimiento por código (DIR, DER, IZQ)"""
-    return Movimiento.objects.get(codigo=codigo)
+def get_regulacion_by_id(regulacion_id):
+    """Obtener regulación por ID"""
+    return Regulacion.objects.get(id=regulacion_id)
 
 
-def movimiento_create(data):
-    """Crear un nuevo tipo de movimiento"""
-    return Movimiento.objects.create(**data)
+def get_regulacion_by_codigo(codigo):
+    """Obtener regulación por código (DIR, DER, IZQ)"""
+    return Regulacion.objects.get(codigo=codigo)
 
 
-def movimiento_update(movimiento_id, data):
-    """Actualizar un movimiento"""
-    movimiento = Movimiento.objects.get(id=movimiento_id)
+def regulacion_create(data):
+    """Crear un nuevo tipo de regulación"""
+    return Regulacion.objects.create(**data)
+
+
+def regulacion_update(regulacion_id, data):
+    """Actualizar una regulación"""
+    regulacion = Regulacion.objects.get(id=regulacion_id)
     for key, value in data.items():
-        setattr(movimiento, key, value)
-    movimiento.save()
-    return movimiento
+        setattr(regulacion, key, value)
+    regulacion.save()
+    return regulacion
 
 
-def movimiento_delete(movimiento_id):
-    """Eliminar un movimiento"""
-    movimiento = Movimiento.objects.get(id=movimiento_id)
-    movimiento.delete()
+def regulacion_delete(regulacion_id):
+    """Eliminar una regulación"""
+    regulacion = Regulacion.objects.get(id=regulacion_id)
+    regulacion.delete()
 
 
 # ========== NODO MOVIMIENTO SERVICES ==========
@@ -175,7 +156,7 @@ def get_all_nodos_movimientos():
 def get_nodos_movimientos_by_proyecto(proyecto_id):
     """Obtener configuraciones de un proyecto"""
     return NodoMovimiento.objects.filter(proyecto_id=proyecto_id).select_related(
-        'nodo', 'movimiento', 'arco_entrada', 'arco_salida'
+        'nodo',  'arco_entrada', 'arco_salida', 'regulacion'
     )
 
 

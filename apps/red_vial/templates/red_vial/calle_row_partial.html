@@ -1,0 +1,43 @@
+{# Partial template for a single calle row#}
+{% comment %} {% if calle.id == htmx_highlight %}
+<tr id="calle-row-{{ calle.id }}" class="table-success">
+{% else %}
+{% endif %} {% endcomment %}
+<tr id="calle-row-{{ calle.id }}">
+  <form
+    id="updatableForm{{ calle.id }}"
+    method="POST"
+    enctype="multipart/form-data"
+    action="{% url 'calle_update' calle.id %}"
+  >
+    {% csrf_token %}
+    <input type="hidden" name="htmx_request" value="true">
+
+    <td><input type="text" name="numero" class="form-control w-25" value="{{ calle.numero }}"></td>
+    <td><input type="text" name="nombre" class="form-control" value="{{ calle.nombre }}"></td>
+    <td>
+      {{ calle.nodos_calle_1.count|add:calle.nodos_calle_2.count }} nodo(s)
+    </td>
+    <td>
+      <button type="submit" class="btn btn-sm btn-outline-primary">
+        <span id="loading-{{ calle.id }}" 
+        class="htmx-indicator spinner-border spinner-border-sm me-1" 
+        role="status" 
+        aria-hidden="true" 
+        style="display: none;"></span>
+        Actualizar
+      </button>
+  </form>
+      <a href="{% url 'calle_delete' calle.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+    </td>
+</tr>
+
+<style>
+  .htmx-request {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .table-success {
+    transition: background-color 0.5s ease;
+  }
+</style>

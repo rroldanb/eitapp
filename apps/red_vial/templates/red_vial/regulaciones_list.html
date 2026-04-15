@@ -4,28 +4,26 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Tipos de Movimiento</h3>
-        <a href="{% url 'movimiento_create' %}" class="btn btn-primary">+ Agregar Movimiento</a>
+        <h3>Tipos de Regulaciones</h3>
+        <a href="{% url 'regulacion_create' %}" class="btn btn-primary">+ Agregar Regulación</a>
     </div>
 
     <div class="card">
         <div class="card-body">
-            {% if movimientos %}
+            {% if regulaciones %}
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Código</th>
-                        <th>Nombre</th>
                         <th>Descripción</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for movimiento in movimientos %}
+                    {% for regulacion in regulaciones %}
                     <tr>
-                        <td>{{ movimiento.codigo }}</td>
-                        <td>{{ movimiento.nombre }}</td>
-                        <td>{{ movimiento.descripcion }}</td>
+                        <td>{{ regulacion.codigo }}</td>
+                        <td>{{ regulacion.descripcion }}</td>
                         <td>
                             <a href="#" class="btn btn-sm btn-outline-primary">Editar</a>
                         </td>
@@ -34,7 +32,7 @@
                 </tbody>
             </table>
             {% else %}
-            <p class="text-muted">No hay movimientos registrados.</p>
+            <p class="text-muted">No hay regulaciones registradas.</p>
             {% endif %}
         </div>
     </div>

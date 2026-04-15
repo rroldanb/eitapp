@@ -210,3 +210,20 @@ def proyecto_calles_view(request, proyecto_id):
         'calles': calles,
         'active_section': 'calles'
     })
+
+
+@login_required
+def proyecto_resumen_view(request, proyecto_id):
+    """Vista de resumen de Red Vial del proyecto"""
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    calles = proyecto.calles.all()
+    nodos = proyecto.nodos.all().select_related('calle_1', 'calle_2')
+    arcos = proyecto.arcos.all().select_related('nodo_origen', 'nodo_destino')
+
+    return render(request, 'proyecto_resumen.html', {
+        'proyecto': proyecto,
+        'calles': calles,
+        'nodos': nodos,
+        'arcos': arcos,
+        'active_section': 'resumen'
+    })

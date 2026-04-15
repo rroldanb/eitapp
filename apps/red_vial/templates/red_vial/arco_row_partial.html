@@ -1,0 +1,49 @@
+          <tr>
+            <form
+              id="updatableForm{{ arco.id }}"
+              method="POST"
+              enctype="multipart/form-data"
+              action="{% url 'arco_update' arco.id %}"
+            >
+              {% csrf_token %}
+
+              <td>{{ arco.codigo_arco }}</td>
+
+              <td>
+                <select class="form-select" name="nodo_origen" required>
+                  <option value="">Seleccionar nodo...</option>
+                  {% for nodo in proyecto.nodos.all %}
+                  <option value="{{ nodo.id }}" {% if arco.nodo_origen.id == nodo.id %}selected{% endif %}>
+                    {{ nodo.numero }}{% if nodo.calle_1 %} - {{ nodo.calle_1.nombre }}{% endif %}{% if nodo.calle_2 %} / {{ nodo.calle_2.nombre }}{% endif %}
+                  </option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td>
+                <select class="form-select" name="nodo_destino" required>
+                  <option value="">Seleccionar nodo...</option>
+                  {% for nodo in proyecto.nodos.all %}
+                  <option value="{{ nodo.id }}" {% if arco.nodo_destino.id == nodo.id %}selected{% endif %}>
+                    {{ nodo.numero }}{% if nodo.calle_1 %} - {{ nodo.calle_1.nombre }}{% endif %}{% if nodo.calle_2 %} / {{ nodo.calle_2.nombre }}{% endif %}
+                  </option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td style="max-width: 150px;">
+                <input
+                  type="number"
+                  step="1"
+                  class="form-control "
+                  name="longitud"
+                  value="{{ arco.longitud|default:'' }}"
+                  required
+                />
+              </td>
+              <td>
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                  Actualizar
+                </button>
+            </form>
+                <a href="{% url 'arco_delete' arco.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+              </td>
+          </tr>

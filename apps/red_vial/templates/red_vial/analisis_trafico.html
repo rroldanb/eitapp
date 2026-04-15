@@ -1,0 +1,125 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Análisis de Tráfico</h3>
+        <a href="{% url 'flujos_list' proyecto.id %}" class="btn btn-outline-secondary">Ver Flujos</a>
+    </div>
+
+    <!-- Promedios por Período -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Flujos Promedio por Período</h5>
+        </div>
+        <div class="card-body">
+            {% if promedios_list %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Período</th>
+                            <th class="text-end">Flujo Veh/h (Promedio)</th>
+                            <th class="text-end">Flujo Veh Eq/h (Promedio)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in promedios_list %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.periodo.codigo }}</strong>
+                                <small class="text-muted d-block">{{ item.periodo.nombre }}</small>
+                            </td>
+                            <td class="text-end">
+                                {% if item.promedio_veh_hora %}
+                                    {{ item.promedio_veh_hora|floatformat:2 }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if item.promedio_veq_hora %}
+                                    <strong>{{ item.promedio_veq_hora|floatformat:2 }}</strong>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No hay datos de flujos registrados para este proyecto.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Top Nodos con Mayor Flujo -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Nodos con Mayor Flujo de Tráfico (Top 10)</h5>
+        </div>
+        <div class="card-body">
+            {% if top_nodos %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Nodo</th>
+                            <th>Origen</th>
+                            <th>Destino</th>
+                            <th class="text-end">Flujo Total (Veh Eq/h)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for nodo in top_nodos %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ nodo.nodo.numero|default:nodo.nodo_id }}</span>
+                            </td>
+                            <td>{{ nodo.origen }}</td>
+                            <td>{{ nodo.destino }}</td>
+                            <td class="text-end">
+                                <strong>{{ nodo.flujos_totales|default:0|floatformat:2 }}</strong>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No hay datos de flujos registrados para identificar nodos con mayor tráfico.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Resumen de Conteos -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Conteos Vehiculares</h6>
+                    <a href="{% url 'conteos_list' proyecto.id %}" class="btn btn-outline-primary">
+                        Ver Conteos
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Flujos de Movimiento</h6>
+                    <a href="{% url 'flujos_list' proyecto.id %}" class="btn btn-outline-primary">
+                        Ver Flujos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -3,7 +3,7 @@ from apps.red_vial.models import (
     Calle,
     Nodo,
     Arco,
-    Movimiento,
+    Regulacion,
     NodoMovimiento,
     Coeficiente_Cruce,
 )
@@ -14,7 +14,7 @@ class CalleForm(forms.ModelForm):
 
     class Meta:
         model = Calle
-        fields = ['numero', 'nombre', 'proyecto']
+        fields = ['numero', 'nombre']
         widgets = {
             'numero': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -24,20 +24,21 @@ class CalleForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ej: Av. Huasco'
             }),
-            'proyecto': forms.HiddenInput(),
+            # 'proyecto': forms.HiddenInput(),
         }
         labels = {
             'numero': 'Número de Calle',
             'nombre': 'Nombre de la Calle',
         }
-
+    def __init__(self, *args, proyecto=None, **kwargs):
+        super().__init__(*args, **kwargs)
 
 class NodoForm(forms.ModelForm):
     """Formulario para crear/editar nodos"""
 
     class Meta:
         model = Nodo
-        fields = ['numero', 'interseccion', 'calle_1', 'calle_2', 'plano', 'imagen', 'proyecto']
+        fields = ['numero', 'interseccion', 'calle_1', 'calle_2', 'plano', 'imagen', 'is_pc', 'numero_pc']
         widgets = {
             'numero': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -49,6 +50,13 @@ class NodoForm(forms.ModelForm):
             }),
             'calle_1': forms.Select(attrs={'class': 'form-control'}),
             'calle_2': forms.Select(attrs={'class': 'form-control'}),
+            'is_pc': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'numero_pc': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número de PC (si aplica)'
+            }),
             'plano': forms.URLInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'URL del plano'
@@ -57,13 +65,15 @@ class NodoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'URL de la imagen'
             }),
-            'proyecto': forms.HiddenInput(),
+            # 'proyecto': forms.HiddenInput(),
         }
         labels = {
             'numero': 'Número del Nodo',
             'interseccion': 'Descripción de la Intersección',
             'calle_1': 'Calle 1',
             'calle_2': 'Calle 2',
+            'is_pc': '¿Es Punto de Control (PC)?',
+            'numero_pc': 'Número de PC (si es aplicable)',
             'plano': 'URL del Plano',
             'imagen': 'URL de la Imagen',
         }
@@ -80,16 +90,16 @@ class ArcoForm(forms.ModelForm):
 
     class Meta:
         model = Arco
-        fields = ['nodo_origen', 'nodo_destino', 'longitud', 'proyecto']
+        fields = ['nodo_origen', 'nodo_destino', 'longitud']
         widgets = {
             'nodo_origen': forms.Select(attrs={'class': 'form-control'}),
             'nodo_destino': forms.Select(attrs={'class': 'form-control'}),
             'longitud': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ej: 150.5',
-                'step': '0.01'
+                'step': '0.1'
             }),
-            'proyecto': forms.HiddenInput(),
+            # 'proyecto': forms.HiddenInput(),
         }
         labels = {
             'nodo_origen': 'Nodo de Origen',
@@ -114,22 +124,19 @@ class ArcoForm(forms.ModelForm):
         return cleaned_data
 
 
-class MovimientoForm(forms.ModelForm):
-    """Formulario para crear/editar tipos de movimiento"""
+class RegulacionForm(forms.ModelForm):
+    """Formulario para crear/editar tipos de regulación"""
 
     class Meta:
-        model = Movimiento
-        fields = ['codigo', 'nombre', 'descripcion']
+        model = Regulacion
+        fields = ['codigo', 'descripcion']
         widgets = {
             'codigo': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ej: DIR',
-                'maxlength': '2'
+                'maxlength': '3'
             }),
-            'nombre': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: Directo'
-            }),
+
             'descripcion': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ej: Movimiento directo'
@@ -137,7 +144,6 @@ class MovimientoForm(forms.ModelForm):
         }
         labels = {
             'codigo': 'Código',
-            'nombre': 'Nombre del Movimiento',
             'descripcion': 'Descripción',
         }
 
@@ -151,18 +157,18 @@ class NodoMovimientoForm(forms.ModelForm):
             'nodo', 'movimiento', 'arco_entrada', 'arco_salida',
             'tipo_prioridad', 'regulacion', 'interseccion_valor',
             'numero_pistas', 'velocidad_inicial', 'flujo_total',
-            'velocidad_modelo', 'flujo', 'proyecto'
+            'velocidad_modelo', 'flujo', 
         ]
         widgets = {
             'nodo': forms.Select(attrs={'class': 'form-control'}),
-            'movimiento': forms.Select(attrs={'class': 'form-control'}),
             'arco_entrada': forms.Select(attrs={'class': 'form-control'}),
             'arco_salida': forms.Select(attrs={'class': 'form-control'}),
             'tipo_prioridad': forms.Select(attrs={'class': 'form-control'}),
+            'movimiento': forms.Select(attrs={'class': 'form-control'}),
             'regulacion': forms.Select(attrs={'class': 'form-control'}),
             'interseccion_valor': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'step': '0.01'
+                'step': '0.1'
             }),
             'numero_pistas': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -170,21 +176,21 @@ class NodoMovimientoForm(forms.ModelForm):
             }),
             'velocidad_inicial': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'step': '0.01'
+                'step': '0.1'
             }),
             'flujo_total': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'step': '0.01'
+                'step': '0.1'
             }),
             'velocidad_modelo': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'step': '0.01'
+                'step': '0.1'
             }),
             'flujo': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Vehículos/hora'
             }),
-            'proyecto': forms.HiddenInput(),
+            # 'proyecto': forms.HiddenInput(),
         }
         labels = {
             'nodo': 'Nodo',

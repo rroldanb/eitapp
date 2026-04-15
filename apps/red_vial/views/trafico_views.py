@@ -210,19 +210,23 @@ def analisis_trafico_view(request, proyecto_id):
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     periodos = get_all_periodos()
 
-    # Obtener promedios por período
-    promedios = {}
+    # Obtener promedios por período como lista
+    promedios_list = []
     for periodo in periodos:
-        promedios[periodo.codigo] = get_flujo_promedio_por_periodo(proyecto_id, periodo.id)
+        datos = get_flujo_promedio_por_periodo(proyecto_id, periodo.id)
+        promedios_list.append({
+            'periodo': periodo,
+            'promedio_veh_hora': datos.get('promedio_veh_hora'),
+            'promedio_veq_hora': datos.get('promedio_veq_hora'),
+        })
 
     # Top nodos con mayor flujo
     top_nodos = get_nodos_con_mayor_flujo(proyecto_id, limit=10)
 
     return render(request, 'red_vial/analisis_trafico.html', {
         'proyecto': proyecto,
-        'promedios': promedios,
+        'promedios_list': promedios_list,
         'top_nodos': top_nodos,
-        'periodos': periodos
     })
 
 
