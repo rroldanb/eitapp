@@ -2,37 +2,34 @@
 
 {% block content %}
 
-<main class="container">
-    <div class="row">
-        <div class="mt-5 bg-light p-4 rounded">
-            <h1 class="text-center project-header">{{ list_title }}</h1>
-            <ul class="list-group">
+<main class="container mx-auto px-4 py-8">
+    <div class="flex justify-center">
+        <div class="mt-12 bg-gray-100 p-6 rounded-lg shadow-md w-full max-w-4xl">
+            <h1 class="text-center text-3xl font-bold bg-gradient-to-r from-primary to-secondary text-white py-4 px-6 rounded-lg mb-6">
+                {{ list_title }}
+            </h1>
+            <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
                 {% if proyectos %}
                     {% for proyecto in proyectos %}
-                        <a href="{% url 'proyecto_resumen' proyecto.id %}" class="text-decoration-none">
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5>{{ proyecto.title }}</h5>
-                                    <p>{{ proyecto.mandante }}</p>
+                        <li>
+                            <a href="{% url 'proyecto_resumen' proyecto.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
+                                <div class="flex justify-between items-center">
+                                    <h5 class="text-lg font-semibold text-gray-800">{{ proyecto.title }}</h5>
+                                    <p class="text-sm text-gray-600">{{ proyecto.mandante }}</p>
                                 </div>
-                                <p>Descripción: {{ proyecto.description }}</p>
-                            </li>
-                        </a>
+                                <p class="text-gray-600 mt-2 text-sm">Descripción: {{ proyecto.description }}</p>
+                            </a>
+                        </li>
                     {% endfor %}
                 {% else %}
-                    <p class="text-center">No hay proyectos registrados.</p>
+                    <li class="p-6 text-center text-gray-500">No hay proyectos registrados.</li>
                 {% endif %}
-            <button class="btn btn-primary mt-3" onclick="window.location.href='{% url 'proyecto_create' %}'">
+            </ul>
+            <button class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium" onclick="window.location.href='{% url 'proyecto_create' %}'">
                 Crear Proyecto
             </button>
-            </ul>
         </div>
     </div>
 </main>
-
-
-
-
-
 
 {% endblock %}

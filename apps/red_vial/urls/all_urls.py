@@ -1,28 +1,10 @@
-from django.urls import path
-from .views.red_vial_views import *
-from .views.trafico_views import *
+from django.urls import path, include
+from django.contrib.auth.decorators import login_required
+from ..views.red_vial_views import *
+from ..views.trafico_views import *
 
 urlpatterns = [
-    # ========== CALLE URLs ==========
-    path("proyecto/<uuid:proyecto_id>/calles/", calles_list_view, name="calles_list"),
-    path("proyecto/<uuid:proyecto_id>/calles/create/", calle_create_view, name="calle_create"),
-    path("calle/<uuid:calle_id>/", calle_detail_view, name="calle_detail"),
-    path("calle/<uuid:calle_id>/update/", calle_update_view, name="calle_update"),
-    path("calle/<uuid:calle_id>/delete/", calle_delete_view, name="calle_delete"),
 
-    # ========== NODO URLs ==========
-    path("proyecto/<uuid:proyecto_id>/nodos/", nodos_list_view, name="nodos_list"),
-    path("proyecto/<uuid:proyecto_id>/nodos/create/", nodo_create_view, name="nodo_create"),
-    path("nodo/<uuid:nodo_id>/", nodo_detail_view, name="nodo_detail"),
-    path("nodo/<uuid:nodo_id>/update/", nodo_update_view, name="nodo_update"),
-    path("nodo/<uuid:nodo_id>/delete/", nodo_delete_view, name="nodo_delete"),
-
-    # ========== ARCO URLs ==========
-    path("proyecto/<uuid:proyecto_id>/arcos/", arcos_list_view, name="arcos_list"),
-    path("proyecto/<uuid:proyecto_id>/arcos/create/", arco_create_view, name="arco_create"),
-    path("arco/<uuid:arco_id>/", arco_detail_view, name="arco_detail"),
-    path("arco/<uuid:arco_id>/update/", arco_update_view, name="arco_update"),
-    path("arco/<uuid:arco_id>/delete/", arco_delete_view, name="arco_delete"),
 
     # ========== REGULACIÓN URLs ==========
     path("regulaciones/", regulaciones_list_view, name="regulaciones_list"),

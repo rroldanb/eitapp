@@ -1,61 +1,74 @@
-
 {% block mainnavbar %}
 
-<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">EITApp</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+<nav class="bg-gray-900 text-white px-4 py-3 shadow-lg">
+    <div class="container mx-auto flex items-center justify-between">
+        <!-- Brand -->
+        <a href="{% url 'home' %}" class="text-xl font-bold text-white hover:text-gray-200 transition-colors">
+            EITApp
+        </a>
+
+        <!-- Mobile toggle button (Bootstrap) -->
+        <button class="lg:hidden p-2 rounded hover:bg-gray-700 transition-colors" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" 
+                aria-expanded="false" 
+                aria-label="Toggle navigation">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
 
-            </li>
-            {% if user.is_authenticated %}
-                {% comment %} <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/mandantes/' %}active{% endif %}" href="{% url 'tasks' %}">Mandantes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/contactos/' %}active{% endif %}" href="{% url 'tasks' %}">Contactos</a>
-                </li> {% endcomment %}
-
-
-                <li>
-                    <a class="nav-link {% if request.resolver_match.url_name == 'proyectos' %}active{% endif %}" href="{% url 'proyectos' %}">
-                        Proyectos
+        <!-- Nav links -->
+        <div class="hidden lg:flex items-center space-x-6" id="navbarNav">
+            <ul class="flex items-center space-x-4 ml-auto">
+                <!-- Home -->
+                <li class="list-none">
+                    <a href="/" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.path == '/' %}bg-gray-800 text-white{% endif %}">
+                        Home
                     </a>
                 </li>
 
+                {% if user.is_authenticated %}
+                    <!-- Proyectos -->
+                    <li class="list-none">
+                        <a href="{% url 'proyectos' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.resolver_match.url_name == 'proyectos' %}bg-gray-800 text-white{% endif %}">
+                            Proyectos
+                        </a>
+                    </li>
 
+                    <!-- Mandantes Dropdown -->
+                    <li class="list-none relative">
+                        {% include "common/navbar/mandantes_dropdown.html" %}
+                    </li>
 
-                <li class="nav-item dropdown">
+                    <!-- Tasks Dropdown -->
+                    <li class="list-none relative">
+                        {% include "common/navbar/tasks_dropdown.html" %}
+                    </li>
 
-                    {% include "common/navbar/mandantes_dropdown.html" %}
-
-                </li>
-                <li class="nav-item dropdown">
-
-                    {% include "common/navbar/tasks_dropdown.html" %}
-
-                </li>
-
-
-                <li class="nav-item">
-                    <a class="nav-link ms-5" href="{% url 'signout' %}">Logout</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" {% if request.path == '/signup/' %}active{% endif %} href="{% url 'signup' %}">Register</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" {% if request.path == '/signin/' %}active{% endif %} href="{% url 'signin' %}">Login</a>
-                </li>
-
-            {% endif %}            
-
-        </ul>
+                    <!-- Logout -->
+                    <li class="list-none">
+                        <a href="{% url 'signout' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors ml-4">
+                            Logout
+                        </a>
+                    </li>
+                {% else %}
+                    <!-- Register -->
+                    <li class="list-none">
+                        <a href="{% url 'signup' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.path == '/signup/' %}bg-gray-800 text-white{% endif %}">
+                            Register
+                        </a>
+                    </li>
+                    <!-- Login -->
+                    <li class="list-none">
+                        <a href="{% url 'signin' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.path == '/signin/' %}bg-gray-800 text-white{% endif %}">
+                            Login
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 </nav>

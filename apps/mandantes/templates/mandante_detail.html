@@ -1,33 +1,35 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
 
-<main class="container">
-  <div class="row">
-    <div class="mt-5 bg-light p-4 rounded">
-      <h2 class="text-center">Detalles del Mandante</h2>
-      <h3 class="text-success text-center">{{ mandante.name }}</h3>
-      {% comment %}
-      <p>Ubicación: {{ mandante.location }}</p>
-      <p>Detalles: {{ mandante.details }}</p>
-      <p>Contactos:</p>
-      {% endcomment %} 
-      {{ error }}
+{% block content %}
 
-      <form method="POST">
-        {% csrf_token %} {{ form }}
+<main class="container mx-auto px-4 py-8">
+  <div class="flex justify-center">
+    <div class="mt-12 bg-gray-100 p-6 rounded-lg shadow-md w-full max-w-4xl">
+      <h2 class="text-center text-2xl font-bold text-gray-800 mb-4">Detalles del Mandante</h2>
+      <h3 class="text-center text-xl font-semibold text-green-600 mb-4">{{ mandante.name }}</h3>
+
+      {% if error %}
+      <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        {{ form }}
 
         <div class="container-fluid mt-3">
           <div class="row">
             <div class="col-md-12">
-              <h4>Contactos asociados:</h4>
-              <div class="rounded-3 border mb-3">
-                <ul>
+              <h4 class="text-lg font-semibold text-gray-700 mb-3">Contactos asociados:</h4>
+              <div class="rounded-lg border border-gray-300 mb-3 bg-white">
+                <ul class="divide-y divide-gray-200">
                   {% for contacto in contactos %}
-                  <a
-                    href="{% url 'contacto_detail' contacto.id %}"
-                    class="text-decoration-none"
-                  >
-                    <li>{{ contacto.name }} - {{ contacto.position }}</li>
-                  </a>
+                  <li>
+                    <a href="{% url 'contacto_detail' contacto.id %}" class="block p-3 hover:bg-gray-50 no-underline">
+                      <span class="text-gray-700">{{ contacto.name }} - {{ contacto.position }}</span>
+                    </a>
+                  </li>
                   {% endfor %}
                 </ul>
               </div>
@@ -36,26 +38,30 @@
         </div>
 
         <a
-          class="btn btn-primary w-100 {% if request.resolver_match.url_name == 'contacto_create' %}active{% endif %}"
+          class="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium {% if request.resolver_match.url_name == 'contacto_create' %}ring-2 ring-indigo-300{% endif %}"
           href="{% url 'contacto_create' mandante.id %}"
         >
           Agregar contacto
         </a>
-        <button type="submit" class="btn btn-dark w-100 mt-1">
+        <button type="submit" class="w-full px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium mt-1">
           Actualizar
         </button>
       </form>
-      <div class="d-flex justify-content-around mt-2">
-        <form action="{% url 'mandante_delete' mandante.id %}" method="POST">
+
+      <div class="flex justify-around mt-4 space-x-2">
+        <form action="{% url 'mandante_delete' mandante.id %}" method="POST" class="flex-1">
           {% csrf_token %}
-          <button type="submit" class="btn btn-danger w-100">Eliminar</button>
+          <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+            Eliminar
+          </button>
         </form>
 
         <a
           href="{% url 'mandantes' %}"
-          class="btn btn-secondary w-100 ms-1 mb-2"
-          >Volver</a
+          class="flex-1 text-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium ml-1 mb-2"
         >
+          Volver
+        </a>
       </div>
     </div>
   </div>

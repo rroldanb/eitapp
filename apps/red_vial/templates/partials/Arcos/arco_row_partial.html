@@ -1,4 +1,4 @@
-          <tr>
+<tr class="hover:bg-gray-50">
             <form
               id="updatableForm{{ arco.id }}"
               method="POST"
@@ -7,10 +7,10 @@
             >
               {% csrf_token %}
 
-              <td>{{ arco.codigo_arco }}</td>
+              <td class="px-4 py-3 text-gray-700 font-medium">{{ arco.codigo_arco }}</td>
 
-              <td>
-                <select class="form-select" name="nodo_origen" required>
+              <td class="px-4 py-3">
+                <select class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="nodo_origen" required>
                   <option value="">Seleccionar nodo...</option>
                   {% for nodo in proyecto.nodos.all %}
                   <option value="{{ nodo.id }}" {% if arco.nodo_origen.id == nodo.id %}selected{% endif %}>
@@ -19,8 +19,8 @@
                   {% endfor %}
                 </select>
               </td>
-              <td>
-                <select class="form-select" name="nodo_destino" required>
+              <td class="px-4 py-3">
+                <select class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="nodo_destino" required>
                   <option value="">Seleccionar nodo...</option>
                   {% for nodo in proyecto.nodos.all %}
                   <option value="{{ nodo.id }}" {% if arco.nodo_destino.id == nodo.id %}selected{% endif %}>
@@ -29,21 +29,21 @@
                   {% endfor %}
                 </select>
               </td>
-              <td style="max-width: 150px;">
+              <td class="px-4 py-3">
                 <input
                   type="number"
                   step="1"
-                  class="form-control "
+                  class="w-32 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
                   name="longitud"
                   value="{{ arco.longitud|default:'' }}"
                   required
                 />
               </td>
-              <td>
-                <button type="submit" class="btn btn-sm btn-outline-primary">
+              <td class="px-4 py-3">
+                <button type="submit" class="px-3 py-1 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-600 hover:text-white transition-colors">
                   Actualizar
                 </button>
             </form>
-                <a href="{% url 'arco_delete' arco.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                <a href="{% url 'arco_delete' arco.id }}" class="ml-1 px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors">Eliminar</a>
               </td>
           </tr>

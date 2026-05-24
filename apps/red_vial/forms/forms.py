@@ -14,7 +14,7 @@ class CalleForm(forms.ModelForm):
 
     class Meta:
         model = Calle
-        fields = ['numero', 'nombre']
+        fields = ['numero', 'nombre', ]
         widgets = {
             'numero': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -30,8 +30,6 @@ class CalleForm(forms.ModelForm):
             'numero': 'Número de Calle',
             'nombre': 'Nombre de la Calle',
         }
-    def __init__(self, *args, proyecto=None, **kwargs):
-        super().__init__(*args, **kwargs)
 
 class NodoForm(forms.ModelForm):
     """Formulario para crear/editar nodos"""

@@ -1,55 +1,120 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 
 
 
-<div class="d-flex">
+<div class="flex">
   <!-- Sidebar -->
-{% include "common/navbar/proyecto_sidebar.html" %}
+  {% include "common/navbar/proyecto_sidebar.html" %}
 
   <!-- Main Content -->
-  <main class="main-content">
-  
-    <div class="container">
+  <main class="flex-1 p-5">
+    <div class="container mx-auto">
       <!-- Project Header -->
-      <div class="project-header">
-        <h1>{{ proyecto.title }}</h1>
-        <div class="d-flex justify-content-between mt-3">
-          <span><i class="bi bi-building"></i> {{ proyecto.mandante }}</span>
-          <span><i class="bi bi-person"></i> {{ proyecto.user.username }}</span>
+      <div class="bg-gradient-to-r from-primary to-secondary text-white p-8 rounded-xl shadow-lg mb-1">
+        <h1 class="text-2xl font-bold">{{ proyecto.title }}</h1>
+        <div class="flex justify-between mt-3 text-sm opacity-90">
+          <span>Mandante: {{ proyecto.mandante }}</span>
+          <span>Editor: {{ proyecto.user.username }}</span>
         </div>
         {% if proyecto.image_url %}
+        
 
-        <div id="viewer" class="viewer">
-          <img
-            id="image"
-            src="{{ proyecto.image_url }}"
-            alt="Imagen del proyecto"
-          />
-          <div class="mt-2 z-index-10 position-absolute bottom-0 end-0 p-2">
-            <button onclick="zoom(0.1)" class="btn btn-sm btn-primary">+</button>
-            <button onclick="zoom(-0.1)" class="btn btn-sm btn-secondary">
-              -
-            </button>
-            <button onclick="resetView()" class="btn btn-sm btn-light">
-              Reset
-            </button>
-          </div>
+
+    <details class="sd-details mt-4 mb-0 mx-0">
+        <summary class="sd-summary"> Ver / Ocultar imagen ampliable </summary>
+
+        <div id="seadragon-viewer-proyecto"></div>
+
+        <div class="info-imagen">
+          Imagen proyecto: {{ proyecto.title }} | 
+          Usa la rueda del mouse para acercar/alejar | 
+          Arrastra para mover
         </div>
-
+    </details>
 
         {% else %}
-        <p class="text-muted">Sin imagen</p>
+        <p class="text-gray-200 mt-4">Sin imagen</p>
         {% endif %}
       </div>
+
       <!-- Section Content -->
-      <div class="container bg-light p-4 rounded">
+      <div class="container bg-gray-100 p-4 rounded-lg">
         {% block section_content %}{% endblock %}
       </div>
     </div>
   </main>
 </div>
 
+
 <script>
+
+document.addEventListener("DOMContentLoaded", function() {
+  var imagenUrl = "{{ proyecto.image_url }}";
+
+  if (imagenUrl && imagenUrl !== "") {
+      var viewer = OpenSeadragon({
+          id: "seadragon-viewer-proyecto",
+          prefixUrl: "https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/images/",
+          tileSources: {
+              type: 'image',
+              url: imagenUrl,
+              crossOriginPolicy: 'Anonymous',
+          },
+
+          // Configuración de zoom y navegación
+          //            zoomInButton: "zoom-in",
+          //           zoomOutButton: "zoom-out",
+          //        showRotationControl: false,
+          
+          
+          showZoomControl: false,
+          showPanControl: false,
+          showFullPageControl: true,
+          showHomeControl: false,
+          navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT,
+          
+          // Parámetros de zoom
+          zoomPerClick: 2.0,
+          zoomPerScroll: 1.2,
+          minZoomLevel: 0.5,
+          maxZoomLevel: 10,
+          defaultZoomLevel: 1,
+          
+          // Comportamiento
+          gestureSettingsMouse: {
+              clickToZoom: false,
+              dblClickToZoom: true,
+              pinchToZoom: true,
+              flickEnabled: true,
+              flickMinSpeed: 120,
+              flickMomentum: 0.25
+          },
+          
+          // Estilo visual
+          navigatorPosition: "BOTTOM_RIGHT",
+          showNavigator: true,
+          navigatorSizeRatio: 0.1
+      });
+      
+      viewer.addHandler('open-failed', function(event) {
+          console.error("Error al cargar la imagen:", imagenUrl);
+          alert("No se pudo cargar la imagen. Verifica que la ruta sea correcta.");
+      });
+      
+  } else {
+      console.error("No se encontró URL de imagen");
+      document.getElementById('seadragon-viewer-proyecto').innerHTML = 
+          '<div style="color: red; text-align: center; padding: 50px;">⚠️ No se encontró ninguna imagen para este proyecto</div>';
+  }
+});
+
+
+
+
+
+
   function toggleSidebar() {
     const sidebar = document.getElementById("projectSidebar");
     sidebar.classList.toggle("collapsed");
@@ -59,6 +124,8 @@
     const isCollapsed = sidebar.classList.contains("collapsed");
     localStorage.setItem("sidebarCollapsed", isCollapsed);
   }
+
+
 
   // Restore sidebar state
   document.addEventListener("DOMContentLoaded", function () {
@@ -71,97 +138,8 @@
     }
   });
 
-document.addEventListener("DOMContentLoaded", function () {
 
-    const viewer = document.getElementById("viewer");
-    const img = document.getElementById("image");
 
-    if (!viewer || !img) return; 
-
-    let scale = 1;
-    let minScale = 1;
-    let maxScale = 5;
-
-    let pos = { x: 0, y: 0 };
-    let start = { x: 0, y: 0 };
-    let dragging = false;
-
-    img.onload = () => {
-        resetView();
-    };
-
-    function update() {
-        img.style.transform = `
-            translate(-50%, -50%)
-            translate(${pos.x}px, ${pos.y}px)
-            scale(${scale})
-        `;
-    }
-
-    viewer.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.008 : 0.008;
-        zoom(delta);
-    });
-
-    function zoom(delta) {
-        const newScale = Math.min(maxScale, Math.max(minScale, scale + delta));
-        if (newScale === scale) return;
-
-        scale = newScale;
-        clampPosition();
-        update();
-    }
-
-    viewer.addEventListener("mousedown", (e) => {
-        dragging = true;
-        start.x = e.clientX - pos.x;
-        start.y = e.clientY - pos.y;
-        viewer.style.cursor = "grabbing";
-    });
-
-    window.addEventListener("mouseup", () => {
-        dragging = false;
-        viewer.style.cursor = "grab";
-    });
-
-    window.addEventListener("mousemove", (e) => {
-        if (!dragging) return;
-
-        pos.x = e.clientX - start.x;
-        pos.y = e.clientY - start.y;
-
-        clampPosition();
-        update();
-    });
-
-    function clampPosition() {
-        const rect = viewer.getBoundingClientRect();
-
-        const maxX = (img.naturalWidth * scale) / 2 - rect.width / 2;
-        const maxY = (img.naturalHeight * scale) / 2 - rect.height / 2;
-
-        pos.x = Math.max(-maxX, Math.min(maxX, pos.x));
-        pos.y = Math.max(-maxY, Math.min(maxY, pos.y));
-    }
-
-    function resetView() {
-        const rect = viewer.getBoundingClientRect();
-
-        const scaleX = rect.width / img.naturalWidth;
-        const scaleY = rect.height / img.naturalHeight;
-
-        scale = Math.min(scaleX, scaleY);
-        minScale = scale;
-
-        pos = { x: 0, y: 0 };
-
-        update();
-    }
-
-    window.zoom = zoom;
-    window.resetView = resetView;
-});
 </script>
 
 {% endblock %}

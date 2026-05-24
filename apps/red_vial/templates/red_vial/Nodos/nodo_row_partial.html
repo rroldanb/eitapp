@@ -1,0 +1,53 @@
+{# Partial template for a single nodo row - used by HTMX #}
+<tr id="nodo-row-{{ nodo.id }}" class="hover:bg-gray-50">
+  <form
+    id="updatableForm{{ nodo.id }}"
+    method="POST"
+    enctype="multipart/form-data"
+    action="{% url 'nodo_update' nodo.id %}"
+  >
+    {% csrf_token %}
+    <input type="hidden" name="htmx_request" value="true">
+
+    <td class="px-4 py-3">
+      <input type="number" name="numero" class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ nodo.numero }}" min="1" max="99">
+    </td>
+    <td class="px-4 py-3">
+      <select class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_1">
+        <option value="">Seleccionar calle...</option>
+        {% for calle in proyecto.calles.all %}
+        <option value="{{ calle.id }}" {% if nodo.calle_1.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="px-4 py-3">
+      <select class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_2">
+        <option value="">Seleccionar calle...</option>
+        {% for calle in proyecto.calles.all %}
+        <option value="{{ calle.id }}" {% if nodo.calle_2.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="px-4 py-3">
+      <div class="flex items-center gap-2">
+        <input class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" type="checkbox" name="is_pc" id="is_pc_{{ nodo.id }}" {% if nodo.is_pc %}checked{% endif %}>
+        {% if nodo.is_pc %}
+        <input type="number" name="numero_pc" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm mt-1" value="{{ nodo.numero_pc|default:'' }}" min="1" max="99">
+        {% endif %}
+      </div>
+    </td>
+    <td class="px-4 py-3">
+    </td>
+    <td class="px-4 py-3">
+      <button type="submit" class="px-3 py-1 text-sm border border-indigo-600 text-indigo-600 rounded hover:bg-indigo-600 hover:text-white transition-colors">
+        <span id="loading-{{ nodo.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-indigo-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+        Actualizar
+      </button>
+  </form>
+      <a href="{% url 'nodo_delete' nodo.id %}" class="ml-1 px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors">Eliminar</a>
+    </td>
+</tr>
+
+<style>
+  .htmx-request { opacity: 0.7; pointer-events: none; }
+</style>

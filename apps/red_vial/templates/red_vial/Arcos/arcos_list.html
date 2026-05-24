@@ -1,5 +1,6 @@
 {% extends "proyecto_base.html" %} {% block section_content %}
 
+
 <div class="section-header">
   <h3>Arcos del Proyecto</h3>
   <span class="badge bg-info ms-auto fs-4">{{ proyecto.arcos.count }}</span>
@@ -73,7 +74,7 @@
           </form>
           {% if arcos %}
           {% for arco in arcos %} 
-            {% include 'red_vial/arco_row_partial.html' with arco=arco %}
+            {% include 'partials/Arcos/arco_row_partial.html' with arco=arco %}
 
           {% endfor %}
           {% endif %}
@@ -83,6 +84,6 @@
       </table>
     </div>
   </div>
-</div>
+</div> 
 
 {% endblock %}

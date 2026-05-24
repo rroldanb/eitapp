@@ -1,0 +1,27 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="section-header flex justify-between items-center mb-6">
+    <h3 class="text-xl font-semibold text-gray-800">{% if nodo %}Editar Nodo{% else %}Nuevo Nodo{% endif %}</h3>
+    <a href="{% url 'proyecto_nodos' proyecto.id %}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium">Volver</a>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="p-6">
+        {% if error %}
+        <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="flex gap-3">
+                <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors font-medium">Guardar</button>
+                <a href="{% url 'proyecto_nodos' proyecto.id %}" class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

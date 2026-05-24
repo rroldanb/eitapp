@@ -4,3 +4,9 @@ __pycache__
 .env
 context
 migrations
+data.json
+*.log
+*basurero*
+.opencode
+*copy.*
+*RR_Temp*

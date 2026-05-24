@@ -27,6 +27,18 @@ def calle_create(data):
     """Crear una nueva calle"""
     return Calle.objects.create(**data)
 
+def calle_update_new(calle_id, data):
+    """Actualizar una calle"""
+    from apps.proyectos.models import Proyecto
+    calle = Calle.objects.get(id=calle_id)
+    exclude_fields = ['proyecto']
+    for key, value in data.items():
+        if key in exclude_fields:
+            continue
+        setattr(calle, key, value)
+    calle.save()
+    return calle
+
 def calle_update(calle_id, data):
     """Actualizar una calle"""
     calle = Calle.objects.get(id=calle_id)
@@ -39,6 +51,26 @@ def calle_delete(calle_id):
     """Eliminar una calle"""
     calle = Calle.objects.get(id=calle_id)
     calle.delete()
+
+def calles_bulk_update(data_list):
+    """Actualizar múltiples calles de una vez"""
+    from django.db import transaction
+    updated_ids = []
+    with transaction.atomic():
+        for item in data_list:
+            calle_id = item.get('id')
+            if calle_id:
+                try:
+                    calle = Calle.objects.get(id=calle_id)
+                    if 'numero' in item and item['numero']:
+                        calle.numero = item['numero']
+                    if 'nombre' in item and item['nombre']:
+                        calle.nombre = item['nombre']
+                    calle.save()
+                    updated_ids.append(str(calle_id))
+                except Calle.DoesNotExist:
+                    continue
+    return updated_ids
 
 # ========== NODO SERVICES ==========
 

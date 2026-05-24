@@ -7,10 +7,23 @@
     <title>EIT_App</title>
  
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        accent: '#667eea',
+                    }
+                }
+            }
+        }
+    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/2aaa0bfb6c.js" crossorigin="anonymous"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/_hyperscript.min.js" integrity="sha384-OT9bNmUa5rM34SmxFpRftn2F6GbgM/4xnTmn0z106OE5uvsigkdtUMOpdPKOigyO" crossorigin="anonymous"></script>
@@ -18,6 +31,7 @@
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/openseadragon.min.js"></script>
 
 </head>
 
@@ -37,19 +51,15 @@
         {% endblock %}
     </main>
 
-    {% comment %} {% block extra_js %}
-    {% endblock %} {% endcomment %}
-
-
-    {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshVV5spnDQom3nTLH5jYg/0L6DlnXjm1i6PtmF3PVq1grCc5yQ9o9yD" crossorigin="anonymous"></script> {% endcomment %}
+    {% block extra_js %}
+    {% endblock %}
 
     <!-- HTMX CSRF Configuration for Django -->
-    {% comment %} <script>
+    <script>
         document.body.addEventListener('htmx:configRequest', function(evt) {
             evt.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
         });
-    </script> {% endcomment %}
+    </script>
 
 </body>
 </html>

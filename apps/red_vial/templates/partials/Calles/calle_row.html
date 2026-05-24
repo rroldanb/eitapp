@@ -1,0 +1,32 @@
+{# Partial template for a single calle row - Edit Mode (always editable) #}
+<tr id="calle-row-{{ calle.id }}" class="calle-row hover:bg-gray-50" data-calle-id="{{ calle.id }}">
+  <td class="px-4 py-1">
+    <input type="number" name="numero" class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ calle.numero }}">
+  </td>
+  <td class="px-4 py-1">
+    <input type="text" name="nombre" class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 calle-nombre" value="{{ calle.nombre }}">
+  </td>
+  <td class="px-4 py-1 text-gray-600">{{ calle.nodos_calle_1.count|add:calle.nodos_calle_2.count }} nodo(s)</td>
+  <td class="px-4 py-1 flex gap-2">
+    <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors" data-action="update"
+      hx-put="{% url 'calle_update' calle.id %}"
+      hx-include="closest tr"
+      hx-target="closest tr"
+      hx-swap="outerHTML transition:true swap:1s"
+      hx-indicator="#save-indicator-{{ calle.id }}"
+    >
+      <span id="save-indicator-{{ calle.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+      Actualizar
+    </button>
+    <button type="button" class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors" data-action="delete"
+      hx-delete="{% url 'calle_delete' calle.id %}"
+      hx-target="closest tr"
+      hx-swap="outerHTML transition:true swap:1s"
+      hx-indicator="#delete-indicator-{{ calle.id }}"
+    >
+      <span id="delete-indicator-{{ calle.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+      Eliminar
+    </button>
+  </td>
+</tr>
+

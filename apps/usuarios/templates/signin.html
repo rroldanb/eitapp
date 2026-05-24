@@ -1,30 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main class="container">
-    <div class="row">
-        <div class="col-md-4 offset-md-4 mt-5">
+<main class="container mx-auto px-4 py-8">
+    <div class="flex justify-center">
+        <div class="w-full md:w-1/3 mt-12">
+            <form method="POST" class="bg-white p-6 rounded-lg shadow-md">
+                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h1>
 
-            <form method="POST" class="card p-4">
-                <h1 class="text-center">Login</h1>
+                {% if error %}
+                <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {{ error }}
+                </div>
+                {% endif %}
 
-                {{ error }}
                 {% csrf_token %}
-                {% comment %} {{ form.as_p }} {% endcomment %}
-                <div class="mb-3">
-                    <label for="username">Username:</label>
-                    <input type="text" name="username" id="username" class="form-control"
-                    placeholder="Type your username">
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
+                    <input type="text" name="username" id="username"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Type your username">
                 </div>
-                <div class="mb-3">
-                    <label for="password">Password:</label>
-                    <input type="password" name="password" id="password" class="form-control"
-                    placeholder="Type your password">
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+                    <input type="password" name="password" id="password"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Type your password">
                 </div>
-                <button type="submit" class="btn btn-dark w-100">
-                    Login</button>
+                <button type="submit" class="w-full bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors font-medium">
+                    Login
+                </button>
             </form>
-
         </div>
     </div>
 </main>

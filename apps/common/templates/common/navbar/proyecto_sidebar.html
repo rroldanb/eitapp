@@ -1,120 +1,122 @@
-  <nav id="projectSidebar" class="sidebar expanded position-relative">
-    <button
-      class="sidebar-toggle"
-      onclick="toggleSidebar()"
-      title="Colapsar/Expandir"
-    >
-      <i class="bi bi-chevron-left">←</i>
-    </button>
+<nav id="projectSidebar" class="sidebar expanded relative min-h-screen bg-gray-50 border-r border-gray-200 transition-all duration-300">
+  <button
+    class="sidebar-toggle absolute -right-3 top-5 w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center cursor-pointer border-none z-10 transition-transform duration-300 hover:scale-110"
+    onclick="toggleSidebar()"
+    title="Colapsar/Expandir"
+  >
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  </button>
 
-    <div class="p-3">
-      <h6 class="sidebar-header mb-3">
-        <i class="bi bi-folder"></i>
-        <span class="nav-link-text">{{ proyecto.title|truncatechars:20 }}</span>
-      </h6>
+  <div class="p-3">
+    <h6 class="sidebar-header mb-3 text-gray-700 font-semibold">
+      📁
+      <span class="nav-link-text">{{ proyecto.title|truncatechars:20 }}</span>
+    </h6>
 
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'proyecto_resumen' %}active{% endif %}"
-            href="{% url 'proyecto_resumen' proyecto.id %}"
+    <ul class="nav flex-column space-y-1">
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'proyecto_resumen' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'proyecto_resumen' proyecto.id %}"
+        >
+          <span class="text-lg">🚧</span>
+          <span class="nav-link-text">Resumen</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'proyecto_detail' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'proyecto_detail' proyecto.id %}"
+        >
+          <span class="text-lg">🏠</span>
+          <span class="nav-link-text">Portada</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'calles_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'calles_list' proyecto.id %}"
+        >
+          <span class="text-lg">🛣️</span>
+          <span class="nav-link-text">Calles</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full"
+            >{{ proyecto.calles.count }}</span
           >
-            <i class="bi bi-signpost-split">🚧</i>
-            <span class="nav-link-text">Resumen</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'proyecto_detail' %}active{% endif %}"
-            href="{% url 'proyecto_detail' proyecto.id %}"
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'nodos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'nodos_list' proyecto.id %}"
+        >
+          <span class="text-lg">📍</span>
+          <span class="nav-link-text">Nodos</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full"
+            >{{ proyecto.nodos.count }}</span
           >
-            <i class="bi bi-house">🏠</i>
-            <span class="nav-link-text">Portada</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'proyecto_calles' or request.resolver_match.url_name == 'calles_list' %}active{% endif %}"
-            href="{% url 'proyecto_calles' proyecto.id %}"
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'arcos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'arcos_list' proyecto.id %}"
+        >
+          <span class="text-lg">↔️</span>
+          <span class="nav-link-text">Arcos</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full"
+            >{{ proyecto.arcos.count }}</span
           >
-            <i class="bi bi-signpost">🛣️</i>
-            <span class="nav-link-text">Calles</span>
-            <span class="badge bg-primary ms-auto"
-              >{{ proyecto.calles.count }}</span
-            >
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'proyecto_nodos' or request.resolver_match.url_name == 'nodos_list' %}active{% endif %}"
-            href="{% url 'proyecto_nodos' proyecto.id %}"
-          >
-            <i class="bi bi-geo-alt">📍</i>
-            <span class="nav-link-text">Nodos</span>
-            <span class="badge bg-primary ms-auto"
-              >{{ proyecto.nodos.count }}</span
-            >
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'proyecto_arcos' or request.resolver_match.url_name == 'arcos_list' %}active{% endif %}"
-            href="{% url 'proyecto_arcos' proyecto.id %}"
-          >
-            <i class="bi bi-arrow-right">↔️</i>
-            <span class="nav-link-text">Arcos</span>
-            <span class="badge bg-primary ms-auto"
-              >{{ proyecto.arcos.count }}</span
-            >
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'nodos_movimientos_list' %}active{% endif %}"
-            href="{% url 'nodos_movimientos_list' proyecto.id %}"
-          >
-            <i class="bi bi-arrows-move">🔄</i>
-            <span class="nav-link-text">Movimientos</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'conteos_list' %}active{% endif %}"
-            href="{% url 'conteos_list' proyecto.id %}"
-          >
-            <i class="bi bi-car-front">🚗</i>
-            <span class="nav-link-text">Conteos</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'flujos_list' %}active{% endif %}"
-            href="{% url 'flujos_list' proyecto.id %}"
-          >
-            <i class="bi bi-graph-up">📊</i>
-            <span class="nav-link-text">Flujos</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if request.resolver_match.url_name == 'analisis_trafico' %}active{% endif %}"
-            href="{% url 'analisis_trafico' proyecto.id %}"
-          >
-            <i class="bi bi-bar-chart">📈</i>
-            <span class="nav-link-text">Análisis</span>
-          </a>
-        </li>
-      </ul>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'nodos_movimientos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'nodos_movimientos_list' proyecto.id %}"
+        >
+          <span class="text-lg">🔄</span>
+          <span class="nav-link-text">Movimientos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'conteos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'conteos_list' proyecto.id %}"
+        >
+          <span class="text-lg">🚗</span>
+          <span class="nav-link-text">Conteos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'flujos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'flujos_list' proyecto.id %}"
+        >
+          <span class="text-lg">📊</span>
+          <span class="nav-link-text">Flujos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'analisis_trafico' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'analisis_trafico' proyecto.id %}"
+        >
+          <span class="text-lg">📈</span>
+          <span class="nav-link-text">Análisis</span>
+        </a>
+      </li>
+    </ul>
 
-      <hr class="my-3" />
+    <hr class="my-3 border-gray-300" />
 
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'proyectos' %}">
-            <i class="bi bi-arrow-return-left">⬅️</i>
-            <span class="nav-link-text">Volver a Proyectos</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-  </nav>
+    <ul class="nav flex-column space-y-1">
+      <li class="nav-item">
+        <a class="nav-link text-gray-600 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors" href="{% url 'proyectos' %}">
+          <span class="text-lg">⬅️</span>
+          <span class="nav-link-text">Volver a Proyectos</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>

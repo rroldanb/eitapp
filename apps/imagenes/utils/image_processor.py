@@ -11,12 +11,9 @@ def get_image_from_request(request):
     desde base64 (paste) o request.FILES
     """
 
-    # 🔹 Caso 1: imagen desde portapapeles
     image_data = request.POST.get("image_file")
 
     if image_data:
-        print("Procesando imagen pegada...")
-        print(f"Data recibida: {image_data[:30]}...")  # Debug: muestra el inicio del string
         try:
             format, imgstr = image_data.split(';base64,')
             ext = format.split('/')[-1]
@@ -34,8 +31,8 @@ def get_image_from_request(request):
         except Exception:
             raise ValueError("Error procesando imagen pegada")
     else:
-        print("No se encontró imagen pegada en el formulario.")
-    # 🔹 Caso 2: archivo tradicional
+        pass
+
     image = request.FILES.get("image")
 
     if image:

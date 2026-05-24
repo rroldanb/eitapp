@@ -33,7 +33,6 @@ def upload_project_image(file):
     except Exception as e:
         raise Exception(f"Error subiendo imagen a Supabase: {str(e)}")
 
-    # 🔹 obtener URL pública
     public_url = supabase.storage.from_(BUCKET).get_public_url(file_name)
 
     return public_url

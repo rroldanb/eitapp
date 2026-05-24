@@ -2,39 +2,42 @@
 
 {% block content %}
 
-<main class="container">
-    <div class="row">
-        <div class="mt-5 bg-light p-4 rounded">
+<main class="container mx-auto px-4 py-8">
+    <div class="flex justify-center">
+        <div class="mt-12 bg-gray-100 p-6 rounded-lg shadow-md w-full max-w-2xl">
 
-            <h2 class="text-center">Detalles del Contacto</h2>
-            <h3 class="text-success text-center">{{ contacto.name }}</h3>
-            {% comment %} <p> Email: {{ contacto.email }}  </p>
-            <p> Teléfono: {{ contacto.phone }}</p>
-            <p> Mandante: {{ contacto.mandante.name }}</p>
-            <p> Cargo: {{ contacto.cargo }}</p>
-            <p> Position: {{ contacto.position }}</p> {% endcomment %}
+            <h2 class="text-center text-2xl font-bold text-gray-800 mb-4">Detalles del Contacto</h2>
+            <h3 class="text-center text-xl font-semibold text-green-600 mb-4">{{ contacto.name }}</h3>
 
-            {{ error }}
+            {% if error %}
+            <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {{ error }}
+            </div>
+            {% endif %}
 
-            <form method="POST">
+            <form method="POST" class="space-y-4">
                 {% csrf_token %}
                 {{ form }}
-                <button type="submit" class="btn btn-dark w-100 mt-1">Actualizar</button>
+                <button type="submit" class="w-full px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium mt-1">
+                    Actualizar
+                </button>
             </form>
-            <div class="d-flex justify-content-around mt-2">
-                <form action="{% url 'contacto_delete' contacto.id %}" method="POST">
+
+            <div class="flex justify-around mt-4 space-x-2">
+                <form action="{% url 'contacto_delete' contacto.id %}" method="POST" class="flex-1">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger w-100">Eliminar</button>
+                    <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                        Eliminar
+                    </button>
                 </form>
-   
-                <a href="{% url 'mandante_detail' contacto.mandante.id %}" class="btn btn-secondary w-100 ms-1 mb-2">Volver</a>
-            {{ error }}
-            
-      
+
+                <a href="{% url 'mandante_detail' contacto.mandante.id %}" class="flex-1 text-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium ml-1 mb-2">
+                    Volver
+                </a>
+            </div>
+
         </div>
     </div>
 </main>
-
-
 
 {% endblock %}

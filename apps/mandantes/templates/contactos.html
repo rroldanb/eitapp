@@ -1,30 +1,30 @@
+{% extends "base.html" %}
 
 {% block content %}
 
-<main class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3 mt-5">
-            <h1 class="text-center">{{ list_title }}</h1>
-            <ul class="list-group">
+<main class="container mx-auto px-4 py-8">
+    <div class="flex justify-center">
+        <div class="w-full md:w-1/2 mt-12">
+            <h1 class="text-center text-2xl font-bold text-gray-800 mb-6">{{ list_title }}</h1>
+            <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
                 {% if contactos %}
                     {% for contacto in contactos %}
-                        <a href="{% url 'contacto_detail' contacto.id %}" class="text-decoration-none">
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-end">
-                                    <h5>{{ contacto.name }}</h5>
-                                    <p>{{ contacto.location }}</p>
+                        <li>
+                            <a href="{% url 'contacto_detail' contacto.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
+                                <div class="flex justify-between items-end">
+                                    <h5 class="text-lg font-semibold text-gray-800">{{ contacto.name }}</h5>
+                                    <p class="text-sm text-gray-600">{{ contacto.position }}</p>
                                 </div>
-                                <p>Descripción: {{ contacto.details }}</p>
-                            </li>
-                        </a>
+                                <p class="text-gray-600 mt-2 text-sm">Descripción: {{ contacto.details }}</p>
+                            </a>
+                        </li>
                     {% endfor %}
                 {% else %}
-                    <p class="text-center">No hay contactos registrados.</p>
+                    <li class="p-6 text-center text-gray-500">No hay contactos registrados.</li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </main>
-
 
 {% endblock %}

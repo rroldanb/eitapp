@@ -2,45 +2,49 @@
 
 {% block content %}
 
-<main class="container">
-    <div class="row">
-        <div class="col-md-4 offset-md-4 mt-5 card card-detail">
+<main class="container mx-auto px-4 py-8">
+    <div class="flex justify-center">
+        <div class="w-full md:w-1/3 mt-12">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">Task Details</h1>
+                {% if task.is_important %}
+                    <h3 class="text-xl font-semibold text-center text-red-600 mb-4">{{ task.title }}</h3>
+                {% else %}
+                    <h3 class="text-xl font-semibold text-center text-green-600 mb-4">{{ task.title }}</h3>
+                {% endif %}
 
-            <h1 class="text-center">Task Details</h1>
-            {% if task.is_important %}
-                            {% comment %} <strong>Important:</strong> {% endcomment %}
-                            <h3 class="text-danger text-center">{{ task.title }}</h3>
-                        {% else %}
-                            <h3 class="text-success text-center">{{ task.title }}</h3>
-                        {% endif %} 
-            {% comment %} <p>Description: {{ task.description }}</p>
-            <p>Assigned to: {{ task.user.username }}</p>
-            <p>Status: {{ task.is_completed|yesno:"Completed,Incomplete" }}</p> {% endcomment %}
-            
-            {{ error }}
-            
-            
-            <form method="POST">
-                {% csrf_token %}
-                {{ form }}
-                <button type="submit" class="btn btn-dark w-100 mt-1">Update</button>
-            </form>
-            <div class="d-flex justify-content-around mt-2">
-                <form action="{% url 'delete_task' task.id %}" method="POST">
+                {% if error %}
+                <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" class="space-y-4">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger w-100">Delete</button>
+                    {{ form.as_p }}
+                    <button type="submit" class="w-full bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors font-medium">
+                        Update
+                    </button>
                 </form>
-                
-                <form action="{% url 'complete_task' task.id %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-secondary w-100">Complete</button>
-                </form>
-                
+
+                <div class="flex justify-around mt-4 space-x-2">
+                    <form action="{% url 'delete_task' task.id %}" method="POST" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium">
+                            Delete
+                        </button>
+                    </form>
+
+                    <form action="{% url 'complete_task' task.id %}" method="POST" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors font-medium">
+                            Complete
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </main>
-
-
 
 {% endblock %}

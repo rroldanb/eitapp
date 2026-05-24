@@ -2,34 +2,29 @@
 
 {% block content %}
 
-<main class="container">
-    <div class="row">
-        <div class="mt-5 bg-light p-4 rounded">
-            <h1 class="text-center">{{ list_title }}</h1>
-            <ul class="list-group">
+<main class="container mx-auto px-4 py-8">
+    <div class="flex justify-center">
+        <div class="mt-12 bg-gray-100 p-6 rounded-lg shadow-md w-full max-w-4xl">
+            <h1 class="text-center text-2xl font-bold text-gray-800 mb-6">{{ list_title }}</h1>
+            <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
                 {% if mandantes %}
                     {% for mandante in mandantes %}
-                        <a href="{% url 'mandante_detail' mandante.id %}" class="text-decoration-none">
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-end">
-                                    <h5>{{ mandante.name }}</h5>
-                                    <p>{{ mandante.location }}</p>
+                        <li>
+                            <a href="{% url 'mandante_detail' mandante.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
+                                <div class="flex justify-between items-end">
+                                    <h5 class="text-lg font-semibold text-gray-800">{{ mandante.name }}</h5>
+                                    <p class="text-sm text-gray-600">{{ mandante.location }}</p>
                                 </div>
-                                <p>Descripción: {{ mandante.details }}</p>
-                            </li>
-                        </a>
+                                <p class="text-gray-600 mt-2 text-sm">Descripción: {{ mandante.details }}</p>
+                            </a>
+                        </li>
                     {% endfor %}
                 {% else %}
-                    <p class="text-center">No hay mandantes registrados.</p>
+                    <li class="p-6 text-center text-gray-500">No hay mandantes registrados.</li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </main>
-
-
-
-
-
 
 {% endblock %}

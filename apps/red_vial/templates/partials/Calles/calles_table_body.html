@@ -1,0 +1,13 @@
+{% include 'partials/Calles/calle_create.html' with proyecto=proyecto %}
+
+{% if calles %}
+  {% for calle in calles %}
+    {% include 'partials/Calles/calle_row.html' with calle=calle %}
+  {% endfor %}
+{% else %}
+  <tr>
+    <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+      No hay calles registradas para este proyecto.
+    </td>
+  </tr>
+{% endif %}
