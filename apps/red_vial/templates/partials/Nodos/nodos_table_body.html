@@ -1,0 +1,15 @@
+{% comment %} Cuerpo de tabla para Nodos. Usa el partial de fila existente {% endcomment %}
+
+{% include 'partials/Nodos/nodo_create.html' with proyecto=proyecto %}
+
+{% if nodos %}
+  {% for nodo in nodos %}
+    {% include 'partials/Nodos/nodo_row.html' with nodo=nodo %}
+  {% endfor %}
+{% else %}
+  <tr>
+    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+      No hay nodos registrados para este proyecto.
+    </td>
+  </tr>
+{% endif %}

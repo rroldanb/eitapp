@@ -47,6 +47,8 @@ BASE_APPS = [
 THIRD_APPS = [
     'whitenoise.runserver_nostatic',
     'apps.common.apps.CommonConfig',
+    'tailwind',
+    "theme",
 ]
 
 MY_APPS = [
@@ -59,6 +61,11 @@ MY_APPS = [
 
 INSTALLED_APPS = BASE_APPS + THIRD_APPS + MY_APPS
 
+if DEBUG:
+    # Add django_browser_reload only in DEBUG mode
+    INSTALLED_APPS += ["django_browser_reload"]
+
+TAILWIND_APP_NAME = "theme"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -70,6 +77,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+
+if DEBUG:
+    # Add django_browser_reload middleware only in DEBUG mode
+    MIDDLEWARE += [
+        "django_browser_reload.middleware.BrowserReloadMiddleware",
+    ]
 
 ROOT_URLCONF = 'transito_backend.urls'
 

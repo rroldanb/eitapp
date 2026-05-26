@@ -1,13 +1,18 @@
-from django.urls import path, include
-from django.contrib.auth.decorators import login_required
+from django.urls import path
 
-from ..views.arco_views import *
+from ..views.arco_views_cbv import (
+    ArcosListView,
+    ArcosCreateView,
+    ArcosUpdateView,
+    ArcosDeleteView,
+    ArcosBulkUpdateView,
+)
 
 urlpatterns = [
         # ========== ARCO URLs ==========
-    path("proyecto/<uuid:proyecto_id>/arcos/", arcos_list_view, name="arcos_list"),
-    path("proyecto/<uuid:proyecto_id>/arcos/create/", arco_create_view, name="arco_create"),
-    path("arco/<uuid:arco_id>/", arco_detail_view, name="arco_detail"),
-    path("arco/<uuid:arco_id>/update/", arco_update_view, name="arco_update"),
-    path("arco/<uuid:arco_id>/delete/", arco_delete_view, name="arco_delete"),
+    path("proyecto/<uuid:proyecto_id>/arcos/", ArcosListView.as_view(), name="arcos_list"),
+    path("proyecto/<uuid:proyecto_id>/arcos/create/", ArcosCreateView.as_view(), name="arco_create"),
+    path("arco/<uuid:item_id>/update/", ArcosUpdateView.as_view(), name="arco_update"),
+    path("arco/<uuid:item_id>/delete/", ArcosDeleteView.as_view(), name="arco_delete"),
+    path("proyecto/<uuid:proyecto_id>/arcos/bulk-update/", ArcosBulkUpdateView.as_view(), name="arcos_bulk_update"),
 ]

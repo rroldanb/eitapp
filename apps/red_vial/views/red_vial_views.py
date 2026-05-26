@@ -6,6 +6,10 @@ from django.contrib.auth.decorators import login_required
 # from apps.red_vial.models import Calle, Nodo, Arco, Regulacion, NodoMovimiento, Coeficiente_Cruce
 from apps.red_vial.services.red_vial_service import *
 from apps.red_vial.forms.forms import   RegulacionForm, NodoMovimientoForm, CoeficienteCruceForm
+from apps.red_vial.services.arco_service import get_arcos_by_proyecto
+from apps.red_vial.services.calle_service import get_calles_by_proyecto
+from apps.red_vial.services.nodo_service import get_nodos_by_proyecto
+
 
 
 # ========== REGULACIONES VIEWS ==========

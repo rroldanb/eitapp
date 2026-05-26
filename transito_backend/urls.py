@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from apps.usuarios import views as user_views
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,4 +16,12 @@ urlpatterns = [
     path('mandantes/', include('apps.mandantes.urls')),
     path('proyectos/', include('apps.proyectos.urls')),
     path('red-vial/', include('apps.red_vial.urls')),
+    path('theme/', include('theme.urls')),
 ]
+
+
+if settings.DEBUG:
+    # Include django_browser_reload URLs only in DEBUG mode
+    urlpatterns += [
+        path("__reload__/", include("django_browser_reload.urls")),
+    ]

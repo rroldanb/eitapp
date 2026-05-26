@@ -1,22 +1,19 @@
-<a class="nav-link dropdown-toggle {% if '/tasks' in request.path %}active{% endif %}" href="#" id="tasksDropdownMenu" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-    Tasks
-</a>
-
-<ul class="dropdown-menu" aria-labelledby="tasksDropdownMenu">
-    <li>
-        <a class="dropdown-item {% if request.resolver_match.url_name == 'tasks' %}active{% endif %}" href="{% url 'tasks' %}">
-            Pending Tasks
+<div class="relative group">
+    <button class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors dropdown-toggle {% if '/tasks' in request.path %}bg-gray-800 text-white{% endif %}" data-dropdown="tasks-menu">
+        Tasks
+        <i class="fas fa-chevron-down ml-1 text-xs"></i>
+    </button>
+    
+    <div id="tasks-menu" class="hidden lg:absolute left-0 mt-2 w-full lg:w-56 bg-slate-600/80 lg:bg-gray-800 rounded-lg shadow-xl py-2 z-50">
+        <a href="{% url 'tasks' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'tasks' %}bg-gray-700 text-white{% endif %}">
+            <i class="fas fa-spinner mr-2"></i> Pending Tasks
         </a>
-    </li>
-    <li>
-        <a class="dropdown-item {% if request.resolver_match.url_name == 'tasks_completed' %}active{% endif %}" href="{% url 'tasks_completed' %}">
-            Completed Tasks
+        <a href="{% url 'tasks_completed' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'tasks_completed' %}bg-gray-700 text-white{% endif %}">
+            <i class="fas fa-check-circle mr-2"></i> Completed Tasks
         </a>
-    </li>
-    <li><hr class="dropdown-divider"></li>
-    <li>
-        <a class="dropdown-item {% if request.resolver_match.url_name == 'create_task' %}active{% endif %}" href="{% url 'create_task' %}">
-            Create Task
+        <hr class="my-2 border-gray-700">
+        <a href="{% url 'create_task' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'create_task' %}bg-gray-700 text-white{% endif %}">
+            <i class="fas fa-plus-circle mr-2"></i> Create Task
         </a>
-    </li>
-</ul>
+    </div>
+</div>

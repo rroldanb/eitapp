@@ -3,8 +3,8 @@
 {% block section_content %}
 
 <div class="section-header flex justify-between items-center mb-6">
-    <h3 class="text-xl font-semibold text-gray-800">{% if arco %}Editar Arco{% else %}Nuevo Arco{% endif %}</h3>
-    <a href="{% url 'arcos_list' proyecto.id %}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium">Volver</a>
+    <h3 class="text-xl font-semibold text-gray-800">{% if nodo_movimiento %}Editar{% else %}Nuevo{% endif %} Nodo-Movimiento</h3>
+    <a href="{% url 'nodos_movimientos_list' proyecto.id %}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium">Volver</a>
 </div>
 
 <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -18,7 +18,7 @@
             {{ form.as_p }}
             <div class="flex gap-3">
                 <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors font-medium">Guardar</button>
-                <a href="{% url 'arcos_list' proyecto.id %}" class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium">Cancelar</a>
+                <a href="{% url 'nodos_movimientos_list' proyecto.id %}" class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium">Cancelar</a>
             </div>
         </form>
     </div>

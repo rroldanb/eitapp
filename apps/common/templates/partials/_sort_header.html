@@ -1,0 +1,25 @@
+{# Generic sortable table headers - Include this in any model's table template #}
+{# Usage: {% include 'partials/_sort_header.html' with table_id="items-table" sort_fields=sort_fields sort_by=sort_by sort_order=sort_order %} #}
+
+<thead class="bg-gray-50">
+  <tr>
+    {% for field_name, field_label in sort_fields %}
+      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          aria-sort="{% if sort_by == field_name %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button"
+           hx-get="?sort_by={{ field_name }}&sort_order={% if sort_by == field_name and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-target="#{{ table_id }}"
+           hx-swap="outerHTML"
+           hx-push-url="true"
+           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == field_name %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}"
+        >
+          {{ field_label }}
+          {% if sort_by == field_name %}
+            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+          {% endif %}
+        </a>
+      </th>
+    {% endfor %}
+    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ actions_label|default:"Acciones" }}</th>
+  </tr>
+</thead>

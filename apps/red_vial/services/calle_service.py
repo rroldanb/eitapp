@@ -1,98 +1,60 @@
-from django.db import transaction
 from django.db.models import Count, F
-from django.core.exceptions import ValidationError
 
 from apps.red_vial.models import Calle
 from apps.red_vial.forms.forms import CalleForm
+from .base_service import apply_sort_to_queryset, create_item, update_item, delete_item, bulk_update_items
 
 
-def get_all_calles():
-    """Obtener todas las calles."""
-    return Calle.objects.all()
-
+# ========== CALLE VIEWS ==========
 
 def get_calles_by_proyecto(proyecto_id, sort_by=None, order='asc'):
-    """Obtener calles de un proyecto con orden opcional."""
+    """
+    Obtener calles de un proyecto con ordenamiento.
+    
+    Args:
+        proyecto_id: ID del proyecto
+        sort_by: Campo para ordenar ('numero', 'nombre', 'nodos')
+        order: 'asc' o 'desc'
+        
+    Returns:
+        QuerySet de Calle ordenado
+    """
     queryset = Calle.objects.filter(proyecto_id=proyecto_id).annotate(
         nodos_1=Count('nodos_calle_1', distinct=True),
         nodos_2=Count('nodos_calle_2', distinct=True),
     ).annotate(
         nodos_total=F('nodos_1') + F('nodos_2')
     )
-
+    
     valid_sort_fields = {
         'numero': 'numero',
         'nombre': 'nombre',
         'nodos': 'nodos_total',
     }
-    sort_field = valid_sort_fields.get(sort_by, 'numero')
-    if order not in ['asc', 'desc']:
-        order = 'asc'
-
-    if order == 'desc':
-        sort_field = f'-{sort_field}'
-
-    return queryset.order_by(sort_field)
-
-
-def get_calle_by_id(calle_id):
-    """Obtener calle por ID."""
-    return Calle.objects.get(id=calle_id)
-
-
-def _validate_calle_form(data, instance=None):
-    """Validar datos de calle con el formulario."""
-    form = CalleForm(data, instance=instance)
-    if not form.is_valid():
-        raise ValidationError(form.errors)
-    return form
+    
+    return apply_sort_to_queryset(
+        queryset,
+        sort_by=sort_by,
+        order=order,
+        valid_fields=valid_sort_fields
+    )
 
 
 def create_calle(proyecto, data):
-    """Crear una nueva calle vinculada a un proyecto."""
-    form = _validate_calle_form(data)
-    calle = form.save(commit=False)
-    calle.proyecto = proyecto
-    calle.save()
-    return calle
+    """Crear una nueva calle."""
+    return create_item(Calle, data, form_class=CalleForm, proyecto=proyecto)
 
 
-def update_calle(calle, data):
-    """Actualizar una calle existente."""
-    form = _validate_calle_form(data, instance=calle)
-    return form.save()
+def update_calle(calle_id, data):
+    """Actualizar una calle."""
+    return update_item(Calle, calle_id, data, form_class=CalleForm)
 
 
 def delete_calle(calle_id):
     """Eliminar una calle."""
-    calle = Calle.objects.get(id=calle_id)
-    calle.delete()
+    delete_item(Calle, calle_id)
 
 
-def bulk_update_calles(data_list):
+def bulk_update_calles(items_data):
     """Actualizar múltiples calles en lote."""
-    updated = []
-    updated_ids = []
-
-    calle_ids = [item.get('id') for item in data_list if item.get('id')]
-    calles = {str(c.id): c for c in Calle.objects.filter(id__in=calle_ids)}
-
-    with transaction.atomic():
-        for item in data_list:
-            calle_id = str(item.get('id'))
-            calle = calles.get(calle_id)
-            if not calle:
-                continue
-
-            if 'numero' in item:
-                calle.numero = item['numero']
-            if 'nombre' in item:
-                calle.nombre = item['nombre']
-
-            updated.append(calle)
-            updated_ids.append(calle_id)
-
-        if updated:
-            Calle.objects.bulk_update(updated, ['numero', 'nombre'])
-
-    return updated_ids
+    return bulk_update_items(Calle, items_data, ['numero', 'nombre'])

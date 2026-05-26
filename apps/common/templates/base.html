@@ -8,20 +8,10 @@
  
 
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#667eea',
-                        secondary: '#764ba2',
-                        accent: '#667eea',
-                    }
-                }
-            }
-        }
-    </script>
+    {% comment %} <script src="https://cdn.tailwindcss.com"></script> {% endcomment %}
+
+    {% load static tailwind_tags %}
+    {% tailwind_css %}
 
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/2aaa0bfb6c.js" crossorigin="anonymous"></script>
@@ -29,13 +19,14 @@
     <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/_hyperscript.min.js" integrity="sha384-OT9bNmUa5rM34SmxFpRftn2F6GbgM/4xnTmn0z106OE5uvsigkdtUMOpdPKOigyO" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz" crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/openseadragon.min.js"></script>
-
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<script src="{% static 'js/dropdown_handler.js' %}"></script>
 </head>
 
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    
     <header>
         
         {% block mainnavbar %}

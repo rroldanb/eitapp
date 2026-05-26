@@ -1,81 +1,37 @@
 {% extends "proyecto_base.html" %}
+{% load static %}
 
 {% block section_content %}
 
 <div class="section-header flex justify-between items-center mb-6">
   <h3 class="text-xl font-semibold text-gray-800">Nodos del Proyecto</h3>
-  <span class="ml-auto px-3 py-1 bg-green-100 text-green-800 text-lg rounded-full">{{ proyecto.nodos.count }}</span>
+  <span class="ml-auto px-3 py-1 bg-green-100 text-green-800 text-lg rounded-full" onchange="update_new_node()" data-count-badge>{{ proyecto.nodos.count }}</span>
 </div>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-  <div class="p-4">
-    <div class="overflow-x-auto">
-      <table class="w-full divide-y divide-gray-200" id="nodos-table">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">N°</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Calle 1</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Calle 2</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Es PC</th>
-            <th class="px-4 py-3"></th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          {% if nodos %}
-          {% for nodo in nodos %}
-            {% include 'red_vial/Nodos/nodo_row_partial.html' with nodo=nodo %}
-          {% endfor %}
-          {% endif %}
-          <form
-            id="newNodoForm"
-            enctype="multipart/form-data"
-            action="{% url 'nodo_create' proyecto.id %}"
-            method="POST"
-          >
-            {% if error %}{{ error }}{% endif %}
-            {% csrf_token %}
-            <tr class="hover:bg-gray-50">
-              <td class="px-4 py-3">
-                <input type="number" id="numero" name="numero" class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent" value="{{ proyecto.nodos.count|add:1 }}" min="1" max="99"/>
-              </td>
-              <td class="px-4 py-3">
-                <select class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent" name="calle_1">
-                  <option value="">Seleccionar calle...</option>
-                  {% for calle in proyecto.calles.all %}
-                  <option value="{{ calle.id }}">{{ calle.nombre }}</option>
-                  {% endfor %}
-                </select>
-              </td>
-              <td class="px-4 py-3">
-                <select class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent" name="calle_2">
-                  <option value="">Seleccionar calle...</option>
-                  {% for calle in proyecto.calles.all %}
-                  <option value="{{ calle.id }}">{{ calle.nombre }}</option>
-                  {% endfor %}
-                </select>
-              </td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <input class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" type="checkbox" name="is_pc" id="is_pc_new">
-                  <input type="number" id="numero_pc" name="numero_pc" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm" placeholder="N°" min="1" max="99" />
-                </div>
-              </td>
-              <td class="px-4 py-3">
-              </td>
-              <td class="px-4 py-3">
-                <button type="submit" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors">
-                  Guardar
-                </button>
-              </td>
-            </tr>
-          </form>
-        </tbody>
-      </table>
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="p-4">
+        <div class="overflow-x-auto">
+          {% include 'partials/Nodos/nodos_table.html' with proyecto=proyecto nodos=nodos sort_by=sort_by sort_order=sort_order %}
+          <div class="mt-4 flex gap-2 justify-end">
+            <button type="button" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors font-medium" id="submit-all">
+              💾 Guardar todos los cambios
+            </button>
+            <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium" id="cancel-all">
+              ✖ Cancelar cambios
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
+
+    {% endblock %}
+    
+    <div id="data-crud-config" data-table-id="nodos-table" data-model-name="Nodo" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
+
+
+{% block extra_js %}
+<script src="{% static 'js/crud_events.js' %}"></script>
 <script>
   // Toggle PC number input visibility
   document.getElementById('is_pc_new').addEventListener('change', function() {
@@ -83,6 +39,16 @@
     pcNumInput.style.display = this.checked ? 'flex' : 'none';
     if (!this.checked) pcNumInput.value = '';
   });
+
+
+  // Actualizar el badge de conteo al crear un nuevo nodo
+  function update_new_node() {
+    alert('Actualizando conteo de nodos...'); // Debug alert
+    const countBadge = document.querySelector('[data-count-badge]');
+    const currentCount = parseInt(countBadge.getAttribute('data-count')) || 0;
+    countBadge.setAttribute('data-count', currentCount + 1);
+    countBadge.textContent = currentCount + 1;
+  }
 </script>
 
 {% endblock %}

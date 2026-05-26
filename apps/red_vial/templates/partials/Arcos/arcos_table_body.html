@@ -1,0 +1,13 @@
+{% include 'partials/Arcos/arco_create.html' with proyecto=proyecto %}
+
+{% if arcos %}
+  {% for arco in arcos %}
+    {% include 'partials/Arcos/arco_row.html' with arco=arco proyecto=proyecto %}
+  {% endfor %}
+{% else %}
+  <tr>
+    <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+      No hay arcos registrados para este proyecto.
+    </td>
+  </tr>
+{% endif %}

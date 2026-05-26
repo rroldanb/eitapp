@@ -1,8 +1,10 @@
 <table class="w-full divide-y divide-gray-200 table-results" id="calles-table">
-  <thead class="bg-gray-50">
+  <thead class="bg-slate-200">
     <tr>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" aria-sort="{% if sort_by == 'numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button" href="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" 
+      aria-sort="{% if sort_by == 'numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button" 
+        href="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
             hx-get="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
             hx-target="#calles-table"
             hx-swap="outerHTML"

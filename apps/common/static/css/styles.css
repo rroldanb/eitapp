@@ -397,6 +397,40 @@ tr.htmx-swapping td {
     color: #764ba2;
 }
 
+.bg-primary {
+    background-color: #667eea;
+}
+
+.bg-secondary {
+    background-color: #764ba2;
+}
+
+.bg-accent {
+    background-color: #667eea;
+}
+
+.from-primary {
+    --tw-gradient-from: #667eea;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(102, 126, 234, 0));
+}
+
+.via-secondary {
+    --tw-gradient-stops: var(--tw-gradient-from), #764ba2, var(--tw-gradient-to, rgba(102, 126, 234, 0));
+}
+
+.to-accent {
+    --tw-gradient-to: #667eea;
+}
+
+.from-secondary {
+    --tw-gradient-from: #764ba2;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(118, 75, 162, 0));
+}
+
+.to-secondary {
+    --tw-gradient-to: #764ba2;
+}
+
 .bg-gradient-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }

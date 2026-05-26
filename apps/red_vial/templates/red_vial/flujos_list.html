@@ -1,0 +1,47 @@
+{% extends "proyecto_base.html" %}
+
+{% block section_content %}
+
+<div class="section-header flex justify-between items-center mb-6">
+    <h3 class="text-xl font-semibold text-gray-800">Flujos de Movimiento</h3>
+    <a href="{% url 'flujo_create' proyecto.id %}" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors font-medium">+ Agregar Flujo</a>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="p-4">
+        {% if flujos %}
+        <div class="overflow-x-auto">
+            <table class="w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nodo-Movimiento</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Período</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hora</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Flujo (veh/h)</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Flujo (VEQ/h)</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for flujo in flujos %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">{{ flujo.nodo_movimiento }}</td>
+                        <td class="px-4 py-3">{{ flujo.periodo.codigo }}</td>
+                        <td class="px-4 py-3">{{ flujo.hora|time:"H:i" }}</td>
+                        <td class="px-4 py-3">{{ flujo.flujo_veh|default:"-" }}</td>
+                        <td class="px-4 py-3 font-medium">{{ flujo.flujo_veq|default:"-" }}</td>
+                        <td class="px-4 py-3">
+                            <a href="#" class="text-indigo-600 hover:text-indigo-800 text-sm">Editar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-8">No hay flujos registrados</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

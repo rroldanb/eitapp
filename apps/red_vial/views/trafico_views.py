@@ -3,10 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from apps.proyectos.models import Proyecto
 from apps.red_vial.services.trafico_service import *
-from apps.red_vial.services.red_vial_service import (
-    get_nodos_movimientos_by_proyecto,
-    get_nodos_by_proyecto
-)
+
 from apps.red_vial.forms.trafico_forms import (
     PeriodoForm,
     ConteoVehicularForm,
