@@ -41,8 +41,6 @@ class CoeficienteCruceAdmin(admin.ModelAdmin):
 class PeriodoAdmin(admin.ModelAdmin):
     list_display = ('codigo', 'proyecto', 'hora_inicio', 'hora_fin', 'es_laboral')
     list_filter = ('proyecto', 'es_laboral')
-    # list_display = ('codigo',  'hora_inicio', 'hora_fin', 'es_laboral')
-    # list_filter = ('es_laboral')
     search_fields = ('codigo',)
 
 

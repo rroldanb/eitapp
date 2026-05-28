@@ -98,3 +98,7 @@ class FlujoMovimiento(BaseModel):
 
     def __str__(self):
         return f"{self.nodo_movimiento} - {self.hora}"
+
+
+# models/conteo_vehicular.py
+ 
