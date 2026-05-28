@@ -1,0 +1,29 @@
+<tr id="regulacion-row-{{ regulacion.id }}" class="regulacion-row hover:bg-gray-50" data-regulacion-id="{{ regulacion.id }}">
+  <td class="px-4 py-1">
+    <input type="text" name="codigo" class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 uppercase" value="{{ regulacion.codigo }}" maxlength="20">
+  </td>
+  <td class="px-4 py-1">
+    <input type="text" name="descripcion" class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ regulacion.descripcion }}">
+  </td>
+  <td class="px-4 py-1 flex gap-2">
+    <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors" data-action="update"
+      hx-put="{% url 'regulacion_update' regulacion.id %}"
+      hx-include="closest tr"
+      hx-target="closest tr"
+      hx-swap="outerHTML transition:true swap:1s"
+      hx-indicator="#save-indicator-{{ regulacion.id }}"
+    >
+      <span id="save-indicator-{{ regulacion.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+      Actualizar
+    </button>
+    <button type="button" class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors" data-action="delete"
+      hx-delete="{% url 'regulacion_delete' regulacion.id %}"
+      hx-target="closest tr"
+      hx-swap="outerHTML transition:true swap:1s"
+      hx-indicator="#delete-indicator-{{ regulacion.id }}"
+    >
+      <span id="delete-indicator-{{ regulacion.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+      Eliminar
+    </button>
+  </td>
+</tr>

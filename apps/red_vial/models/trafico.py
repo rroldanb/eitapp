@@ -1,27 +1,29 @@
 from django.db import models
 from apps.common.models import BaseModel
 from apps.proyectos.models.proyecto import Proyecto
-from .red_vial import Nodo, NodoMovimiento
 
+from apps.red_vial.models.nodo import Nodo
+from apps.red_vial.models.periodo import Periodo
+from apps.red_vial.models.red_vial_nn import NodoMovimiento
 
-class Periodo(BaseModel):
-    """
-    Períodos de medición de tráfico (ej: PM-L = Pico Mañana Laboral)
-    """
-    codigo = models.CharField(max_length=10, unique=True)
-    nombre = models.CharField(max_length=100)
-    tipo_dia = models.CharField(
-        max_length=20,
-        choices=[
-            ('laboral', 'Día Laboral'),
-            ('sabado', 'Sábado'),
-            ('domingo', 'Domingo/Festivo'),
-        ],
-        default='laboral'
-    )
+# class Periodos(BaseModel):
+#     """
+#     Períodos de medición de tráfico (ej: PM-L = Pico Mañana Laboral)
+#     """
+#     codigo = models.CharField(max_length=10, unique=True)
+#     nombre = models.CharField(max_length=100)
+#     tipo_dia = models.CharField(
+#         max_length=20,
+#         choices=[
+#             ('laboral', 'Día Laboral'),
+#             ('sabado', 'Sábado'),
+#             ('domingo', 'Domingo/Festivo'),
+#         ],
+#         default='laboral'
+#     )
 
-    def __str__(self):
-        return f"{self.codigo} - {self.nombre}"
+#     def __str__(self):
+#         return f"{self.codigo} - {self.nombre}"
 
 
 class ConteoVehicular(BaseModel):
@@ -41,7 +43,7 @@ class ConteoVehicular(BaseModel):
     periodo = models.ForeignKey(
         Periodo,
         on_delete=models.CASCADE,
-        related_name="conteos"
+        related_name="traficos"
     )
     hora = models.TimeField()
 

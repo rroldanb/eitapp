@@ -6,10 +6,6 @@ from ..views.trafico_views import *
 urlpatterns = [
 
 
-    # ========== REGULACIÓN URLs ==========
-    path("regulaciones/", regulaciones_list_view, name="regulaciones_list"),
-    path("regulaciones/create/", regulacion_create_view, name="regulacion_create"),
-
     # ========== NODO MOVIMIENTO URLs ==========
     path("proyecto/<uuid:proyecto_id>/nodos-movimientos/", nodos_movimientos_list_view, name="nodos_movimientos_list"),
     path("proyecto/<uuid:proyecto_id>/nodos-movimientos/create/", nodo_movimiento_create_view, name="nodo_movimiento_create"),

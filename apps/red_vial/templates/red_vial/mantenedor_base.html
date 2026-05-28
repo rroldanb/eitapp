@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+
+<div class="flex">
+  <!-- Sidebar -->
+  {% include "common/navbar/proyecto_sidebar.html" %}
+
+  <!-- Main Content -->
+  <main class="flex-1 p-5">
+    <div class="container mx-auto">
+      <!-- Project Header -->
+      <div class="bg-gradient-primary text-white p-8 rounded-xl shadow-lg mb-1">
+        <h1 class="text-2xl font-bold">{{ proyecto.title }}</h1>
+        <div class="flex justify-between mt-3 text-sm opacity-90">
+
+          
+        </div>
+      </div>
+
+      <!-- Section Content -->
+      <div class="container bg-gray-100 p-4 rounded-lg">
+        {% block section_content %}{% endblock %}
+      </div>
+    </div>
+  </main>
+</div>
+
+
+<script>
+
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById("projectSidebar");
+    sidebar.classList.toggle("collapsed");
+    sidebar.classList.toggle("expanded");
+
+    // Save preference
+    const isCollapsed = sidebar.classList.contains("collapsed");
+    localStorage.setItem("sidebarCollapsed", isCollapsed);
+  }
+
+
+
+  // Restore sidebar state
+  document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("projectSidebar");
+    const isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+
+    if (isCollapsed) {
+      sidebar.classList.remove("expanded");
+      sidebar.classList.add("collapsed");
+    }
+  });
+
+
+
+</script>
+
+{% endblock %}

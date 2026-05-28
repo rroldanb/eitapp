@@ -1,4 +1,4 @@
-from apps.red_vial.models.red_vial import Nodo
+from apps.red_vial.models import Nodo
 from apps.red_vial.forms.forms import NodoForm
 from apps.red_vial.services.base_service import (
     apply_sort_to_queryset,

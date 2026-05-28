@@ -53,6 +53,13 @@
                         {% include "common/navbar/tasks_dropdown.html" %}
                     </li>
 
+                    <!-- Regulaciones -->
+                    <li class="list-none">
+                        <a href="{% url 'regulaciones_list' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.resolver_match.url_name == 'regulaciones_list' %}bg-gray-800 text-white{% endif %}">
+                            Regulaciones
+                        </a>
+                    </li>
+
                     <!-- Logout -->
                     <li class="list-none">
                         <a href="{% url 'signout' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors ml-4">

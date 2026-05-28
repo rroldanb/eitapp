@@ -1,0 +1,13 @@
+{% include 'partials/Regulaciones/regulacion_create.html' %}
+
+{% if regulaciones %}
+  {% for regulacion in regulaciones %}
+    {% include 'partials/Regulaciones/regulacion_row.html' with regulacion=regulacion %}
+  {% endfor %}
+{% else %}
+  <tr>
+    <td colspan="3" class="px-4 py-8 text-center text-gray-500">
+      No hay regulaciones registradas.
+    </td>
+  </tr>
+{% endif %}

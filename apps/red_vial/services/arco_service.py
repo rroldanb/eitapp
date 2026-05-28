@@ -1,4 +1,4 @@
-from apps.red_vial.models.red_vial import Arco
+from apps.red_vial.models import Arco
 from apps.red_vial.forms.forms import ArcoForm
 from apps.red_vial.services.base_service import (
     apply_sort_to_queryset,

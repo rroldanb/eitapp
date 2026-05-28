@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models.red_vial import *
+from .models import *
 from .models.trafico import *
 
 
@@ -39,9 +39,11 @@ class CoeficienteCruceAdmin(admin.ModelAdmin):
 
 
 class PeriodoAdmin(admin.ModelAdmin):
-    list_display = ('codigo', 'nombre', 'tipo_dia')
-    list_filter = ('tipo_dia',)
-    search_fields = ('codigo', 'nombre')
+    list_display = ('codigo', 'proyecto', 'hora_inicio', 'hora_fin', 'es_laboral')
+    list_filter = ('proyecto', 'es_laboral')
+    # list_display = ('codigo',  'hora_inicio', 'hora_fin', 'es_laboral')
+    # list_filter = ('es_laboral')
+    search_fields = ('codigo',)
 
 
 class ConteoVehicularAdmin(admin.ModelAdmin):

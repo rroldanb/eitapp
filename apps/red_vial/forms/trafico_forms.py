@@ -11,24 +11,31 @@ class PeriodoForm(forms.ModelForm):
 
     class Meta:
         model = Periodo
-        fields = ['codigo', 'nombre', 'tipo_dia']
+        fields = ['codigo', 'hora_inicio', 'hora_fin', 'es_laboral']
         widgets = {
-            'codigo': forms.TextInput(attrs={
+            'codigo': forms.Select(attrs={'class': 'form-control'}),
+            'hora_inicio': forms.TimeInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: PM-L',
-                'maxlength': '10'
+                'type': 'time'
             }),
-            'nombre': forms.TextInput(attrs={
+            'hora_fin': forms.TimeInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: Punta Mañana Laboral'
+                'type': 'time'
             }),
-            'tipo_dia': forms.Select(attrs={'class': 'form-control'}),
+            'es_laboral': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
         }
         labels = {
             'codigo': 'Código del Período',
-            'nombre': 'Nombre del Período',
-            'tipo_dia': 'Tipo de Día',
+            'hora_inicio': 'Hora de Inicio',
+            'hora_fin': 'Hora de Fin',
+            'es_laboral': 'Es día laboral',
         }
+
+
+      
+
 
 
 class ConteoVehicularForm(forms.ModelForm):
