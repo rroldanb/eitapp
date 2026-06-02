@@ -1,11 +1,9 @@
 
 
 
-<tr id="new-nodo-form-row" class=""> 
-  <td colspan="5" class="px-0 py-1 ">
+<tr id="new-nodo-form-row"> 
+  <td colspan="5" class="px-2 py-3 {% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
     <form id="new-nodo-form"
-    class="bg-slate-100/50 border"
-
       data-action="create"
       hx-post="{% url 'nodo_create' proyecto.id %}"
       hx-target="closest tr"
@@ -14,32 +12,44 @@
       hx-indicator="#create-indicator"
     >
       {% csrf_token %}
-      <div class="flex flex-wrap items-center justify-around   rounded">
+      {% if form.errors %}
+      <div class="mb-2 space-y-1">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <p class="text-red-600 text-xs error-message">{{ field.label }}: {{ error }}</p>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <p class="text-red-600 text-xs error-message">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="flex flex-wrap items-center gap-4 justify-center">
         
         <input type="number" id="new_number" name="numero" 
-          class="form-control py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 ml-0"
+          class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50"
           value="{{ proyecto.nodos.count|add:1 }}" min="1" max="999"/>
 
-        <select class="form-control py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent" name="calle_1">
-          <option value="">Seleccionar calle...</option>
+        <select class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50" name="calle_1">
+          <option value="">Calle 1...</option>
           {% for calle in proyecto.calles.all %}
           <option value="{{ calle.id }}">{{ calle.nombre }}</option>
           {% endfor %}
         </select>
 
-        <select class="form-control py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent" name="calle_2">
-          <option value="">Seleccionar calle...</option>
+        <select class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50" name="calle_2">
+          <option value="">Calle 2...</option>
           {% for calle in proyecto.calles.all %}
           <option value="{{ calle.id }}">{{ calle.nombre }}</option>
           {% endfor %}
         </select>
 
-        <div class="form-control flex items-center gap-2">
-          <input class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" type="checkbox" name="is_pc" id="is_pc_new">
-          <input type="number" id="numero_pc" name="numero_pc" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm" placeholder="N°" min="1" max="99" />
+        <div class="flex items-center gap-1">
+          <label class="text-xs text-gray-600 whitespace-nowrap">PC N°</label>
+          <input type="number" name="numero_pc" class="w-14 px-1 py-1 border border-gray-300 rounded text-xs" placeholder="N°" min="1" max="99" />
         </div>
 
-        <button type="submit" class="px-1 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors" data-action="create">
+        <button type="submit" class="px-2 py-1 bg-slate-50 border border-green-900 text-green-900 rounded hover:bg-green-600 hover:text-white transition-colors" data-action="create">
           Guardar
         </button>
 

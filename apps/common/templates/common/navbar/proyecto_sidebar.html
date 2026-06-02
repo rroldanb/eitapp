@@ -1,21 +1,18 @@
-<nav id="projectSidebar" class="sidebar expanded relative min-h-screen bg-gray-50 border-r border-gray-200 transition-all duration-300">
+<nav id="projectSidebar" class="sidebar expanded relative min-h-screen bg-gradient-primary border-r border-gray-200 transition-all duration-300">
   <button
     class="sidebar-toggle absolute -right-3 top-5 w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center cursor-pointer border-none z-10 transition-transform duration-300 hover:scale-110"
     onclick="toggleSidebar()"
     title="Colapsar/Expandir"
   >
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="w-4 h-4 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
     </svg>
   </button>
 
-  <div class="p-3">
-    <h6 class="sidebar-header mb-3 text-gray-700 font-semibold">
-      📁
-      <span class="nav-link-text">{{ proyecto.title|truncatechars:20 }}</span>
-    </h6>
+  <div class="p-0 ">
 
-    <ul class="nav flex-column space-y-1">
+
+    <ul class="nav flex-column space-y-1 navbar-list mt-8">
       <li class="nav-item">
         <a
           class="nav-link {% if request.resolver_match.url_name == 'proyecto_resumen' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
@@ -41,7 +38,7 @@
         >
           <span class="text-lg">🛣️</span>
           <span class="nav-link-text">Calles</span>
-          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full"
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
             >{{ proyecto.calles.count }}</span
           >
         </a>
@@ -53,7 +50,7 @@
         >
           <span class="text-lg">📍</span>
           <span class="nav-link-text">Nodos</span>
-          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full"
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
             >{{ proyecto.nodos.count }}</span
           >
         </a>
@@ -65,8 +62,20 @@
         >
           <span class="text-lg">↔️</span>
           <span class="nav-link-text">Arcos</span>
-          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full"
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
             >{{ proyecto.arcos.count }}</span
+          >
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'puntos_control_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'puntos_control_list' proyecto.id %}"
+        >
+          <span class="text-lg">🎯</span>
+          <span class="nav-link-text">Puntos Control</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+            >{{ proyecto.puntos_control.count }}</span
           >
         </a>
       </li>
@@ -77,6 +86,9 @@
         >
           <span class="text-lg">🔄</span>
           <span class="nav-link-text">Movimientos</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+            >{{ proyecto.nodos_movimientos.count }}</span
+          >
         </a>
       </li>
       <li class="nav-item">
@@ -86,6 +98,9 @@
         >
           <span class="text-lg">🚗</span>
           <span class="nav-link-text">Conteos</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+            >{{ proyecto.conteos.count }}</span
+          >
         </a>
       </li>
       <li class="nav-item">
@@ -95,8 +110,12 @@
         >
           <span class="text-lg">📊</span>
           <span class="nav-link-text">Flujos</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+            >{{ proyecto.flujos.count }}</span
+          >
         </a>
       </li>
+
       <li class="nav-item">
         <a
           class="nav-link {% if request.resolver_match.url_name == 'analisis_trafico' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"

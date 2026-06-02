@@ -1,12 +1,12 @@
 {# Partial template for a single nodo row - used by HTMX #}
 <tr id="nodo-row-{{ nodo.id }}" class="nodo-row hover:bg-gray-50" data-nodo-id="{{ nodo.id }}">
 
-  <td class="px-4 py-3">
-    <input type="number" name="numero" class="w-16 px-1 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ nodo.numero }}" min="1" max="99">
+  <td class="px-2 py-1">
+    <input type="number" name="numero" class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ nodo.numero }}" min="1" max="99">
   </td>
 
-  <td class="px-4 py-3">
-    <select class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_1">
+  <td class="px-2 py-1">
+    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_1">
       <option value="">Seleccionar calle...</option>
       {% for calle in proyecto.calles.all %}
       <option value="{{ calle.id }}" {% if nodo.calle_1.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
@@ -14,8 +14,8 @@
     </select>
   </td>
 
-  <td class="px-4 py-3">
-    <select class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_2">
+  <td class="px-2 py-1">
+    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_2">
       <option value="">Seleccionar calle...</option>
       {% for calle in proyecto.calles.all %}
       <option value="{{ calle.id }}" {% if nodo.calle_2.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
@@ -23,18 +23,19 @@
     </select>
   </td>
 
-  <td class="px-4 py-3 ">
-    <div class="flex items-center gap-2">
-      <input class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" type="checkbox" name="is_pc" id="is_pc_{{ nodo.id }}" {% if nodo.is_pc %}checked{% endif %}>
+  <td class="px-2 py-1">
+    <div class="flex items-center gap-1">
+      <label class="text-xs text-gray-600">PC N°</label>
+      <input type="number" name="numero_pc" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm" value="{{ nodo.numero_pc|default:'' }}" min="1" max="99">
       {% if nodo.is_pc %}
-      <input type="number" name="numero_pc" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm mt-1" value="{{ nodo.numero_pc|default:'' }}" min="1" max="99">
+      <span class="text-xs font-semibold text-indigo-600 ml-1">{{ nodo.nombre_pc }}</span>
       {% endif %}
     </div>
   </td>
 
 
 
-  <td class="px-4 py-1 flex gap-2">
+  <td class="px-2 py-1 flex gap-1">
     <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors" data-action="update"
       hx-put="{% url 'nodo_update' nodo.id %}"
       hx-include="closest tr"

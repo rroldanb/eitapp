@@ -1,0 +1,42 @@
+<tr id="new-punto-control-form-row">
+  <td colspan="10" class="px-2 py-3 {% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
+    <form id="new-punto-control-form"
+      data-action="create"
+      hx-post="{% url 'punto_control_create' proyecto.id %}"
+      hx-target="closest tr"
+      hx-swap="afterend"
+      hx-indicator="#create-indicator"
+      >
+      {% comment %} hx-on::after-request="if(event.detail.successful) this.reset()" {% endcomment %}
+      {% csrf_token %}
+      {% if form.errors %}
+      <div class="mb-2 space-y-1">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <p class="text-red-600 text-xs error-message">{{ field.label }}: {{ error }}</p>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <p class="text-red-600 text-xs error-message">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="flex flex-nowrap items-center gap-0 justify-between">
+        {{ form.nodo }}
+        {{ form.movimiento }}
+        {{ form.viraje }}
+        <label class="flex flex-col items-center gap-1 text-xs wrap">
+          {{ form.is_prioritario }} Prior.
+        </label>
+        {{ form.arco_entrada }}
+        {{ form.arco_salida }}
+        {{ form.regulacion }}
+        {{ form.numero_pistas }}
+        <button type="submit" class="px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors">
+          + PC
+        </button>
+        <span id="create-indicator" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin htmx-indicator" style="display:none;"></span>
+      </div>
+    </form>
+  </td>
+</tr>

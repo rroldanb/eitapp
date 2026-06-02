@@ -56,6 +56,30 @@ class FlujoMovimientoAdmin(admin.ModelAdmin):
     search_fields = ('nodo_movimiento__nodo__numero',)
 
 
+class PuntoControlAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'nodo', 'movimiento', 'viraje', 'is_prioritario', 'proyecto')
+    list_filter = ('is_prioritario', 'viraje', 'proyecto')
+    search_fields = ('nombre', 'nodo__numero')
+
+
+class PeriodizacionAdmin(admin.ModelAdmin):
+    list_display = ('pc', 'periodo', 'hora', 'ftot')
+    list_filter = ('periodo',)
+    search_fields = ('pc__nombre',)
+
+
+class ResumenFlujoAdmin(admin.ModelAdmin):
+    list_display = ('pc', 'periodo', 'flujo', 'flujo_total', 'interseccion_valor')
+    list_filter = ('periodo',)
+    search_fields = ('pc__nombre',)
+
+
+class CoeficienteCruceProyectoAdmin(admin.ModelAdmin):
+    list_display = ('nomenclatura', 'tipo_transporte', 'coeficiente', 'is_standard', 'proyecto')
+    list_filter = ('is_standard',)
+    search_fields = ('nomenclatura', 'tipo_transporte')
+
+
 admin.site.register(Calle, CalleAdmin)
 admin.site.register(Nodo, NodoAdmin)
 admin.site.register(Arco, ArcoAdmin)
@@ -65,3 +89,7 @@ admin.site.register(Coeficiente_Cruce, CoeficienteCruceAdmin)
 admin.site.register(Periodo, PeriodoAdmin)
 admin.site.register(ConteoVehicular, ConteoVehicularAdmin)
 admin.site.register(FlujoMovimiento, FlujoMovimientoAdmin)
+admin.site.register(PuntoControl, PuntoControlAdmin)
+admin.site.register(Periodizacion, PeriodizacionAdmin)
+admin.site.register(ResumenFlujo, ResumenFlujoAdmin)
+admin.site.register(CoeficienteCruce, CoeficienteCruceProyectoAdmin)

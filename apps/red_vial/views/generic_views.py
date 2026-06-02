@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 import json
 import inspect
 
@@ -35,7 +36,8 @@ class GenericListView(View):
     partial_template = None
     full_template = None
     context_items_key = 'items'  # Nombre de la variable en el contexto
-    
+    form_class = None   
+
     @method_decorator(login_required)
     def get(self, request, proyecto_id=None):
         """GET: Retorna lista de items, partial si HTMX, página completa si no."""
@@ -84,6 +86,13 @@ class GenericListView(View):
             'sort_fields': self.sort_fields,
         }
         
+        if self.form_class:
+            kwargs = {}
+            sig = inspect.signature(self.form_class.__init__)
+            if 'proyecto' in sig.parameters:
+                kwargs['proyecto'] = proyecto
+            context['form'] = self.form_class(**kwargs)
+
         # Retornar partial si HTMX, página completa si no
         if request.headers.get('HX-Request'):
             return render(request, self.partial_template, context)
@@ -117,7 +126,12 @@ class GenericCreateView(View):
         from apps.proyectos.models import Proyecto
         
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-        form = self.form_class(request.POST)
+        
+        form_kwargs = {'data': request.POST}
+        sig = inspect.signature(self.form_class.__init__)
+        if 'proyecto' in sig.parameters:
+            form_kwargs['proyecto'] = proyecto
+        form = self.form_class(**form_kwargs)
         
         if form.is_valid():
             try:
@@ -127,14 +141,42 @@ class GenericCreateView(View):
                 # para compatibilidad con templates que esperan el nombre del modelo (ej. 'calle')
                 singular = self.model._meta.model_name if self.model is not None else 'item'
                 context = {'item': item, 'proyecto': proyecto, singular: item}
+                print(f"Context for create response 1 : {context}")  # Debug log
 
-                
+                if self.form_class:
+                    kwargs = {}
+                    sig = inspect.signature(self.form_class.__init__)
+                    if 'proyecto' in sig.parameters:
+                        kwargs['proyecto'] = proyecto
+                    context['form'] = self.form_class(**kwargs)
+                    print(f"Context for create response: {context}")  # Debug log
                 return render(request, self.row_template, context)
             except ValidationError as e:
-                return HttpResponseBadRequest(
-                    json.dumps({'error': str(e)}),
-                    content_type='application/json'
-                )
+                for err in e.messages:
+                    form.add_error(None, str(err))
+                return render(request, self.form_template, {
+                    'proyecto': proyecto,
+                    'form': form,
+                }, status=400)
+            except IntegrityError as e:
+                msg = 'Ya existe un item con la misma clave primaria, revisa los datos ingresados.'
+                form.add_error(None, msg)
+                response = render(request, self.form_template, {
+                    'proyecto': proyecto,
+                    'form': form,
+                }, status=400)
+                response['X-Form-Error'] = msg
+                return response
+            # except IntegrityError:
+            #     form.add_error(None, 'Ya existe un registro con esos valores.')
+            #     return render(request, self.form_template, {
+            #         'proyecto': proyecto,
+            #         'form': form,
+            #     }, status=400)
+                # return HttpResponseBadRequest(
+                #     json.dumps({'error': str(e)}),
+                #     content_type='application/json'
+                # )
         
         return render(request, self.form_template, {
             'proyecto': proyecto,
@@ -157,6 +199,7 @@ class GenericUpdateView(View):
     model = None
     service_update_function = None
     row_template = None
+    form_class = None
     
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['PUT']))
@@ -170,6 +213,15 @@ class GenericUpdateView(View):
             item = service_func(item_id, data)
             singular = self.model._meta.model_name if self.model is not None else 'item'
             context = {'item': item, singular: item}
+            
+            if self.form_class:
+                kwargs = {}
+                sig = inspect.signature(self.form_class.__init__)
+                if 'proyecto' in sig.parameters:
+                    if hasattr(item, 'proyecto') and item.proyecto:
+                        kwargs['proyecto'] = item.proyecto
+                context['form'] = self.form_class(**kwargs)
+            
             response = render(request, self.row_template, context)
             response['HX-Trigger'] = f'item-updated:{item.id}'
             return response

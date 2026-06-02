@@ -31,4 +31,4 @@ class Arco(BaseModel):
         return f"{origen}{destino}1"
 
     def __str__(self):
-        return f"Arco {self.codigo_arco} (Longitud: {self.longitud} m)"
+        return f"{self.codigo_arco} (nodos {self.nodo_origen.numero} → {self.nodo_destino.numero})"

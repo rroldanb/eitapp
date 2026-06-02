@@ -1,7 +1,7 @@
 <table class="w-full divide-y divide-gray-200 table-results" id="nodos-table">
   <thead class="bg-slate-200">
     <tr>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" 
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
       aria-sort="{% if sort_by == 'numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button"
            hx-get="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
@@ -15,7 +15,7 @@
           {% endif %}
         </a>
       </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" 
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
       aria-sort="{% if sort_by == 'calle_1' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button"
            hx-get="?sort_by=calle_1&sort_order={% if sort_by == 'calle_1' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
@@ -29,7 +29,7 @@
           {% endif %}
         </a>
       </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" aria-sort="{% if sort_by == 'calle_2' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'calle_2' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button"
            hx-get="?sort_by=calle_2&sort_order={% if sort_by == 'calle_2' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
            hx-target="#nodos-table"
@@ -42,7 +42,7 @@
           {% endif %}
         </a>
       </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" aria-sort="{% if sort_by == 'is_pc' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'is_pc' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button"
            hx-get="?sort_by=is_pc&sort_order={% if sort_by == 'is_pc' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
            hx-target="#nodos-table"
@@ -55,7 +55,7 @@
           {% endif %}
         </a>
       </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase">Acc</th>
     </tr>
   </thead>
   <tbody id="nodos-table-body" class="divide-y divide-gray-200">

@@ -1,0 +1,14 @@
+
+{% include 'partials/PuntosControl/punto_control_create.html' with proyecto=proyecto %}
+
+{% if puntos_control %}
+  {% for pc in puntos_control %}
+    {% include 'partials/PuntosControl/punto_control_row.html' with item=pc %}
+  {% endfor %}
+{% else %}
+  <tr>
+    <td colspan="10" class="px-4 py-8 text-center text-gray-500">
+      No hay puntos de control registrados para este proyecto.
+    </td>
+  </tr>
+{% endif %}

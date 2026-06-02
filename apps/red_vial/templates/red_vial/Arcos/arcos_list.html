@@ -5,21 +5,14 @@
 
 <div class="section-header flex justify-between items-center mb-6">
   <h3 class="text-xl font-semibold text-gray-800">Arcos del Proyecto</h3>
-  <span class="ml-auto px-3 py-1 bg-cyan-100 text-cyan-800 text-lg rounded-full" data-count-badge>{{ proyecto.arcos.count }}</span>
+  <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full" id="items-count-badge" >{{ proyecto.arcos.count }}</span>
 </div>
 
 <div class="bg-white rounded-lg shadow overflow-hidden">
   <div class="p-4">
     <div class="overflow-x-auto">
       {% include 'partials/Arcos/arcos_table.html' with proyecto=proyecto arcos=arcos sort_by=sort_by sort_order=sort_order %}
-      <div class="mt-4 flex gap-2 justify-end">
-        <button type="button" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors font-medium" id="submit-all">
-          💾 Guardar todos los cambios
-        </button>
-        <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium" id="cancel-all">
-          ✖ Cancelar cambios
-        </button>
-      </div>
+
     </div>
   </div>
 </div>

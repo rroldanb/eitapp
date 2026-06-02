@@ -48,10 +48,10 @@ class PuntoControl(BaseModel):
         DER = 'DER', 'Derecha'
         IZQ = 'IZQ', 'Izquierda'
 
-    nombre         = models.CharField(max_length=5)
+    # nombre         = models.CharField(max_length=5)
     proyecto       = models.ForeignKey(Proyecto,on_delete=models.CASCADE,related_name="puntos_control")
     nodo           = models.ForeignKey(Nodo, on_delete=models.CASCADE, related_name='pc_nodo')
-    movimiento     = models.CharField(max_length=2, choices=Movimiento.choices, blank=True, null=True)
+    movimiento     = models.CharField(max_length=2, choices=Movimiento.choices, blank=False, null=False)
     viraje         = models.CharField(max_length=3, choices=Viraje.choices, blank=True, null=True)
     is_prioritario = models.BooleanField(default=False)
     arco_entrada   = models.ForeignKey(Arco, on_delete=models.CASCADE, related_name='pc_input')
@@ -61,15 +61,26 @@ class PuntoControl(BaseModel):
 
     class Meta:
         unique_together = ['nodo', 'movimiento', 'proyecto']
+        verbose_name = "Punto_Control"
+        verbose_name_plural = "Puntos_Control"
+        
+    # @property
+    # def codigo_pc(self):
+    #     return f"{self.arco_entrada.codigo_arco}_{self.arco_salida.codigo_arco}"
+    @property
+    def nombre(self):
+        """PC-03 o 'Sin PC' si el nodo no tiene numero_pc."""
+        return self.nodo.nombre_pc or f"Nodo-{self.nodo.numero}"
 
     @property
     def codigo_pc(self):
         return f"{self.arco_entrada.codigo_arco}_{self.arco_salida.codigo_arco}"
-
+    
     @property
     def distancia(self):
         return self.arco_entrada.longitud
 
     def __str__(self):
-        return f"{self.nombre} ({self.nodo.numero} - {self.movimiento})"
+        # return f"{self.nombre} ({self.nodo.numero} - {self.movimiento})"
+        return f"{self.nombre} | Mov {self.movimiento} | {self.viraje or '—'}"
     

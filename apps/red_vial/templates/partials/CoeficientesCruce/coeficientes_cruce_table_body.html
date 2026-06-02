@@ -1,0 +1,13 @@
+{% include 'partials/CoeficientesCruce/coeficiente_cruce_create.html' %}
+
+{% if coeficientes %}
+  {% for coef in coeficientes %}
+    {% include 'partials/CoeficientesCruce/coeficiente_cruce_row.html' with coeficiente=coef %}
+  {% endfor %}
+{% else %}
+  <tr>
+    <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+      No hay coeficientes de cruce registrados.
+    </td>
+  </tr>
+{% endif %}

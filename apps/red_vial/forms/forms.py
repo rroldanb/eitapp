@@ -6,6 +6,8 @@ from apps.red_vial.models import (
     Regulacion,
     NodoMovimiento,
     Coeficiente_Cruce,
+    PuntoControl,
+    CoeficienteCruce,
 )
 
 
@@ -36,7 +38,7 @@ class NodoForm(forms.ModelForm):
 
     class Meta:
         model = Nodo
-        fields = ['numero', 'interseccion', 'calle_1', 'calle_2', 'plano', 'imagen', 'is_pc', 'numero_pc']
+        fields = ['numero', 'interseccion', 'calle_1', 'calle_2', 'plano', 'imagen',  'numero_pc']
         widgets = {
             'numero': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -48,9 +50,9 @@ class NodoForm(forms.ModelForm):
             }),
             'calle_1': forms.Select(attrs={'class': 'form-control'}),
             'calle_2': forms.Select(attrs={'class': 'form-control'}),
-            'is_pc': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
+            # 'is_pc': forms.CheckboxInput(attrs={
+            #     'class': 'form-check-input'
+            # }),
             'numero_pc': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Número de PC (si aplica)'
@@ -70,7 +72,7 @@ class NodoForm(forms.ModelForm):
             'interseccion': 'Descripción de la Intersección',
             'calle_1': 'Calle 1',
             'calle_2': 'Calle 2',
-            'is_pc': '¿Es Punto de Control (PC)?',
+            # 'is_pc': '¿Es Punto de Control (PC)?',
             'numero_pc': 'Número de PC (si es aplicable)',
             'plano': 'URL del Plano',
             'imagen': 'URL de la Imagen',
@@ -242,4 +244,104 @@ class CoeficienteCruceForm(forms.ModelForm):
             'tipo_transporte': 'Tipo de Transporte',
             'coeficiente': 'Coeficiente',
             'is_standard': '¿Es estándar?',
+        }
+
+
+_input = 'w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50'
+_select = 'px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50' 
+
+class PuntoControlForm(forms.ModelForm):
+    class Meta:
+        model = PuntoControl
+        fields = [
+             'nodo', 'movimiento', 'viraje', 'is_prioritario',
+            'arco_entrada', 'arco_salida', 'regulacion', 'numero_pistas',
+        ]
+        widgets = {
+            # 'nombre': forms.TextInput(attrs={
+            #     'class': _input,
+            #     'placeholder': 'PC-01',
+            #     'maxlength': '5',
+            # }),
+            'nodo': forms.Select(attrs={'class': _select, }),
+            'movimiento': forms.Select(attrs={'class': _select, }),
+            'viraje': forms.Select(attrs={'class': _select, }),
+            'is_prioritario': forms.CheckboxInput(attrs={'class': 'mr-1'}),
+            'arco_entrada': forms.Select(attrs={'class': _select, }),
+            'arco_salida': forms.Select(attrs={'class': _select, }),
+            'regulacion': forms.Select(attrs={'class': _select, }),
+            'numero_pistas': forms.NumberInput(attrs={
+                'class': _input.replace('w-24', 'w-20'),
+                'step': '0.5',
+                'placeholder': 'Pistas',
+            }),
+        }
+        labels = {
+            # 'nombre': 'Nombre PC',
+            'nodo': 'Nodo',
+            'movimiento': 'Movimiento',
+            'viraje': 'Tipo de Viraje',
+            'is_prioritario': '¿Es prioritario?',
+            'arco_entrada': 'Arco de Entrada',
+            'arco_salida': 'Arco de Salida',
+            'regulacion': 'Regulación',
+            'numero_pistas': 'Número de Pistas',
+        }
+
+    def __init__(self, *args, proyecto=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if proyecto:
+            # self.fields['nodo'].queryset = proyecto.nodos.all()
+            self.fields['nodo'].queryset = (
+                proyecto.nodos
+                .filter(numero_pc__isnull=False)
+                .select_related('calle_1', 'calle_2')
+                .order_by('numero_pc')
+            )
+            self.fields['nodo'].label_from_instance = lambda obj: (
+                f"{obj.nombre_pc} - "
+                f"{obj.calle_1.nombre if obj.calle_1 else 'Sin calle'} / "
+                f"{obj.calle_2.nombre if obj.calle_2 else 'Sin intersección'}"
+            )
+            # self.fields['arco_entrada'].queryset = proyecto.arcos.all().order_by('codigo_arco')
+            self.fields['arco_entrada'].queryset = proyecto.arcos.all().order_by('nodo_origen__numero', 'nodo_destino__numero')
+            self.fields['arco_salida'].queryset = proyecto.arcos.all().order_by('nodo_origen__numero', 'nodo_destino__numero')
+            self.fields['nodo'].empty_label = 'Selecciona un Punto de Control (PC)'
+            self.fields['arco_entrada'].empty_label = 'Selecciona un arco de entrada'
+            self.fields['arco_salida'].empty_label = 'Selecciona un arco de salida'
+            self.fields['regulacion'].empty_label = 'Selecciona una regulación'
+            self.fields['movimiento'].choices = [('', 'Selecciona un movimiento')] + [(value, f"{value} - {label}") for value, label in self.fields['movimiento'].choices]
+            self.fields['viraje'].choices = [('', 'Selecciona un viraje')] + list(self.fields['viraje'].choices)
+            self.fields['numero_pistas'].initial = 1
+
+
+class CoeficienteCruceModelForm(forms.ModelForm):
+    class Meta:
+        model = CoeficienteCruce
+        fields = ['nomenclatura', 'tipo_transporte', 'coeficiente', 'is_standard', 'proyecto']
+        widgets = {
+            'nomenclatura': forms.TextInput(attrs={
+                'class': 'w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500',
+                'placeholder': 'VL',
+            }),
+            'tipo_transporte': forms.TextInput(attrs={
+                'class': 'px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500',
+                'placeholder': 'Vehículo Liviano',
+            }),
+            'coeficiente': forms.NumberInput(attrs={
+                'class': 'w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500',
+                'step': '0.01',
+                'placeholder': '1.0',
+            }),
+            'is_standard': forms.CheckboxInput(attrs={'class': 'mr-1'}),
+            'proyecto': forms.Select(attrs={
+                'class': 'px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500',
+            }),
+        }
+        labels = {
+            'nomenclatura': 'Nomenclatura',
+            'tipo_transporte': 'Tipo de Transporte',
+            'coeficiente': 'Coeficiente',
+            'is_standard': '¿Estándar?',
+            'proyecto': 'Proyecto',
         }

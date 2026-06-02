@@ -64,7 +64,7 @@ function showToast(message, isSuccess = true, duration = 3000) {
  * @param {number} value - Valor a sumar/restar (default 1)
  */
 function updateItemCount(operation = 'add', value = 1) {
-  const badge = document.querySelector('[data-count-badge]');
+  const badge = document.getElementById('items-count-badge');
   const new_num = document.getElementById('new_number');
   if (!badge) return;
 
@@ -77,6 +77,9 @@ function updateItemCount(operation = 'add', value = 1) {
   if (new_num) { new_num.value = count+1};
   badge.textContent = count;
 }
+
+
+
 
 // ========== BULK UPDATE ==========
 
@@ -154,6 +157,40 @@ function handleBulkSave() {
 // ========== HTMX EVENT HANDLERS ==========
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Manejador antes del swap HTMX: evita duplicados en errores de validación
+
+
+document.addEventListener('htmx:beforeSwap', (event) => {
+    if (event.detail.xhr?.status === 400) {
+        const ct = event.detail.xhr.getResponseHeader('Content-Type') || '';
+        if (ct.includes('text/html')) {
+            event.detail.swapBehavior = 'outerHTML';
+            const msg = event.detail.xhr.getResponseHeader('X-Form-Error')
+                        || 'Corrige los errores en el formulario';
+            showToast(msg, false, 5000);
+        }
+    }
+});
+
+// document.addEventListener('htmx:beforeSwap', (event) => {
+//   if (event.detail.xhr?.status === 400) {
+//     const ct = event.detail.xhr.getResponseHeader('Content-Type') || '';
+//     if (ct.includes('text/html')) {
+//       event.detail.swapBehavior = 'outerHTML';
+//       showToast('Corrige los errores en el formulario', false);
+//     }
+//   }
+// });
+
+  // document.addEventListener('htmx:beforeSwap', (event) => {
+  //   if (event.detail.xhr?.status === 400) {
+  //     const ct = event.detail.xhr.getResponseHeader('Content-Type') || '';
+  //     if (ct.includes('text/html')) {
+  //       event.detail.swapBehavior = 'outerHTML';
+  //     }
+  //   }
+  // });
+
   // Manejador antes de cualquier request HTMX
   document.addEventListener('htmx:beforeRequest', (event) => {
     const method = event.detail.xhr?.method;
@@ -179,6 +216,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Éxito (200, 201, 204)
     if ([200, 201, 204].includes(status)) {
       if (action === 'create') {
+        // Restaurar UI del form si estaba en estado de error
+        const formRow = document.querySelector('tr[id^="new-"][id$="-form-row"]');
+        if (formRow) {
+          const td = formRow.querySelector('td');
+          if (td) {
+            td.classList.remove('bg-red-50', 'bg-red-100');
+            td.classList.add('bg-green-100');
+          }
+          formRow.querySelectorAll('.error-message, .field-error').forEach(el => el.remove());
+        }
         showToast(`${config.modelName}: Creado exitosamente`, true);
         setTimeout(() => updateItemCount('add'), 400);
 
@@ -194,10 +241,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     // Error
-    else if (status >= 400) {
-      const action_text = action ? action.charAt(0).toUpperCase() + action.slice(1) : 'Operación';
-      showToast(`${action_text} fallido (${status})`, false);
-    }
+
+else if (status >= 400) {
+  const ct = event.detail.xhr?.getResponseHeader('Content-Type') || '';
+  let errorMsg = '';
+  if (ct.includes('application/json')) {
+    try {
+      const data = JSON.parse(event.detail.xhr.responseText);
+      errorMsg = data.error || data.message || '';
+    } catch (e) {}
+  }
+  if (errorMsg) showToast(errorMsg, false);
+}
+
+    // else if (status >= 400) {
+    //   const ct = event.detail.xhr?.getResponseHeader('Content-Type') || '';
+    //   let errorMsg = '';
+    //   if (ct.includes('application/json')) {
+    //     try {
+    //       const data = JSON.parse(event.detail.xhr.responseText);
+    //       errorMsg = data.error || data.message || '';
+    //     } catch (e) {}
+    //   } else if (ct.includes('text/html')) {
+    //     errorMsg = 'Corrige los errores en el formulario';
+    //   }
+    //   if (!errorMsg) {
+    //     const action_text = action ? action.charAt(0).toUpperCase() + action.slice(1) : 'Operación';
+    //     errorMsg = `${action_text} fallido (${status})`;
+    //   }
+    //   showToast(errorMsg, false);
+    // }
   });
 
   // Vincular botones de submit/cancel (si existen)

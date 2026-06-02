@@ -60,6 +60,13 @@
                         </a>
                     </li>
 
+                    <!-- Coeficientes de Cruce -->
+                    <li class="list-none">
+                        <a href="{% url 'coeficientes_cruce_list' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.resolver_match.url_name == 'coeficientes_cruce_list' %}bg-gray-800 text-white{% endif %}">
+                            Coeficientes
+                        </a>
+                    </li>
+
                     <!-- Logout -->
                     <li class="list-none">
                         <a href="{% url 'signout' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors ml-4">

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h3 class="text-xl font-semibold text-gray-800">Coeficientes de Cruce</h3>
+    <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-800 text-lg rounded-full" id="coeficientes-count">{{ coeficientes.count }}</span>
+  </div>
+
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="p-4">
+      <div class="overflow-x-auto">
+        {% include 'partials/CoeficientesCruce/coeficientes_cruce_table.html' %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

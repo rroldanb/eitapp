@@ -1,7 +1,7 @@
 <table class="w-full divide-y divide-gray-200 table-results" id="arcos-table">
   <thead class="bg-slate-200">
     <tr>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
         aria-sort="{% if sort_by == 'codigo_arco' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button"
            hx-get="?sort_by=codigo_arco&sort_order={% if sort_by == 'codigo_arco' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
@@ -15,7 +15,7 @@
           {% endif %}
         </a>
       </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" 
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
       aria-sort="{% if sort_by == 'origen' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button"
            hx-get="?sort_by=origen&sort_order={% if sort_by == 'origen' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
@@ -27,7 +27,7 @@
 
         </a>
       </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" 
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
       aria-sort="{% if sort_by == 'destino' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button"
            hx-get="?sort_by=destino&sort_order={% if sort_by == 'destino' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
@@ -39,7 +39,7 @@
 
         </a>
       </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase" aria-sort="{% if sort_by == 'longitud' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'longitud' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button"
            hx-get="?sort_by=longitud&sort_order={% if sort_by == 'longitud' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
            hx-target="#arcos-table"
@@ -50,7 +50,7 @@
 
         </a>
       </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase">Acc</th>
     </tr>
   </thead>
   <tbody id="arcos-table-body" class="divide-y divide-gray-200">

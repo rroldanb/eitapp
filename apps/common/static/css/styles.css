@@ -26,14 +26,32 @@ body {
    ============================================================================ */
 .sidebar {
     min-height: 100vh;
-    background-color: #f9fafb;
+    /* background-color: #f9fafb; */
     border-right: 1px solid #e5e7eb;
     transition: all 0.3s ease;
 }
 
+
 .sidebar.collapsed {
     width: 60px;
+    /* overflow: hidden; */
+    padding: 0;
+}
+
+.sidebar.collapsed .navbar-list {
+    padding: 0;
+    margin: 0;
+    margin-top: 2rem;
+    left: -100%;
+    transition: left 0.3s ease;
+}
+
+.sidebar.collapsed > div {
     overflow: hidden;
+}
+
+.sidebar.collapsed .navbar-counter {
+    display: none;
 }
 
 .sidebar.expanded {
@@ -63,13 +81,18 @@ body {
     transition: transform 0.3s ease;
 }
 
+.sidebar-toggle:hover {
+    background-color: #374151;
+    box-shadow: 0 0 8px rgba(55, 65, 81, 0.5);
+}
+
 .sidebar.collapsed .sidebar-toggle {
     transform: rotate(180deg);
 }
 
 /* Links dentro del sidebar */
 .sidebar .nav-link {
-    color: #333;
+    color: #eaedef;
     padding: 12px 20px;
     display: flex;
     align-items: center;
@@ -269,6 +292,61 @@ tr.htmx-swapping td {
   transition: all 1s ease-out;      
 } */
 
+/* Sticky columns + scroll */
+.pc-table-wrap {
+  overflow-x: auto;
+  position: relative;
+}
+.pc-table-wrap table {
+  table-layout: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 900px;
+}
+.pc-col-nombre {
+  width: 88px;
+  min-width: 88px;
+}
+.pc-col-nodo {
+  width: 80px;
+  min-width: 80px;
+}
+.pc-col-mov {
+  width: 60px;
+  min-width: 60px;
+}
+.pc-col-viraje {
+  width: 65px;
+  min-width: 65px;
+}
+.pc-col-prior {
+  width: 50px;
+  min-width: 50px;
+}
+.pc-col-entrada {
+  width: 80px;
+  min-width: 80px;
+}
+.pc-col-salida {
+  width: 80px;
+  min-width: 80px;
+}
+.pc-col-regul {
+  width: 80px;
+  min-width: 80px;
+}
+.pc-col-pistas {
+  width: 60px;
+  min-width: 60px;
+}
+.pc-col-accion {
+  width: 70px;
+  min-width: 70px;
+}
+
+.form-control{
+    background-color: #f8fafc;
+}
 /* ============================================================================
    7. TABLE STATES - Estados de tablas (edición inline)
    ============================================================================ */

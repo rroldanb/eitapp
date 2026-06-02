@@ -1,0 +1,72 @@
+<div class="pc-table-wrap">
+<table class="w-full divide-y divide-gray-200 table-results " id="puntos-control-table">
+  <thead class="bg-slate-200">
+    <tr>
+      <th class="pc-col-nombre px-1 py-2 text-center font-bold text-gray-900 uppercase">
+        <a role="button"
+          href="?sort_by=nombre&amp;sort_order={% if sort_by == 'nombre' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=nombre&amp;sort_order={% if sort_by == 'nombre' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#puntos-control-table"
+          hx-swap="outerHTML"
+          hx-push-url="true"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'nombre' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          Pc
+          {% if sort_by == 'nombre' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="pc-col-nodo px-1 py-2 text-center font-bold text-gray-900 uppercase">
+        <a role="button" href="?sort_by=nodo&amp;sort_order={% if sort_by == 'nodo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=nodo&amp;sort_order={% if sort_by == 'nodo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'nodo' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          Nodo
+          {% if sort_by == 'nodo' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="pc-col-mov px-1 py-2 text-center font-bold text-gray-900 uppercase">
+        <a role="button" href="?sort_by=movimiento&amp;sort_order={% if sort_by == 'movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=movimiento&amp;sort_order={% if sort_by == 'movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'movimiento' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          Mov
+          {% if sort_by == 'movimiento' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="pc-col-viraje px-1 py-2 text-center font-bold text-gray-900 uppercase">
+        <a role="button" href="?sort_by=viraje&amp;sort_order={% if sort_by == 'viraje' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=viraje&amp;sort_order={% if sort_by == 'viraje' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'viraje' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          Viraje
+          {% if sort_by == 'viraje' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="pc-col-prior px-1 py-2 text-center font-bold text-gray-900 uppercase">Prior</th>
+      <th class="pc-col-entrada px-1 py-2 text-center font-bold text-gray-900 uppercase">
+        <a role="button" href="?sort_by=arco_entrada&amp;sort_order={% if sort_by == 'arco_entrada' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=arco_entrada&amp;sort_order={% if sort_by == 'arco_entrada' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'arco_entrada' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          Entrada
+          {% if sort_by == 'arco_entrada' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="pc-col-salida px-1 py-2 text-center font-bold text-gray-900 uppercase">
+        <a role="button" href="?sort_by=arco_salida&amp;sort_order={% if sort_by == 'arco_salida' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=arco_salida&amp;sort_order={% if sort_by == 'arco_salida' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'arco_salida' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          Salida
+          {% if sort_by == 'arco_salida' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="pc-col-regul px-1 py-2 text-center font-bold text-gray-900 uppercase">Regul</th>
+      <th class="pc-col-pistas px-1 py-2 text-center font-bold text-gray-900 uppercase">Pistas</th>
+      <th class="pc-col-accion px-1 py-2 text-center font-bold text-gray-900 uppercase">Acc</th>
+    </tr>
+  </thead>
+  <tbody id="puntos-control-table-body" class="divide-y divide-gray-200">
+    {% include 'partials/PuntosControl/puntos_control_table_body.html' with proyecto=proyecto puntos_control=puntos_control %}
+  </tbody>
+</table>
+</div>
