@@ -1,9 +1,11 @@
+from datetime import date
 from django.db import models
 from apps.common.models import BaseModel
 from apps.red_vial.models.coeficiente_cruce import CoeficienteCruce
 
 
 class Periodizacion(BaseModel):
+    fecha   = models.DateField(default=date.today)
     pc      = models.ForeignKey('PuntoControl', on_delete=models.CASCADE, related_name='conteos')
     periodo = models.ForeignKey('Periodo', on_delete=models.CASCADE, related_name='conteos')
     hora    = models.TimeField()
@@ -21,7 +23,7 @@ class Periodizacion(BaseModel):
     ftot = models.FloatField(default=0, editable=False)
 
     class Meta:
-        unique_together = ['pc', 'periodo', 'hora']
+        unique_together = ['fecha', 'pc', 'periodo', 'hora']
 
     def calcular_ftot(self) -> float:
         """
@@ -32,7 +34,7 @@ class Periodizacion(BaseModel):
             self.pc.proyecto
         )
         total = sum(
-            getattr(self, nomenclatura, 0) * coef
+            getattr(self, nomenclatura.lower(), 0) * coef
             for nomenclatura, coef in coefs.items()
         )
         return round(total, 2)

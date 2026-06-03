@@ -1,0 +1,133 @@
+{% load l10n %}
+{% if generated_count %}
+<div id="generation-toast" class="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded shadow-lg text-sm animate-fade-in-down">
+  Se generaron {{ generated_count }} filas
+</div>
+<script>
+  setTimeout(function() {
+    var el = document.getElementById('generation-toast');
+    if (el) el.remove();
+  }, 3000);
+</script>
+{% endif %}
+
+<div id="periodizacion-table-wrap" class="periodizacion-table-wrap overflow-x-auto">
+<table class="w-full divide-y divide-gray-200 text-xs" id="periodizacion-table">
+  <thead class="bg-slate-200">
+    <tr>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=pc&order={% if sort_param == 'pc' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        PC {% if sort_param == 'pc' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      {% comment %} <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=interseccion&order={% if sort_param == 'interseccion' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        Intersección {% if sort_param == 'interseccion' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th> {% endcomment %}
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=hora&order={% if sort_param == 'hora' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        Hora {% if sort_param == 'hora' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=mov&order={% if sort_param == 'mov' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        Mov {% if sort_param == 'mov' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=periodo&order={% if sort_param == 'periodo' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        PER {% if sort_param == 'periodo' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-blue-50 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=vl&order={% if sort_param == 'vl' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        VL {% if sort_param == 'vl' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-blue-50 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=txc&order={% if sort_param == 'txc' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        TXC {% if sort_param == 'txc' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-blue-50 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=txb&order={% if sort_param == 'txb' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        TXB {% if sort_param == 'txb' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-blue-50 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=c2e&order={% if sort_param == 'c2e' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        C 2E {% if sort_param == 'c2e' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-blue-50 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=c_mas2e&order={% if sort_param == 'c_mas2e' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        C+2E {% if sort_param == 'c_mas2e' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-blue-50 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=peat&order={% if sort_param == 'peat' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        Peat {% if sort_param == 'peat' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-blue-50 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=cicl&order={% if sort_param == 'cicl' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        Cicl {% if sort_param == 'cicl' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-blue-50 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=moto&order={% if sort_param == 'moto' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        Moto {% if sort_param == 'moto' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap bg-gray-100 cursor-pointer hover:text-indigo-700"
+        hx-get="?{% if selected_nodos %}{% for p in selected_nodos %}nodo={{ p }}&{% endfor %}{% endif %}{% if selected_periodos %}{% for p in selected_periodos %}periodo={{ p }}&{% endfor %}{% endif %}{% if selected_fecha %}fecha={{ selected_fecha }}&{% endif %}sort=ftot&order={% if sort_param == 'ftot' and order_param == 'asc' %}desc{% else %}asc{% endif %}"
+        hx-target="#periodizacion-table-wrap"
+        hx-swap="outerHTML"
+        hx-push-url="true">
+        FTOT {% if sort_param == 'ftot' %}{% if order_param == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+      </th>
+      <th class="px-1 py-1.5 text-center text-lg font-bold text-gray-800 uppercase whitespace-nowrap">Acc</th>
+    </tr>
+  </thead>
+  <tbody id="periodizacion-table-body" class="divide-y divide-gray-200">
+    {% if rows %}
+      {% for item in rows %}
+        {% include 'partials/Periodizacion/periodizacion_row.html' with item=item %}
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan="16" class="px-4 py-8 text-center text-lg text-gray-500">
+          No hay datos de periodización. Selecciona PC(s), Periodo(s) y Fecha, luego haz clic en "Generar filas".
+        </td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table>
+</div>

@@ -2,6 +2,25 @@ from django.db import models
 from apps.proyectos.models import Proyecto
 from apps.common.models import BaseModel
 
+
+class CoeficienteCruceManager(models.Manager):
+
+    def resolver_para_proyecto(self, proyecto) -> dict[str, float]:
+        """
+        Devuelve un dict {nomenclatura: coeficiente} resolviendo
+        la herencia: proyecto sobreescribe estándar.
+
+        Uso: CoeficienteCruce.objects.resolver_para_proyecto(proyecto)
+        """
+        estandares = self.filter(proyecto__isnull=True).values('nomenclatura', 'coeficiente')
+        propios    = self.filter(proyecto=proyecto).values('nomenclatura', 'coeficiente')
+
+        # Estándares como base, propios sobreescriben
+        coefs = {c['nomenclatura']: c['coeficiente'] for c in estandares}
+        coefs.update({c['nomenclatura']: c['coeficiente'] for c in propios})
+        return coefs
+
+
 class CoeficienteCruce(BaseModel):
     """
     Coeficiente de equivalencia por tipo de vehículo.
@@ -21,6 +40,8 @@ class CoeficienteCruce(BaseModel):
         null=True,   # null = coeficiente estándar global
     )
 
+    objects = CoeficienteCruceManager()
+
     class Meta:
         constraints = [
             # Solo puede existir un coeficiente por nomenclatura dentro de un proyecto
@@ -39,23 +60,3 @@ class CoeficienteCruce(BaseModel):
     def __str__(self):
         scope = f"[{self.proyecto}]" if self.proyecto else "[estándar]"
         return f"{self.nomenclatura} {scope} — {self.tipo_transporte} ({self.coeficiente})"
-
-
-# managers.py (o dentro del mismo archivo)
-
-class CoeficienteCruceManager(models.Manager):
-
-    def resolver_para_proyecto(self, proyecto) -> dict[str, float]:
-        """
-        Devuelve un dict {nomenclatura: coeficiente} resolviendo
-        la herencia: proyecto sobreescribe estándar.
-        
-        Uso: CoeficienteCruce.objects.resolver_para_proyecto(proyecto)
-        """
-        estandares = self.filter(proyecto__isnull=True).values('nomenclatura', 'coeficiente')
-        propios    = self.filter(proyecto=proyecto).values('nomenclatura', 'coeficiente')
-
-        # Estándares como base, propios sobreescriben
-        coefs = {c['nomenclatura']: c['coeficiente'] for c in estandares}
-        coefs.update({c['nomenclatura']: c['coeficiente'] for c in propios})
-        return coefs

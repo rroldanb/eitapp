@@ -1,0 +1,28 @@
+<div class="periodo-table-wrap overflow-x-auto">
+<table class="w-full divide-y divide-gray-200 text-sm" id="periodo-table">
+  <thead class="bg-slate-200">
+    <tr>
+      <th class="px-2 py-2 text-left font-bold text-gray-800 uppercase">Código</th>
+      <th class="px-2 py-2 text-left font-bold text-gray-800 uppercase">Hora Inicio</th>
+      <th class="px-2 py-2 text-left font-bold text-gray-800 uppercase">Hora Fin</th>
+      <th class="px-2 py-2 text-center font-bold text-gray-800 uppercase">Laboral</th>
+      <th class="px-2 py-2 text-center font-bold text-gray-800 uppercase">Acc</th>
+    </tr>
+  </thead>
+  <tbody id="periodo-table-body" class="divide-y divide-gray-200">
+    {% include 'partials/Periodo/periodo_create.html' with proyecto=proyecto %}
+
+    {% if periodos %}
+      {% for p in periodos %}
+        {% include 'partials/Periodo/periodo_row.html' with item=p %}
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+          No hay períodos registrados para este proyecto. Crea uno nuevo en la fila superior.
+        </td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table>
+</div>

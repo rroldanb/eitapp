@@ -1,11 +1,47 @@
 <table class="w-full divide-y divide-gray-200 table-results" id="coeficientes-cruce-table">
   <thead class="bg-slate-200">
     <tr>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nomenclatura</th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo Transporte</th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Coeficiente</th>
+      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          aria-sort="{% if sort_by == 'nomenclatura' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button"
+           hx-get="?sort_by=nomenclatura&sort_order={% if sort_by == 'nomenclatura' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-target="#coeficientes-cruce-table" hx-swap="outerHTML" hx-push-url="true"
+           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'nomenclatura' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
+          Nomenclatura
+          {% if sort_by == 'nomenclatura' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          aria-sort="{% if sort_by == 'tipo_transporte' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button"
+           hx-get="?sort_by=tipo_transporte&sort_order={% if sort_by == 'tipo_transporte' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-target="#coeficientes-cruce-table" hx-swap="outerHTML" hx-push-url="true"
+           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'tipo_transporte' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
+          Tipo Transporte
+          {% if sort_by == 'tipo_transporte' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          aria-sort="{% if sort_by == 'coeficiente' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button"
+           hx-get="?sort_by=coeficiente&sort_order={% if sort_by == 'coeficiente' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-target="#coeficientes-cruce-table" hx-swap="outerHTML" hx-push-url="true"
+           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'coeficiente' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
+          Coeficiente
+          {% if sort_by == 'coeficiente' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
       <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">¿Estándar?</th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Proyecto</th>
+      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          aria-sort="{% if sort_by == 'proyecto' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button"
+           hx-get="?sort_by=proyecto&sort_order={% if sort_by == 'proyecto' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-target="#coeficientes-cruce-table" hx-swap="outerHTML" hx-push-url="true"
+           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'proyecto' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
+          Proyecto
+          {% if sort_by == 'proyecto' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
       <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
     </tr>
   </thead>

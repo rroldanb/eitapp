@@ -1,36 +1,48 @@
 <tr id="coeficiente-cruce-row-{{ coeficiente.id }}" class="coeficiente-cruce-row hover:bg-gray-50" data-coeficiente-id="{{ coeficiente.id }}">
   <td class="px-4 py-1">
-    <input type="text" name="nomenclatura" class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ coeficiente.nomenclatura }}">
+    <span class="{% if coeficiente.is_standard %}font-semibold{% endif %} text-gray-800">{{ coeficiente.nomenclatura }}</span>
   </td>
   <td class="px-4 py-1">
-    <input type="text" name="tipo_transporte" class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 w-full" value="{{ coeficiente.tipo_transporte }}">
+    <span class="text-gray-600">{{ coeficiente.tipo_transporte }}</span>
   </td>
   <td class="px-4 py-1">
-    <input type="number" name="coeficiente" class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" step="0.01" value="{{ coeficiente.coeficiente }}">
+    {% if coeficiente.is_standard %}
+      <span class="text-gray-800">{{ coeficiente.coeficiente }}</span>
+    {% else %}
+      <input type="number" name="coeficiente" class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" step="0.01" value="{{ coeficiente.coeficiente }}" required>
+    {% endif %}
   </td>
-  <td class="px-4 py-1 text-center">
-    <input type="checkbox" name="is_standard" class="mr-1" {% if coeficiente.is_standard %}checked{% endif %}>
+  <td class="px-4 py-1 text-center text-gray-600">{{ coeficiente.is_standard|yesno:"Sí,No" }}</td>
+  <td class="px-4 py-1 text-gray-600">
+    {% if coeficiente.is_standard %}
+      Estándar
+    {% else %}
+      <select name="proyecto" class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 text-sm">
+        <option value="">— Sin proyecto —</option>
+        {% for p in available_projects %}
+          <option value="{{ p.id }}" {% if coeficiente.proyecto_id == p.id %}selected{% endif %}>{{ p.title }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
   </td>
-  <td class="px-4 py-1 text-gray-600">{{ coeficiente.proyecto.title|default:"—" }}</td>
   <td class="px-4 py-1 flex gap-2">
-    <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors"
-      hx-put="{% url 'coeficiente_cruce_update' coeficiente.id %}"
-      hx-include="closest tr"
-      hx-target="closest tr"
-      hx-swap="outerHTML transition:true swap:1s"
-      hx-indicator="#save-indicator-{{ coeficiente.id }}"
-    >
-      <span id="save-indicator-{{ coeficiente.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
-      Actualizar
-    </button>
-    <button type="button" class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
-      hx-delete="{% url 'coeficiente_cruce_delete' coeficiente.id %}"
-      hx-target="closest tr"
-      hx-swap="outerHTML transition:true swap:1s"
-      hx-indicator="#delete-indicator-{{ coeficiente.id }}"
-    >
-      <span id="delete-indicator-{{ coeficiente.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
-      Eliminar
-    </button>
+    {% if not coeficiente.is_standard %}
+      <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors" data-action="update"
+        hx-put="{% url 'coeficiente_cruce_update' coeficiente.id %}"
+        hx-include="closest tr" hx-target="closest tr" hx-swap="outerHTML transition:true swap:1s"
+        hx-indicator="#save-indicator-{{ coeficiente.id }}">
+        <span id="save-indicator-{{ coeficiente.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+        Actualizar
+      </button>
+      <button type="button" class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors" data-action="delete"
+        hx-delete="{% url 'coeficiente_cruce_delete' coeficiente.id %}"
+        hx-target="closest tr" hx-swap="outerHTML transition:true swap:1s"
+        hx-indicator="#delete-indicator-{{ coeficiente.id }}">
+        <span id="delete-indicator-{{ coeficiente.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+        Eliminar
+      </button>
+    {% else %}
+      <span class="text-gray-400 text-xs italic">Fijo</span>
+    {% endif %}
   </td>
 </tr>

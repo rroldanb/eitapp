@@ -81,6 +81,30 @@
       </li>
       <li class="nav-item">
         <a
+          class="nav-link {% if request.resolver_match.url_name == 'periodizacion_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'periodizacion_list' proyecto.id %}"
+        >
+          <span class="text-lg">📋</span>
+          <span class="nav-link-text">Periodización</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+            >{{ proyecto.puntos_control.count }}</span
+          >
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'periodos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'periodos_list' proyecto.id %}"
+        >
+          <span class="text-lg">⏱️</span>
+          <span class="nav-link-text">Períodos</span>
+          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+            >{{ proyecto.periodos.count }}</span
+          >
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
           class="nav-link {% if request.resolver_match.url_name == 'nodos_movimientos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'nodos_movimientos_list' proyecto.id %}"
         >
@@ -123,6 +147,15 @@
         >
           <span class="text-lg">📈</span>
           <span class="nav-link-text">Análisis</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'analisis_flujos' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'analisis_flujos' proyecto.id %}"
+        >
+          <span class="text-lg">📊</span>
+          <span class="nav-link-text">Análisis de Flujos</span>
         </a>
       </li>
     </ul>

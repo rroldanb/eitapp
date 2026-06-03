@@ -36,13 +36,29 @@ const config = getConfig();
  * @param {boolean} isSuccess - true para éxito, false para error
  * @param {number} duration - Duración en ms (default 3000)
  */
-function showToast(message, isSuccess = true, duration = 3000) {
+function showToast(message, isSuccess = true, duration = 3000, buttonLabel = 'Cerrar')  {
   const toast = document.createElement('div');
   const className = isSuccess ? 'toast-success' : 'toast-error';
   toast.className = `toast-notification ${className}`;
   toast.textContent = message;
   toast.setAttribute('role', 'status');
   toast.setAttribute('aria-live', 'polite');
+  // toast.setAttribute('confirmed', 'true');
+
+    // const textSpan = document.createElement('span');
+    // textSpan.textContent = message;
+    // toast.style.display = 'flex';
+    // toast.style.alignItems = 'center';
+    // toast.style.gap = '12px';
+    // toast.appendChild(textSpan);
+    // const btn = document.createElement('button');
+    // btn.textContent = buttonLabel;
+    // btn.style.cssText = 'margin-left:auto; padding:2px 10px; background:white; color:#15803d; border:none; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer;';
+    // btn.onclick = () => {
+    //   toast.classList.remove('show');
+    //   setTimeout(() => toast.remove(), 300);
+    // };
+    // toast.appendChild(btn);
 
   document.body.appendChild(toast);
   requestAnimationFrame(() => {

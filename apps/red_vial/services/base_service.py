@@ -34,22 +34,56 @@ def apply_sort_to_queryset(queryset, sort_by=None, order='asc', valid_fields=Non
             sort_field = valid_fields.get(list(valid_fields.keys())[0])
     else:
         sort_field = sort_by or 'id'
-    
+
     # Validar order
     if order not in ['asc', 'desc']:
         order = 'asc'
 
-    
     # Aplicar ordenamiento
-    
     if isinstance(sort_field, list):
         if order == 'desc':
             sort_field = [f'-{f}' for f in sort_field]
     else:
         if order == 'desc':
             sort_field = f'-{sort_field}'
-        return queryset.order_by(sort_field)    
+        return queryset.order_by(sort_field)
     return queryset.order_by(*sort_field)
+
+
+def apply_multi_sort_to_queryset(queryset, sort_specs=None, valid_fields=None, count_annotations=None):
+    """
+    Aplica ordenamiento multi-campo con direcciones independientes.
+
+    Args:
+        queryset: Django QuerySet
+        sort_specs: Lista de dicts [{'field': 'pc', 'order': 'asc'}, {'field': 'hora', 'order': 'desc'}]
+        valid_fields: Dict {campo_alias: campo_real} ej: {'pc': 'pc__nodo__numero_pc'}
+        count_annotations: Dict de anotaciones de Count/agregación
+
+    Returns:
+        QuerySet ordenado
+    """
+    if count_annotations:
+        queryset = queryset.annotate(**count_annotations)
+
+    if not sort_specs:
+        return queryset
+
+    order_fields = []
+    for spec in sort_specs:
+        alias = spec.get('field')
+        direction = spec.get('order', 'asc')
+
+        if valid_fields and alias:
+            db_field = valid_fields.get(alias, alias)
+        else:
+            db_field = alias or 'id'
+
+        if direction == 'desc':
+            db_field = f'-{db_field}'
+        order_fields.append(db_field)
+
+    return queryset.order_by(*order_fields)
 
 
 # ========== FUNCIONES GENÉRICAS CRUD ==========
