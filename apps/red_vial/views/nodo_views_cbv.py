@@ -1,5 +1,5 @@
 from apps.red_vial.models import Nodo
-from apps.red_vial.forms.forms import NodoForm
+from apps.red_vial.forms.nodo_form import NodoForm
 from apps.red_vial.services.nodo_service import (
     get_nodos_by_proyecto,
     create_nodo,
@@ -22,7 +22,7 @@ class NodosListView(GenericListView):
     sort_fields = ['numero', 'calle_1', 'calle_2', 'is_pc']
     default_sort = 'numero'
     partial_template = 'partials/Nodos/nodos_table.html'
-    full_template = 'red_vial/Nodos/nodos_list.html'
+    full_template = 'red_vial/nodos_list.html'
     context_items_key = 'nodos'
 
 

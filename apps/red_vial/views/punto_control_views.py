@@ -8,7 +8,7 @@ import json
 import inspect
 
 from apps.red_vial.models import PuntoControl
-from apps.red_vial.forms.forms import PuntoControlForm
+from apps.red_vial.forms.punto_control_form import PuntoControlForm
 from apps.red_vial.services.punto_control_service import (
     get_puntos_control_by_proyecto,
     create_punto_control,
@@ -26,7 +26,7 @@ class PuntosControlListView(GenericListView):
     sort_fields = ['nombre', 'nodo', 'movimiento', 'viraje', 'arco_entrada', 'arco_salida']
     default_sort = 'nombre'
     partial_template = 'partials/PuntosControl/puntos_control_table.html'
-    full_template = 'red_vial/PuntosControl/puntos_control_list.html'
+    full_template = 'red_vial/puntos_control_list.html'
     context_items_key = 'puntos_control'
     form_class = PuntoControlForm
     

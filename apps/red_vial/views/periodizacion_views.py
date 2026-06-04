@@ -22,25 +22,28 @@ from apps.proyectos.models import Proyecto
 @method_decorator(login_required, name='dispatch')
 class PeriodizacionListView(View):
     """Lista de periodización con filtros y generación de filas."""
-    template_full = 'red_vial/Periodizacion/periodizacion_list.html'
-    template_table = 'partials/Periodizacion/periodizacion_table.html'
+    template_full = 'red_vial/periodizacion_list.html'
+    template_container = 'partials/Periodizacion/periodizacion_container.html'
 
     def get(self, request, proyecto_id):
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
 
         nodo_ids = request.GET.getlist('nodo')
         periodo_ids = request.GET.getlist('periodo')
+        movimiento_ids = request.GET.getlist('movimiento')
         fecha = request.GET.get('fecha') or None
         sort_param = request.GET.get('sort')
         order_param = request.GET.get('order', 'asc')
 
         nodo_ids = [n for n in nodo_ids if n]
         periodo_ids = [p for p in periodo_ids if p]
+        movimiento_ids = [m for m in movimiento_ids if m]
 
         rows = get_periodizaciones(
             proyecto_id=proyecto_id,
             nodo_ids=nodo_ids or None,
             periodo_ids=periodo_ids or None,
+            movimiento_ids=movimiento_ids or None,
             fecha=fecha,
             sort_param=sort_param,
             order_param=order_param,
@@ -51,13 +54,30 @@ class PeriodizacionListView(View):
         ).select_related('calle_1', 'calle_2')
         available_periodos = Periodo.objects.filter(proyecto=proyecto)
 
+        available_fechas = Periodizacion.objects.filter(
+            pc__proyecto=proyecto
+        ).values_list('fecha', flat=True).distinct().order_by('-fecha')
+
+        pc_qs = PuntoControl.objects.filter(proyecto=proyecto)
+        if nodo_ids:
+            pc_qs = pc_qs.filter(nodo_id__in=nodo_ids)
+        available_movimiento_values = pc_qs.values_list('movimiento', flat=True).distinct().order_by('movimiento')
+        movimiento_choices_dict = dict(PuntoControl.Movimiento.choices)
+        available_movimientos = [
+            {'value': v, 'label': movimiento_choices_dict.get(v, v)}
+            for v in available_movimiento_values
+        ]
+
         context = {
             'proyecto': proyecto,
             'rows': rows,
             'available_nodos': available_nodos,
             'available_periodos': available_periodos,
+            'available_fechas': available_fechas,
+            'available_movimientos': available_movimientos,
             'selected_nodos': nodo_ids,
             'selected_periodos': periodo_ids,
+            'selected_movimientos': movimiento_ids,
             'selected_fecha': fecha,
             'sort_param': sort_param,
             'order_param': order_param,
@@ -65,7 +85,7 @@ class PeriodizacionListView(View):
         }
 
         if request.headers.get('HX-Request'):
-            return render(request, self.template_table, context)
+            return render(request, self.template_container, context)
         return render(request, self.template_full, context)
 
     def post(self, request, proyecto_id):
@@ -79,7 +99,12 @@ class PeriodizacionListView(View):
 
         nodo_ids = data.getlist('nodo') if hasattr(data, 'getlist') else data.get('nodo_ids', [])
         periodo_ids = data.getlist('periodo') if hasattr(data, 'getlist') else data.get('periodo_ids', [])
-        fecha = data.get('fecha')
+        movimiento_ids = data.getlist('movimiento') if hasattr(data, 'getlist') else data.get('movimiento_ids', [])
+        fecha = data.get('fecha_generar') or data.get('fecha')
+
+        nodo_ids = [n for n in nodo_ids if n]
+        periodo_ids = [p for p in periodo_ids if p]
+        movimiento_ids = [m for m in movimiento_ids if m]
 
         if not nodo_ids or not periodo_ids or not fecha:
             return HttpResponseBadRequest(
@@ -88,13 +113,26 @@ class PeriodizacionListView(View):
             )
 
         try:
-            count = generar_filas(proyecto, nodo_ids, periodo_ids, fecha)
+            count = generar_filas(proyecto, nodo_ids, periodo_ids, fecha, movimiento_ids or None)
             rows = get_periodizaciones(
                 proyecto_id=proyecto_id,
                 nodo_ids=nodo_ids,
                 periodo_ids=periodo_ids,
+                movimiento_ids=movimiento_ids or None,
                 fecha=fecha,
             )
+            available_fechas = Periodizacion.objects.filter(
+                pc__proyecto=proyecto
+            ).values_list('fecha', flat=True).distinct().order_by('-fecha')
+            pc_qs = PuntoControl.objects.filter(proyecto=proyecto)
+            if nodo_ids:
+                pc_qs = pc_qs.filter(nodo_id__in=nodo_ids)
+            available_movimiento_values = pc_qs.values_list('movimiento', flat=True).distinct().order_by('movimiento')
+            movimiento_choices_dict = dict(PuntoControl.Movimiento.choices)
+            available_movimientos = [
+                {'value': v, 'label': movimiento_choices_dict.get(v, v)}
+                for v in available_movimiento_values
+            ]
             context = {
                 'proyecto': proyecto,
                 'rows': rows,
@@ -102,13 +140,16 @@ class PeriodizacionListView(View):
                     numero_pc__isnull=False, proyecto=proyecto
                 ).select_related('calle_1', 'calle_2'),
                 'available_periodos': Periodo.objects.filter(proyecto=proyecto),
+                'available_fechas': available_fechas,
+                'available_movimientos': available_movimientos,
                 'selected_nodos': nodo_ids,
                 'selected_periodos': periodo_ids,
+                'selected_movimientos': movimiento_ids,
                 'selected_fecha': fecha,
                 'form': PeriodizacionForm(),
                 'generated_count': count,
             }
-            response = render(request, self.template_table, context)
+            response = render(request, self.template_container, context)
             response['X-Generated-Count'] = str(count)
             return response
         except IntegrityError:
@@ -122,31 +163,18 @@ class PeriodizacionListView(View):
 class PeriodizacionUpdateView(View):
     """Actualiza un campo vehicular de una fila de periodización (PUT parcial)."""
     def put(self, request, item_id):
-        print(f"Received PUT request for Periodizacion ID: {item_id}")  # Debug log
         try:
             try:
                 data = json.loads(request.body) if request.body else {}
             except json.JSONDecodeError:
                 data = QueryDict(request.body).dict()
-            print("Parsed data from QueryDict:", data)  # Debug log
-
-
-    # def put(self, request, item_id):
-    #     try:
-    #         data = json.loads(request.body) if request.body else {}
-    #         if not data:
-    #             from django.http import QueryDict
-    #             data = QueryDict(request.body).dict()
-
             item = update_periodizacion(item_id, data)
             context = {
                 'item': item,
                 'form': PeriodizacionForm(instance=item),
             }
-            print("Context for update response:", context)  # Debug log
             return render(request, 'partials/Periodizacion/periodizacion_row.html', context)
         except ValidationError as e:
-            print("Validation error:", e)  # Debug log
             return HttpResponseBadRequest(
                 json.dumps({'error': str(e)}),
                 content_type='application/json',

@@ -1,0 +1,10 @@
+{% extends "proyecto_base.html" %}
+{% load static %}
+
+{% block section_content %}
+{% include 'partials/Periodizacion/periodizacion_container.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/crud_events.js' %}"></script>
+{% endblock extra_js %}

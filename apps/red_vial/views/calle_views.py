@@ -1,6 +1,6 @@
 from django.views import View
 from apps.red_vial.models import Calle
-from apps.red_vial.forms.forms import CalleForm
+from apps.red_vial.forms.calle_form import CalleForm
 from apps.red_vial.services.calle_service import (
     get_calles_by_proyecto,
     create_calle,
@@ -20,7 +20,7 @@ class CallesListView(GenericListView):
     sort_fields = ['numero', 'nombre', 'nodos']
     default_sort = 'numero'
     partial_template = 'partials/Calles/calles_table.html'
-    full_template = 'red_vial/Calles/calles_list.html'
+    full_template = 'red_vial/calles_list.html'
     context_items_key = 'calles'
 
 

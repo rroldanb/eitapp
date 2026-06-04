@@ -2,18 +2,7 @@
 <table class="w-full divide-y divide-gray-200 table-results " id="puntos-control-table">
   <thead class="bg-slate-200">
     <tr>
-      <th class="pc-col-nombre px-1 py-2 text-center font-bold text-gray-900 uppercase">
-        <a role="button"
-          href="?sort_by=nombre&amp;sort_order={% if sort_by == 'nombre' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-          hx-get="?sort_by=nombre&amp;sort_order={% if sort_by == 'nombre' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-          hx-target="#puntos-control-table"
-          hx-swap="outerHTML"
-          hx-push-url="true"
-          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'nombre' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
-          Pc
-          {% if sort_by == 'nombre' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-        </a>
-      </th>
+
       <th class="pc-col-nodo px-1 py-2 text-center font-bold text-gray-900 uppercase">
         <a role="button" href="?sort_by=nodo&amp;sort_order={% if sort_by == 'nodo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
           hx-get="?sort_by=nodo&amp;sort_order={% if sort_by == 'nodo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"

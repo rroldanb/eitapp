@@ -18,25 +18,69 @@
           class="nav-link {% if request.resolver_match.url_name == 'proyecto_resumen' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'proyecto_resumen' proyecto.id %}"
         >
-          <span class="text-lg">🚧</span>
+          <i class="fas fa-home text-lg"></i>
           <span class="nav-link-text">Resumen</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if request.resolver_match.url_name == 'proyecto_detail' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
-          href="{% url 'proyecto_detail' proyecto.id %}"
+
+            <li class="nav-item">
+        <button
+          class="nav-link w-full text-left text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          _="on click toggle .hidden on #parametros-menu"
         >
-          <span class="text-lg">🏠</span>
-          <span class="nav-link-text">Portada</span>
-        </a>
+          <i class="fas fa-sliders-h text-lg"></i>
+          <span class="nav-link-text font-semibold">Parámetros</span>
+          <i class="fas fa-chevron-down ml-auto text-xs transition-transform"></i>
+        </button>
+        <ul id="parametros-menu" class="hidden space-y-1 pl-4 mt-1">
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.resolver_match.url_name == 'periodos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+              href="{% url 'periodos_list' proyecto.id %}"
+            >
+              <i class="fas fa-clock text-lg"></i>
+              <span class="nav-link-text">Períodos</span>
+              <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+                >{{ proyecto.periodos.count }}</span
+              >
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.resolver_match.url_name == 'regulaciones_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+              href="{% url 'regulaciones_list' proyecto.id %}"
+            >
+              <i class="fas fa-flag text-lg"></i>
+              <span class="nav-link-text">Regulaciones</span>
+              <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+                >{{ regulaciones_count|default:'' }}</span
+              >
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.resolver_match.url_name == 'coeficientes_cruce_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+              href="{% url 'coeficientes_cruce_list' proyecto.id %}"
+            >
+              <i class="fas fa-balance-scale text-lg"></i>
+              <span class="nav-link-text">Coeficientes</span>
+              <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+                >{{ coeficientes_count|default:'' }}</span
+              >
+            </a>
+          </li>
+        </ul>
       </li>
+
+    <hr class="my-3 border-gray-300" />
+
+
       <li class="nav-item">
         <a
           class="nav-link {% if request.resolver_match.url_name == 'calles_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'calles_list' proyecto.id %}"
         >
-          <span class="text-lg">🛣️</span>
+          <i class="fas fa-road text-lg"></i>
           <span class="nav-link-text">Calles</span>
           <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
             >{{ proyecto.calles.count }}</span
@@ -48,7 +92,7 @@
           class="nav-link {% if request.resolver_match.url_name == 'nodos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'nodos_list' proyecto.id %}"
         >
-          <span class="text-lg">📍</span>
+          <i class="fas fa-map-marker-alt text-lg"></i>
           <span class="nav-link-text">Nodos</span>
           <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
             >{{ proyecto.nodos.count }}</span
@@ -60,7 +104,7 @@
           class="nav-link {% if request.resolver_match.url_name == 'arcos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'arcos_list' proyecto.id %}"
         >
-          <span class="text-lg">↔️</span>
+          <i class="fas fa-arrows-alt-h text-lg"></i>
           <span class="nav-link-text">Arcos</span>
           <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
             >{{ proyecto.arcos.count }}</span
@@ -72,100 +116,56 @@
           class="nav-link {% if request.resolver_match.url_name == 'puntos_control_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'puntos_control_list' proyecto.id %}"
         >
-          <span class="text-lg">🎯</span>
+          <i class="fas fa-crosshairs text-lg"></i>
           <span class="nav-link-text">Puntos Control</span>
           <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
             >{{ proyecto.puntos_control.count }}</span
           >
         </a>
       </li>
+
+    <hr class="my-3 border-gray-300" />
+
+
       <li class="nav-item">
         <a
           class="nav-link {% if request.resolver_match.url_name == 'periodizacion_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'periodizacion_list' proyecto.id %}"
         >
-          <span class="text-lg">📋</span>
+          <i class="fas fa-clipboard-list text-lg"></i>
           <span class="nav-link-text">Periodización</span>
           <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
             >{{ proyecto.puntos_control.count }}</span
           >
         </a>
       </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if request.resolver_match.url_name == 'periodos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
-          href="{% url 'periodos_list' proyecto.id %}"
-        >
-          <span class="text-lg">⏱️</span>
-          <span class="nav-link-text">Períodos</span>
-          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
-            >{{ proyecto.periodos.count }}</span
-          >
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if request.resolver_match.url_name == 'nodos_movimientos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
-          href="{% url 'nodos_movimientos_list' proyecto.id %}"
-        >
-          <span class="text-lg">🔄</span>
-          <span class="nav-link-text">Movimientos</span>
-          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
-            >{{ proyecto.nodos_movimientos.count }}</span
-          >
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if request.resolver_match.url_name == 'conteos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
-          href="{% url 'conteos_list' proyecto.id %}"
-        >
-          <span class="text-lg">🚗</span>
-          <span class="nav-link-text">Conteos</span>
-          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
-            >{{ proyecto.conteos.count }}</span
-          >
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if request.resolver_match.url_name == 'flujos_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
-          href="{% url 'flujos_list' proyecto.id %}"
-        >
-          <span class="text-lg">📊</span>
-          <span class="nav-link-text">Flujos</span>
-          <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
-            >{{ proyecto.flujos.count }}</span
-          >
-        </a>
-      </li>
 
-      <li class="nav-item">
-        <a
-          class="nav-link {% if request.resolver_match.url_name == 'analisis_trafico' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
-          href="{% url 'analisis_trafico' proyecto.id %}"
-        >
-          <span class="text-lg">📈</span>
-          <span class="nav-link-text">Análisis</span>
-        </a>
-      </li>
+
       <li class="nav-item">
         <a
           class="nav-link {% if request.resolver_match.url_name == 'analisis_flujos' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'analisis_flujos' proyecto.id %}"
         >
-          <span class="text-lg">📊</span>
+          <i class="fas fa-chart-bar text-lg"></i>
           <span class="nav-link-text">Análisis de Flujos</span>
         </a>
       </li>
     </ul>
 
     <hr class="my-3 border-gray-300" />
-
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.resolver_match.url_name == 'proyecto_detail' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'proyecto_detail' proyecto.id %}"
+        >
+          <i class="fas fa-hard-hat text-lg"></i>
+          <span class="nav-link-text">Admin Proyecto</span>
+        </a>
+      </li>
     <ul class="nav flex-column space-y-1">
       <li class="nav-item">
         <a class="nav-link text-gray-600 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors" href="{% url 'proyectos' %}">
-          <span class="text-lg">⬅️</span>
+          <i class="fas fa-arrow-left text-lg"></i>
           <span class="nav-link-text">Volver a Proyectos</span>
         </a>
       </li>

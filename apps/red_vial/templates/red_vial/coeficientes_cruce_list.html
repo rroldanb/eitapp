@@ -1,0 +1,22 @@
+{% extends "proyecto_base.html" %}
+{% load static %}
+
+{% block hero_image %}
+<div class="flex justify-between items-center mt-2 mb-0">
+
+<h2 class="text-3xl font-bold text-white mt-4">Coeficientes de Cruce</h2>
+<span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full" id="coeficientes-count">{{ coeficientes.count }}</span>
+</div>
+{% endblock %}
+
+{% block section_content %}
+
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="p-4">
+    <div class="overflow-x-auto">
+      {% include 'partials/CoeficientesCruce/coeficientes_cruce_table.html' with coeficientes=coeficientes sort_by=sort_by sort_order=sort_order %}
+    </div>
+  </div>
+</div>
+{% endblock %}

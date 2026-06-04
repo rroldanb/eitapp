@@ -1,5 +1,5 @@
 from apps.red_vial.models import PuntoControl
-from apps.red_vial.forms.forms import PuntoControlForm
+from apps.red_vial.forms.punto_control_form import PuntoControlForm
 from .base_service import apply_sort_to_queryset, create_item, update_item, delete_item
 
 

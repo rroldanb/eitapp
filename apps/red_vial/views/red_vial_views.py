@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 
 # from apps.red_vial.models import Calle, Nodo, Arco, Regulacion, NodoMovimiento, Coeficiente_Cruce
 from apps.red_vial.services.red_vial_service import *
-from apps.red_vial.forms.forms import   RegulacionForm, NodoMovimientoForm, CoeficienteCruceForm
+from apps.red_vial.forms.regulacion_form import RegulacionForm
+from apps.red_vial.forms.coeficiente_cruce_form import CoeficienteCruceForm
 from apps.red_vial.services.arco_service import get_arcos_by_proyecto
 from apps.red_vial.services.calle_service import get_calles_by_proyecto
 from apps.red_vial.services.nodo_service import get_nodos_by_proyecto
@@ -35,40 +36,6 @@ def regulacion_create_view(request):
         form = RegulacionForm()
 
     return render(request, 'red_vial/regulacion_form.html', {
-        'form': form
-    })
-
-
-# ========== NODO MOVIMIENTO VIEWS ==========
-
-@login_required
-def nodos_movimientos_list_view(request, proyecto_id):
-    """Vista de lista de configuraciones nodo-movimiento"""
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-    nodos_movimientos = get_nodos_movimientos_by_proyecto(proyecto_id)
-    return render(request, 'red_vial/nodos_movimientos_list.html', {
-        'proyecto': proyecto,
-        'nodos_movimientos': nodos_movimientos
-    })
-
-
-@login_required
-def nodo_movimiento_create_view(request, proyecto_id):
-    """Vista para crear configuración nodo-movimiento"""
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-
-    if request.method == 'POST':
-        form = NodoMovimientoForm(request.POST, proyecto=proyecto)
-        if form.is_valid():
-            nodo_mov = form.save(commit=False)
-            nodo_mov.proyecto = proyecto
-            nodo_mov.save()
-            return redirect('nodos_movimientos_list', proyecto_id=proyecto_id)
-    else:
-        form = NodoMovimientoForm(proyecto=proyecto)
-
-    return render(request, 'red_vial/nodo_movimiento_form.html', {
-        'proyecto': proyecto,
         'form': form
     })
 

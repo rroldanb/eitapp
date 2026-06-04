@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from apps.proyectos.models import Proyecto
 from apps.red_vial.services.red_vial_service import *
-from apps.red_vial.forms.forms import  ArcoForm
+from apps.red_vial.forms.arco_form import ArcoForm
 
 
 
@@ -16,7 +16,7 @@ def arcos_list_view(request, proyecto_id):
     """Vista de lista de arcos de un proyecto"""
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     arcos = get_arcos_by_proyecto(proyecto_id)
-    return render(request, 'red_vial/Arcos/arcos_list.html', {
+    return render(request, 'red_vial/arcos_list.html', {
         'proyecto': proyecto,
         'arcos': arcos
     })
@@ -45,7 +45,7 @@ def arco_create_view(request, proyecto_id):
     else:
         form = ArcoForm(proyecto=proyecto)
 
-    return render(request, 'red_vial/Arcos/arcos_list.html', {'proyecto': proyecto})
+    return render(request, 'red_vial/arcos_list.html', {'proyecto': proyecto})
 
 
 @login_required

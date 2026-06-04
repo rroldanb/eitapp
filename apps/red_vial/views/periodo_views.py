@@ -10,14 +10,14 @@ import json
 import inspect
 
 from apps.red_vial.models import Periodo
-from apps.red_vial.forms.trafico_forms import PeriodoForm
+from apps.red_vial.forms.periodo_form import PeriodoForm
 from apps.red_vial.services.trafico_service import periodo_delete
 from apps.proyectos.models import Proyecto
 
 
 @method_decorator(login_required, name='dispatch')
 class PeriodoListView(View):
-    template_full = 'red_vial/Periodo/periodo_list.html'
+    template_full = 'red_vial/periodo_list.html'
     template_table = 'partials/Periodo/periodo_table.html'
 
     def get(self, request, proyecto_id):

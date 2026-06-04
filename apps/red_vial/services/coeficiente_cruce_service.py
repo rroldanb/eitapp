@@ -2,7 +2,7 @@ from django.db.models import Value
 from django.db.models.functions import Coalesce
 
 from apps.red_vial.models import CoeficienteCruce
-from apps.red_vial.forms.forms import CoeficienteCruceModelForm
+from apps.red_vial.forms.coeficiente_cruce_form import CoeficienteCruceModelForm
 from .base_service import apply_sort_to_queryset, create_item, update_item, delete_item
 
 

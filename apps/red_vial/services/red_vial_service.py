@@ -3,7 +3,6 @@ from apps.red_vial.models import (
     Nodo,
     Arco,
     Regulacion,
-    NodoMovimiento,
     Coeficiente_Cruce,
 )
 from apps.proyectos.models import Proyecto
@@ -46,54 +45,6 @@ def regulacion_delete(regulacion_id):
     """Eliminar una regulación"""
     regulacion = Regulacion.objects.get(id=regulacion_id)
     regulacion.delete()
-
-
-# ========== NODO MOVIMIENTO SERVICES ==========
-
-def get_all_nodos_movimientos():
-    """Obtener todas las configuraciones de nodo-movimiento"""
-    return NodoMovimiento.objects.all()
-
-
-def get_nodos_movimientos_by_proyecto(proyecto_id):
-    """Obtener configuraciones de un proyecto"""
-    return NodoMovimiento.objects.filter(proyecto_id=proyecto_id).select_related(
-        'nodo',  'arco_entrada', 'arco_salida', 'regulacion'
-    )
-
-
-def get_nodos_movimientos_by_nodo(nodo_id):
-    """Obtener configuraciones de un nodo específico"""
-    return NodoMovimiento.objects.filter(nodo_id=nodo_id).select_related(
-        'movimiento', 'arco_entrada', 'arco_salida'
-    )
-
-
-def get_nodo_movimiento_by_id(nodo_movimiento_id):
-    """Obtener configuración por ID"""
-    return NodoMovimiento.objects.select_related(
-        'nodo', 'movimiento', 'arco_entrada', 'arco_salida', 'proyecto'
-    ).get(id=nodo_movimiento_id)
-
-
-def nodo_movimiento_create(data):
-    """Crear una nueva configuración de nodo-movimiento"""
-    return NodoMovimiento.objects.create(**data)
-
-
-def nodo_movimiento_update(nodo_movimiento_id, data):
-    """Actualizar una configuración"""
-    nodo_mov = NodoMovimiento.objects.get(id=nodo_movimiento_id)
-    for key, value in data.items():
-        setattr(nodo_mov, key, value)
-    nodo_mov.save()
-    return nodo_mov
-
-
-def nodo_movimiento_delete(nodo_movimiento_id):
-    """Eliminar una configuración"""
-    nodo_mov = NodoMovimiento.objects.get(id=nodo_movimiento_id)
-    nodo_mov.delete()
 
 
 # ========== COEFICIENTE CRUCE SERVICES ==========

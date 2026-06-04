@@ -1,6 +1,6 @@
 import json
 from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.red_vial.models import CoeficienteCruce
 from apps.proyectos.models import Proyecto
-from apps.red_vial.forms.forms import CoeficienteCruceModelForm
+from apps.red_vial.forms.coeficiente_cruce_form import CoeficienteCruceModelForm
 from apps.red_vial.services.coeficiente_cruce_service import (
     get_all_coeficientes_cruce, create_coeficiente_cruce,
     update_coeficiente_cruce, delete_coeficiente_cruce,
@@ -21,7 +21,8 @@ class CoeficientesCruceListView(View):
     sort_fields = ['nomenclatura', 'tipo_transporte', 'coeficiente', 'proyecto']
     default_sort = 'nomenclatura'
 
-    def get(self, request):
+    def get(self, request, proyecto_id):
+        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
         sort_by = request.GET.get('sort_by', self.default_sort)
         sort_order = request.GET.get('sort_order', 'asc')
         if sort_by not in self.sort_fields:
@@ -35,7 +36,9 @@ class CoeficientesCruceListView(View):
             proyecto__isnull=True
         ).values('nomenclatura', 'tipo_transporte').order_by('nomenclatura')
         context = {
+            'proyecto': proyecto,
             'coeficientes': items,
+            'coeficientes_count': items.count(),
             'form': form,
             'sort_by': sort_by,
             'sort_order': sort_order,
@@ -44,7 +47,7 @@ class CoeficientesCruceListView(View):
         }
         if request.headers.get('HX-Request'):
             return render(request, 'partials/CoeficientesCruce/coeficientes_cruce_table.html', context)
-        return render(request, 'red_vial/CoeficientesCruce/coeficientes_cruce_list.html', context)
+        return render(request, 'red_vial/coeficientes_cruce_list.html', context)
 
 
 @method_decorator(login_required, name='dispatch')

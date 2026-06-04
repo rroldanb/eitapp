@@ -1,5 +1,5 @@
 from apps.red_vial.models import Regulacion
-from apps.red_vial.forms.forms import RegulacionForm
+from apps.red_vial.forms.regulacion_form import RegulacionForm
 from .base_service import apply_sort_to_queryset, create_item, update_item, delete_item
 
 

@@ -1,8 +1,5 @@
 <tr id="punto-control-row-{{ item.id }}" class="punto-control-row hover:bg-gray-50" data-pc-id="{{ item.id }}">
   <td class="px-1 py-1">
-    <span class="block w-full px-2 py-1 text-sm font-medium text-gray-700">{{ item.nombre }}</span>
-  </td>
-  <td class="px-1 py-1">
     <select name="nodo" class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
       {% for v, l in form.nodo.field.choices %}
         <option value="{{ v }}" {% if item.nodo.pk == v %}selected{% endif %}>{{ l }}</option>

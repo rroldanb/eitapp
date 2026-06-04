@@ -1,12 +1,6 @@
 from .red_vial_nn import (
     Regulacion,
-    NodoMovimiento,
     Coeficiente_Cruce,
-)
-
-from .trafico import (
-    ConteoVehicular,
-    FlujoMovimiento,
 )
 from .periodo import Periodo
 from .arco import Arco

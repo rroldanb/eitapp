@@ -45,8 +45,9 @@ def parse_sort_specs(sort_param, order_param):
     return specs
 
 
-def get_periodizaciones(proyecto_id, nodo_ids=None, periodo_ids=None, fecha=None,
-                        sort_param=None, order_param='asc'):
+def get_periodizaciones(proyecto_id, nodo_ids=None, periodo_ids=None,
+                         movimiento_ids=None, fecha=None,
+                         sort_param=None, order_param='asc'):
     """Lista periodizaciones con filtros multi-select y orden anidado."""
     qs = Periodizacion.objects.filter(pc__proyecto_id=proyecto_id)
 
@@ -54,6 +55,8 @@ def get_periodizaciones(proyecto_id, nodo_ids=None, periodo_ids=None, fecha=None
         qs = qs.filter(pc__nodo_id__in=nodo_ids)
     if periodo_ids:
         qs = qs.filter(periodo_id__in=periodo_ids)
+    if movimiento_ids:
+        qs = qs.filter(pc__movimiento__in=movimiento_ids)
     if fecha:
         qs = qs.filter(fecha=fecha)
 
@@ -71,13 +74,15 @@ def get_periodizaciones(proyecto_id, nodo_ids=None, periodo_ids=None, fecha=None
 
 
 @transaction.atomic
-def generar_filas(proyecto, nodo_ids, periodo_ids, fecha):
+def generar_filas(proyecto, nodo_ids, periodo_ids, fecha, movimiento_ids=None):
     """
     Genera filas de 15 min para cada combinación PC (todos sus movimientos) × Periodo.
     No duplica filas existentes (get_or_create).
     """
     filas_creadas = 0
     pcs = PuntoControl.objects.filter(nodo_id__in=nodo_ids, proyecto=proyecto)
+    if movimiento_ids:
+        pcs = pcs.filter(movimiento__in=movimiento_ids)
     periodos = Periodo.objects.filter(id__in=periodo_ids, proyecto=proyecto)
 
     for pc in pcs:

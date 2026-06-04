@@ -31,7 +31,7 @@
                 <!-- Home -->
                 <li class="list-none">
                     <a href="/" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.path == '/' %}bg-gray-800 text-white{% endif %}">
-                        Home
+                        Inicio
                     </a>
                 </li>
 
@@ -42,30 +42,23 @@
                             Proyectos
                         </a>
                     </li>
+                    <li class="list-none">
+                        <a href="{% url 'mandantes' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'mandantes' %}bg-gray-700 text-white{% endif %}">
+                            Mandantes
+                        </a>
+                    </li>
 
                     <!-- Mandantes Dropdown -->
-                    <li class="list-none relative">
+                    {% comment %} <li class="list-none relative">
                         {% include "common/navbar/mandantes_dropdown.html" %}
-                    </li>
+                    </li> {% endcomment %}
 
                     <!-- Tasks Dropdown -->
                     <li class="list-none relative">
                         {% include "common/navbar/tasks_dropdown.html" %}
                     </li>
 
-                    <!-- Regulaciones -->
-                    <li class="list-none">
-                        <a href="{% url 'regulaciones_list' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.resolver_match.url_name == 'regulaciones_list' %}bg-gray-800 text-white{% endif %}">
-                            Regulaciones
-                        </a>
-                    </li>
 
-                    <!-- Coeficientes de Cruce -->
-                    <li class="list-none">
-                        <a href="{% url 'coeficientes_cruce_list' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.resolver_match.url_name == 'coeficientes_cruce_list' %}bg-gray-800 text-white{% endif %}">
-                            Coeficientes
-                        </a>
-                    </li>
 
                     <!-- Logout -->
                     <li class="list-none">

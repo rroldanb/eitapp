@@ -8,88 +8,18 @@
   <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full">{{ total_records }} registros</span>
 </div>
 
-<div class="bg-white rounded-lg shadow overflow-hidden mb-4">
-  <div class="p-4 border-b border-gray-200">
-    <form id="analisis-flujos-filters"
-      hx-get="{% url 'analisis_flujos_filter' proyecto.id %}"
-      hx-target="#dashboard-content"
-      hx-swap="innerHTML"
-      hx-push-url="true"
-      hx-trigger="change from:select, change from:input[name=fecha]"
-      class="flex flex-wrap items-top justify-between gap-4">
-
-      <div>
-        <label class="block text-lg font-medium text-gray-700 mb-1">PC(s)</label>
-        <select name="pc" multiple size="4"
-          class="w-100 px-2 py-1 border border-gray-300 rounded text-lg focus:ring-2 focus:ring-indigo-500">
-          {% for nodo in available_nodos %}
-            {% for pc in nodo.pc_nodo.all %}
-            <option value="{{ pc.id }}" {% if pc.id|stringformat:"s" in selected_pcs %}selected{% endif %}>
-              PC-{{ nodo.numero_pc|stringformat:"02d" }} — {{ pc.get_movimiento_display|default:'—' }}
-            </option>
-            {% endfor %}
-          {% endfor %}
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-lg font-medium text-gray-700 mb-1">Periodo(s)</label>
-        <select name="periodo" multiple size="4"
-          class="w-40 px-2 py-1 border border-gray-300 rounded text-lg focus:ring-2 focus:ring-indigo-500">
-          {% for p in available_periodos %}
-            <option value="{{ p.id }}" {% if p.id|stringformat:"s" in selected_periodos %}selected{% endif %}>
-              {{ p.codigo }} ({{ p.hora_inicio|time:"H:i" }}–{{ p.hora_fin|time:"H:i" }})
-            </option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-lg font-medium text-gray-700 mb-1">Fecha</label>
-        <input type="date" name="fecha" value="{{ selected_fecha|default:'' }}"
-          class="px-2 py-1 border border-gray-300 rounded text-lg focus:ring-2 focus:ring-indigo-500">
-      </div>
-
-      <div class="flex items-top justify-between text-center gap-2">
-        <button type="button"
-          class="px-3 py-1.5 bg-green-600 text-white text-lg rounded hover:bg-green-700 transition-colors"
-          hx-post="{% url 'analisis_flujos' proyecto.id %}"
-          hx-vals='{"action": "recalcular"}'
-          hx-target="#recalcular-msg"
-          hx-swap="innerHTML">
-          Recalcular
-        </button>
-        <a href="{% url 'analisis_flujos' proyecto.id %}"
-          class="px-3 py-1.5 bg-gray-200 text-gray-700 text-lg rounded hover:bg-gray-300 transition-colors">
-          Limpiar
-        </a>
-      </div>
-    </form>
-    <div id="recalcular-msg" class="mt-2 text-sm text-gray-600"></div>
-  </div>
-
-  <div id="dashboard-content" class="p-4">
-    {% include 'partials/analisis_flujos/dashboard_content.html' %}
-  </div>
-</div>
+{% include 'partials/analisis_flujos/analisis_flujos_container.html' %}
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/crud_events.js' %}"></script>
 <script>
   document.body.addEventListener('resumenes-recalculados', function(evt) {
     var msg = document.getElementById('recalcular-msg');
     if (msg) {
       msg.textContent = 'Resúmenes recalculados correctamente. Actualiza los filtros para ver los cambios.';
-      msg.className = 'mt-2 text-sm text-green-600';
+      msg.className = 'text-sm text-green-600';
       setTimeout(function() { msg.textContent = ''; }, 5000);
-    }
-  });
-  document.body.addEventListener('htmx:afterOnLoad', function(evt) {
-    if (evt.detail.elt && evt.detail.elt.id === 'dashboard-content') {
-      if (window._flujosChart) {
-        window._flujosChart.destroy();
-        window._flujosChart = null;
-      }
     }
   });
 </script>

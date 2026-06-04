@@ -1,5 +1,5 @@
 from apps.red_vial.models import Arco
-from apps.red_vial.forms.forms import ArcoForm
+from apps.red_vial.forms.arco_form import ArcoForm
 from apps.red_vial.services.arco_service import (
     get_arcos_by_proyecto,
     create_arco,
@@ -22,7 +22,7 @@ class ArcosListView(GenericListView):
     sort_fields = [ 'codigo_arco','origen', 'destino', 'longitud']
     default_sort = 'codigo_arco'
     partial_template = 'partials/Arcos/arcos_table.html'
-    full_template = 'red_vial/Arcos/arcos_list.html'
+    full_template = 'red_vial/arcos_list.html'
     context_items_key = 'arcos'
 
 

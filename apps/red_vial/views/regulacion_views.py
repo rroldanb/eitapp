@@ -8,14 +8,17 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.http import require_http_methods
 
+from django.shortcuts import get_object_or_404
+
 from apps.red_vial.models import Regulacion
-from apps.red_vial.forms.forms import RegulacionForm
+from apps.red_vial.forms.regulacion_form import RegulacionForm
 from apps.red_vial.services.regulacion_service import (
     get_all_regulaciones,
     create_regulacion,
     update_regulacion,
     delete_regulacion,
 )
+from apps.proyectos.models import Proyecto
 
 
 class RegulacionesListView(View):
@@ -23,7 +26,8 @@ class RegulacionesListView(View):
     default_sort = 'codigo'
 
     @method_decorator(login_required)
-    def get(self, request):
+    def get(self, request, proyecto_id):
+        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
         sort_by = request.GET.get('sort_by', self.default_sort)
         sort_order = request.GET.get('sort_order', 'asc')
 
@@ -35,14 +39,16 @@ class RegulacionesListView(View):
         regulaciones = get_all_regulaciones(sort_by=sort_by, order=sort_order)
 
         context = {
+            'proyecto': proyecto,
             'regulaciones': regulaciones,
+            'regulaciones_count': regulaciones.count(),
             'sort_by': sort_by,
             'sort_order': sort_order,
         }
 
         if request.headers.get('HX-Request'):
             return render(request, 'partials/Regulaciones/regulaciones_table.html', context)
-        return render(request, 'red_vial/Regulaciones/regulaciones_list.html', context)
+        return render(request, 'red_vial/regulaciones_list.html', context)
 
 
 class RegulacionCreateView(View):
