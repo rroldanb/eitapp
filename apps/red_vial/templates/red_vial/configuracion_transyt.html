@@ -1,0 +1,55 @@
+{% extends "proyecto_base.html" %}
+{% load static %}
+
+{% block section_content %}
+<div class="section-header flex justify-between items-center mb-6">
+  <h3 class="text-xl font-semibold text-gray-800">Configuración TRANSYT</h3>
+</div>
+
+{% if saved %}
+<div class="mb-4 px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm">
+  Configuración guardada correctamente.
+</div>
+{% endif %}
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="p-6">
+    <form method="POST" action="{% url 'configuracion_transyt' proyecto.id %}">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-6 max-w-lg">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.ciclo.label }}</label>
+          {{ form.ciclo }}
+          {% if form.ciclo.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.ciclo.errors.0 }}</div>{% endif %}
+          <span class="text-xs text-gray-400">Tiempo de ciclo en segundos</span>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.W.label }}</label>
+          {{ form.W }}
+          {% if form.W.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.W.errors.0 }}</div>{% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.K.label }}</label>
+          {{ form.K }}
+          {% if form.K.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.K.errors.0 }}</div>{% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.perdida_inicial.label }}</label>
+          {{ form.perdida_inicial }}
+          {% if form.perdida_inicial.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.perdida_inicial.errors.0 }}</div>{% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.ganancia_final.label }}</label>
+          {{ form.ganancia_final }}
+          {% if form.ganancia_final.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.ganancia_final.errors.0 }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="mt-6">
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors">
+          Guardar configuración
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -2,6 +2,7 @@ from django.forms import ModelForm
 from django import forms
 from .models.proyecto import Proyecto
 
+
 class ProyectoForm(ModelForm):
     class Meta:
         model = Proyecto
@@ -14,10 +15,19 @@ class ProyectoForm(ModelForm):
         }
         widgets = {
             'title': forms.TextInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Ej: Proyecto Autopista Norte'
-    }),
-            'mandante': forms.Select(attrs={'class': 'form-control'}),
-            'date_started': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50',
+                'placeholder': 'Ej: Proyecto Autopista Norte'
+            }),
+            'mandante': forms.Select(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50',
+            }),
+            'date_started': forms.DateInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50',
+                'type': 'date',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50',
+                'rows': 4,
+                'placeholder': 'Descripción del proyecto...',
+            }),
         }

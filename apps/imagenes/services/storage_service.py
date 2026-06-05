@@ -1,47 +1,46 @@
 import uuid
-import mimetypes
+import io
 import os
+from PIL import Image
 from apps.imagenes.utils.supabase_client import supabase
 
 BUCKET = os.getenv("SUPABASE_BUCKET")
 
 
 def upload_project_image(file):
+    try:
+        img = Image.open(file)
+    except Exception as e:
+        raise Exception(f"Error abriendo imagen: {str(e)}")
 
-    file_extension = file.name.split('.')[-1]
-    file_name = f"{uuid.uuid4()}.{file_extension}"
+    if img.mode in ('RGBA', 'LA', 'P'):
+        img = img.convert('RGBA')
+        background = Image.new('RGBA', img.size, (255, 255, 255))
+        img = Image.alpha_composite(background, img)
+    img = img.convert('RGB')
 
-    # 🔹 content-type seguro
-    content_type = getattr(file, "content_type", None)
+    webp_buffer = io.BytesIO()
+    img.save(webp_buffer, format='WebP', quality=92, method=6)
+    webp_buffer.seek(0)
 
-    if not content_type:
-        content_type, _ = mimetypes.guess_type(file.name)
-
-    if not content_type:
-        content_type = "application/octet-stream"
+    file_name = f"{uuid.uuid4()}.webp"
 
     try:
-        # 🔥 importante: resetear puntero
-        file.seek(0)
-
         supabase.storage.from_(BUCKET).upload(
             file_name,
-            file.read(),
-            {"content-type": content_type}
+            webp_buffer.read(),
+            {"content-type": "image/webp"}
         )
-
     except Exception as e:
         raise Exception(f"Error subiendo imagen a Supabase: {str(e)}")
 
     public_url = supabase.storage.from_(BUCKET).get_public_url(file_name)
-
     return public_url
 
 
-
-def delete_project_image(file_name):
+def delete_project_image(image_url):
     try:
-        print(f"Intentando eliminar imagen: {file_name} del bucket: {BUCKET}")
+        file_name = image_url.rstrip('/').rsplit('/', 1)[-1]
         supabase.storage.from_(BUCKET).remove([file_name])
     except Exception as e:
         raise Exception(f"Error eliminando imagen de Supabase: {str(e)}")

@@ -132,6 +132,14 @@ document.addEventListener("DOMContentLoaded", function() {
       sidebar.classList.remove("expanded");
       sidebar.classList.add("collapsed");
     }
+
+    // Tooltips for collapsed sidebar
+    sidebar.querySelectorAll(".nav-link").forEach(function (link) {
+      var textEl = link.querySelector(".nav-link-text");
+      if (textEl && !link.getAttribute("data-tooltip")) {
+        link.setAttribute("data-tooltip", textEl.textContent.trim());
+      }
+    });
   });
 
 

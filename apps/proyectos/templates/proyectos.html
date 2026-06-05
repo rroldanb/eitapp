@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
@@ -8,23 +9,85 @@
             <h1 class="text-center text-3xl font-bold bg-gradient-primary text-white py-4 px-6 rounded-lg mb-6">
                 {{ list_title }}
             </h1>
-            <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
-                {% if proyectos %}
-                    {% for proyecto in proyectos %}
-                        <li>
-                            <a href="{% url 'proyecto_resumen' proyecto.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
-                                <div class="flex justify-between items-center">
-                                    <h5 class="text-lg font-semibold text-gray-800">{{ proyecto.title }}</h5>
-                                    <p class="text-sm text-gray-600">{{ proyecto.mandante }}</p>
-                                </div>
-                                <p class="text-gray-600 mt-2 text-sm">Descripción: {{ proyecto.description }}</p>
-                            </a>
-                        </li>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 mb-0 bg-white rounded-t-lg overflow-hidden">
+                <button type="button" data-tab="active"
+                    class="tab-btn flex-1 px-6 py-3 text-sm font-medium text-center transition-colors border-b-2 border-indigo-600 text-indigo-700 bg-indigo-50/50"
+                    onclick="switchTab('active')">
+                    <i class="fas fa-folder-open mr-1.5"></i>
+                    Proyectos Vigentes
+                    <span class="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full text-xs">{{ active_proyectos|length }}</span>
+                </button>
+                <button type="button" data-tab="completed"
+                    class="tab-btn flex-1 px-6 py-3 text-sm font-medium text-center transition-colors border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    onclick="switchTab('completed')">
+                    <i class="fas fa-check-circle mr-1.5"></i>
+                    Proyectos Terminados
+                    <span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">{{ completed_proyectos|length }}</span>
+                </button>
+            </div>
+
+            <!-- Tab: Vigentes -->
+            <div id="tab-active" class="tab-content bg-white rounded-b-lg shadow overflow-hidden">
+                {% if active_proyectos %}
+                <ul class="divide-y divide-gray-200">
+                    {% for proyecto in active_proyectos %}
+                    <li>
+                        <a href="{% url 'proyecto_resumen' proyecto.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
+                            <div class="flex justify-between items-start">
+                                <h5 class="text-lg font-semibold text-gray-800">{{ proyecto.title }}</h5>
+                                <span class="text-sm text-gray-500 whitespace-nowrap ml-4">{{ proyecto.mandante }}</span>
+                            </div>
+                            <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                <span><i class="far fa-calendar-alt mr-1"></i>Inicio: {{ proyecto.date_started|date:"d/m/Y" }}</span>
+                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium">Vigente</span>
+                            </div>
+                        </a>
+                    </li>
                     {% endfor %}
+                </ul>
                 {% else %}
-                    <li class="p-6 text-center text-gray-500">No hay proyectos registrados.</li>
+                <div class="p-8 text-center text-gray-500">
+                    <i class="fas fa-folder-open text-3xl mb-3 text-gray-300"></i>
+                    <p class="text-sm">No hay proyectos vigentes.</p>
+                    <a href="{% url 'proyecto_create' %}" class="inline-block mt-3 text-sm text-indigo-600 hover:text-indigo-800 font-medium">Crear un proyecto</a>
+                </div>
                 {% endif %}
-            </ul>
+            </div>
+
+            <!-- Tab: Terminados -->
+            <div id="tab-completed" class="tab-content bg-white rounded-b-lg shadow overflow-hidden hidden">
+                {% if completed_proyectos %}
+                <ul class="divide-y divide-gray-200">
+                    {% for proyecto in completed_proyectos %}
+                    <li>
+                        <a href="{% url 'proyecto_resumen' proyecto.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h5 class="text-lg font-semibold text-gray-800">{{ proyecto.title }}</h5>
+                                    <span class="text-xs text-gray-400">{{ proyecto.mandante }}</span>
+                                </div>
+                                <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full whitespace-nowrap ml-4">Completado</span>
+                            </div>
+                            <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                <span><i class="far fa-calendar-alt mr-1"></i>Inicio: {{ proyecto.date_started|date:"d/m/Y" }}</span>
+                                {% if proyecto.date_completed %}
+                                <span><i class="fas fa-flag-checkered mr-1"></i>Término: {{ proyecto.date_completed|date:"d/m/Y" }}</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="p-8 text-center text-gray-500">
+                    <i class="fas fa-check-circle text-3xl mb-3 text-gray-300"></i>
+                    <p class="text-sm">No hay proyectos terminados.</p>
+                </div>
+                {% endif %}
+            </div>
+
             <button class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium" onclick="window.location.href='{% url 'proyecto_create' %}'">
                 Crear Proyecto
             </button>
@@ -33,3 +96,19 @@
 </main>
 
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById('tab-' + tab).classList.remove('hidden');
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('border-indigo-600', 'text-indigo-700', 'bg-indigo-50/50');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        });
+        const activeBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+        activeBtn.classList.remove('border-transparent', 'text-gray-500');
+        activeBtn.classList.add('border-indigo-600', 'text-indigo-700', 'bg-indigo-50/50');
+    }
+</script>
+{% endblock extra_js %}

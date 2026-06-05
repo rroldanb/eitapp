@@ -69,6 +69,39 @@
               >
             </a>
           </li>
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.resolver_match.url_name == 'configuracion_transyt' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+              href="{% url 'configuracion_transyt' proyecto.id %}"
+            >
+              <i class="fas fa-cog text-lg"></i>
+              <span class="nav-link-text">Config. TRANSYT</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.resolver_match.url_name == 'parametros_arco_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+              href="{% url 'parametros_arco_list' proyecto.id %}"
+            >
+              <i class="fas fa-exchange-alt text-lg"></i>
+              <span class="nav-link-text">Param. Arco</span>
+              <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+                >{{ proyecto.parametros_arco.count }}</span
+              >
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.resolver_match.url_name == 'fases_semaforicas_list' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+              href="{% url 'fases_semaforicas_list' proyecto.id %}"
+            >
+              <i class="fas fa-traffic-light text-lg"></i>
+              <span class="nav-link-text">Fases Semafóricas</span>
+              <span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs rounded-full navbar-counter"
+                >{{ proyecto.fases_semaforicas.count }}</span
+              >
+            </a>
+          </li>
         </ul>
       </li>
 

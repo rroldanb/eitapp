@@ -19,10 +19,21 @@ from apps.proyectos.models import Proyecto
 class PeriodoListView(View):
     template_full = 'red_vial/periodo_list.html'
     template_table = 'partials/Periodo/periodo_table.html'
+    sort_fields = ['codigo', 'hora_inicio', 'hora_fin', 'es_laboral']
+    default_sort = 'codigo'
 
     def get(self, request, proyecto_id):
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-        periodos = Periodo.objects.filter(proyecto=proyecto).order_by('codigo')
+
+        sort_by = request.GET.get('sort_by', self.default_sort)
+        sort_order = request.GET.get('sort_order', 'asc')
+        if sort_by not in self.sort_fields:
+            sort_by = self.default_sort
+        if sort_order not in ['asc', 'desc']:
+            sort_order = 'asc'
+
+        order_prefix = '-' if sort_order == 'desc' else ''
+        periodos = Periodo.objects.filter(proyecto=proyecto).order_by(f'{order_prefix}{sort_by}')
 
         form = PeriodoForm(proyecto=proyecto)
 
@@ -30,6 +41,9 @@ class PeriodoListView(View):
             'proyecto': proyecto,
             'periodos': periodos,
             'form': form,
+            'sort_by': sort_by,
+            'sort_order': sort_order,
+            'sort_fields': self.sort_fields,
         }
 
         if request.headers.get('HX-Request'):

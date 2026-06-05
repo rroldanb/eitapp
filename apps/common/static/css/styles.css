@@ -14,10 +14,27 @@
 /* ============================================================================
    1. BASE - Estilos globales del body
    ============================================================================ */
+html {
+    background-color: #1e1b2e;
+}
+
 body {
+    min-height: 100vh;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background-image: url("../img/base2.jpg");
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
+    z-index: -1;
+    pointer-events: none;
 }
 
 
@@ -25,6 +42,9 @@ body {
    2. SIDEBAR - Barra lateral de proyectos
    ============================================================================ */
 .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
     min-height: 100vh;
     /* background-color: #f9fafb; */
     border-right: 1px solid #e5e7eb;
@@ -46,11 +66,8 @@ body {
     transition: left 0.3s ease;
 }
 
-.sidebar.collapsed > div {
-    overflow: hidden;
-}
-
-.sidebar.collapsed .navbar-counter {
+.sidebar.collapsed .navbar-counter,
+.sidebar.collapsed .fa-chevron-down {
     display: none;
 }
 
@@ -111,6 +128,29 @@ body {
     font-size: 1.2rem;
     min-width: 24px;
     text-align: center;
+}
+
+.sidebar.collapsed .nav-link {
+    position: relative;
+}
+
+.sidebar.collapsed .nav-link[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 14px;
+    padding: 6px 12px;
+    background: #1e1b2e;
+    color: #fff;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    z-index: 9999;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    line-height: 1.4;
 }
 
 /* Contenido principal */

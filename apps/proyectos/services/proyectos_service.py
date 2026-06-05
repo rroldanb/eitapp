@@ -4,6 +4,12 @@ from apps.imagenes.services.storage_service import upload_project_image
 def get_all_proyectos():
     return Proyecto.objects.all()
 
+def get_active_proyectos():
+    return Proyecto.objects.filter(is_completed=False)
+
+def get_completed_proyectos():
+    return Proyecto.objects.filter(is_completed=True).order_by('-date_completed')
+
 def get_proyecto_by_id(proyecto_id):
     return Proyecto.objects.get(id=proyecto_id)
 
