@@ -101,10 +101,12 @@
             </div>
           </div>
 
-          <div id="nodo-file-drop-overlay" class="hidden absolute inset-0 bg-indigo-600/90 rounded-lg flex items-center justify-center">
-            <div class="text-white text-center">
-              <i class="fas fa-file-image text-4xl mb-2"></i>
-              <p class="text-lg font-semibold">Suelta la imagen aquí</p>
+          <div id="nodo-file-drop-overlay" class="hidden absolute inset-0 bg-indigo-600/90 rounded-lg">
+            <div class="w-full h-full flex items-center justify-center">
+              <div class="text-white text-center">
+                <i class="fas fa-file-image text-4xl mb-2"></i>
+                <p class="text-lg font-semibold">Suelta la imagen aquí</p>
+              </div>
             </div>
           </div>
         </div>
@@ -116,9 +118,8 @@
             Cancelar
           </button>
           <button type="button" id="nodo-file-delete-btn"
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2 hidden">
-            <i class="fas fa-trash-alt" aria-hidden="true"></i>
-            <span id="nodo-file-delete-label">Eliminar</span>
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium hidden">
+            <span class="flex items-center gap-2"><i class="fas fa-trash-alt" aria-hidden="true"></i><span id="nodo-file-delete-label">Eliminar</span></span>
           </button>
           <button type="button" id="nodo-file-upload-btn"
             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center gap-2 opacity-50 cursor-not-allowed"
@@ -245,14 +246,16 @@
     syncUI();
   };
 
-  window.openNodoFileModal = function(nodoId, field, fileUrl) {
+  window.openNodoFileModal = function(nodoId, field, imagenUrl, planoUrl) {
     selectedNodoId = nodoId;
     activeField = field;
     el('nodo-file-nodo-id').value = nodoId;
     el('nodo-file-active-field').value = field;
 
-    if (!fieldUrls[field]) fieldUrls[field] = {};
-    fieldUrls[field].currentUrl = fileUrl || null;
+    if (!fieldUrls['imagen']) fieldUrls['imagen'] = {};
+    if (!fieldUrls['plano']) fieldUrls['plano'] = {};
+    fieldUrls['imagen'].currentUrl = imagenUrl || null;
+    fieldUrls['plano'].currentUrl = planoUrl || null;
 
     // Reset both fields
     resetField('imagen');
