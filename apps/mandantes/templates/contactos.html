@@ -4,15 +4,17 @@
 
 <main class="container mx-auto px-4 py-8">
     <div class="flex justify-center">
-        <div class="w-full md:w-1/2 mt-12">
-            <h1 class="text-center text-2xl font-bold text-gray-800 mb-6">{{ list_title }}</h1>
+        <div class="mt-12 bg-gray-100 p-6 rounded-lg shadow-md w-full max-w-4xl">
+            <h1 class="text-center text-3xl font-bold bg-gradient-primary text-white py-4 px-6 rounded-lg mb-6">
+                {{ list_title }}
+            </h1>
             <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
                 {% if contactos %}
                     {% for contacto in contactos %}
                         <li>
                             <a href="{% url 'contacto_detail' contacto.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
-                                <div class="flex justify-between items-end">
-                                    <h5 class="text-lg font-semibold text-gray-800">{{ contacto.name }}</h5>
+                                <div class="flex justify-between items-center">
+                                    <h2 class="text-lg font-semibold text-gray-800">{{ contacto.name }}</h2>
                                     <p class="text-sm text-gray-600">{{ contacto.position }}</p>
                                 </div>
                                 <p class="text-gray-600 mt-2 text-sm">Descripción: {{ contacto.details }}</p>
@@ -23,6 +25,9 @@
                     <li class="p-6 text-center text-gray-500">No hay contactos registrados.</li>
                 {% endif %}
             </ul>
+            <button class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium" onclick="window.location.href='{% url 'contacto_create' mandante.id %}'">
+                Crear Contacto
+            </button>
         </div>
     </div>
 </main>

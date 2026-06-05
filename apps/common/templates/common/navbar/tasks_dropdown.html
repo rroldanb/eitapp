@@ -1,19 +1,19 @@
 <div class="relative group">
-    <button class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors dropdown-toggle {% if '/tasks' in request.path %}bg-gray-800 text-white{% endif %}" data-dropdown="tasks-menu">
-        Tasks
-        <i class="fas fa-chevron-down ml-1 text-xs"></i>
+    <button class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors dropdown-toggle {% if '/tasks' in request.path %}bg-gray-800 text-white{% endif %}" data-dropdown="tasks-menu" aria-expanded="false" aria-label="Menú de tareas">
+        Tareas
+        <i class="fas fa-chevron-down ml-1 text-xs" aria-hidden="true"></i>
     </button>
     
     <div id="tasks-menu" class="hidden lg:absolute left-0 mt-2 w-full lg:w-56 bg-slate-600/80 lg:bg-gray-800 rounded-lg shadow-xl py-2 z-50">
         <a href="{% url 'tasks' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'tasks' %}bg-gray-700 text-white{% endif %}">
-            <i class="fas fa-spinner mr-2"></i> Pending Tasks
+            <i class="fas fa-spinner mr-2" aria-hidden="true"></i> Tareas Pendientes
         </a>
         <a href="{% url 'tasks_completed' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'tasks_completed' %}bg-gray-700 text-white{% endif %}">
-            <i class="fas fa-check-circle mr-2"></i> Completed Tasks
+            <i class="fas fa-check-circle mr-2" aria-hidden="true"></i> Tareas Completadas
         </a>
         <hr class="my-2 border-gray-700">
         <a href="{% url 'create_task' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'create_task' %}bg-gray-700 text-white{% endif %}">
-            <i class="fas fa-plus-circle mr-2"></i> Create Task
+            <i class="fas fa-plus-circle mr-2" aria-hidden="true"></i> Crear Tarea
         </a>
     </div>
 </div>

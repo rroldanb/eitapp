@@ -5,7 +5,7 @@
     <div class="flex justify-center">
         <div class="w-full md:w-1/3 mt-12">
             <form method="POST" class="bg-white p-6 rounded-lg shadow-md">
-                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h1>
+                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Iniciar Sesi&oacute;n</h1>
 
                 {% if error %}
                 <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -15,19 +15,22 @@
 
                 {% csrf_token %}
                 <div class="mb-4">
-                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
+                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Nombre de usuario:</label>
                     <input type="text" name="username" id="username"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        placeholder="Type your username">
+                        placeholder="Ingrese su nombre de usuario"
+                        required>
                 </div>
                 <div class="mb-6">
-                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Contrase&ntilde;a:</label>
                     <input type="password" name="password" id="password"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        placeholder="Type your password">
+                        placeholder="Ingrese su contrase&ntilde;a"
+                        required>
                 </div>
-                <button type="submit" class="w-full bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors font-medium">
-                    Login
+                <button type="submit" class="w-full bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                    onclick="this.disabled=true; this.form.submit();">
+                    Iniciar Sesi&oacute;n
                 </button>
             </form>
         </div>

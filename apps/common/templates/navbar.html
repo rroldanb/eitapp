@@ -26,7 +26,7 @@
         </button>
 
         <!-- Nav links -->
-        <div class="hidden lg:flex flex-col lg:flex-row absolute lg:relative top-full left-0 right-16 bg-slate-900/80 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none items-center pb-4 lg:pb-0 pt-2 lg:pt-0 px-4 lg:px-0 z-50" id="navbarNav">
+        <div class="hidden lg:flex flex-col lg:flex-row absolute lg:relative top-full left-0 right-16 bg-slate-900/80 lg:bg-transparent items-center pb-4 lg:pb-0 pt-2 lg:pt-0 px-4 lg:px-0 z-50" id="navbarNav">
             <ul class="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full lg:w-auto">
                 <!-- Home -->
                 <li class="list-none">
@@ -58,25 +58,24 @@
                         {% include "common/navbar/tasks_dropdown.html" %}
                     </li>
 
-
+                    {% if user.is_staff %}
+                    <!-- Admin Dropdown -->
+                    <li class="list-none relative">
+                        {% include "common/navbar/admin_dropdown.html" %}
+                    </li>
+                    {% endif %}
 
                     <!-- Logout -->
                     <li class="list-none">
                         <a href="{% url 'signout' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors ml-4">
-                            Logout
+                            Cerrar Sesi&oacute;n
                         </a>
                     </li>
                 {% else %}
-                    <!-- Register -->
-                    <li class="list-none">
-                        <a href="{% url 'signup' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.path == '/signup/' %}bg-gray-800 text-white{% endif %}">
-                            Register
-                        </a>
-                    </li>
                     <!-- Login -->
                     <li class="list-none">
                         <a href="{% url 'signin' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors {% if request.path == '/signin/' %}bg-gray-800 text-white{% endif %}">
-                            Login
+                            Iniciar Sesi&oacute;n
                         </a>
                     </li>
                 {% endif %}

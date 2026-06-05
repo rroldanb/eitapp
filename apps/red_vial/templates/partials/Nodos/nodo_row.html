@@ -2,11 +2,11 @@
 <tr id="nodo-row-{{ nodo.id }}" class="nodo-row hover:bg-gray-50" data-nodo-id="{{ nodo.id }}">
 
   <td class="px-2 py-1">
-    <input type="number" name="numero" class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ nodo.numero }}" min="1" max="99">
+    <input type="number" name="numero" id="nodo-numero-{{ nodo.id }}" aria-label="Número de nodo" class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ nodo.numero }}" min="1" max="99">
   </td>
 
   <td class="px-2 py-1">
-    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_1">
+    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_1" aria-label="Calle 1">
       <option value="">Seleccionar calle...</option>
       {% for calle in proyecto.calles.all %}
       <option value="{{ calle.id }}" {% if nodo.calle_1.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
@@ -15,7 +15,7 @@
   </td>
 
   <td class="px-2 py-1">
-    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_2">
+    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_2" aria-label="Calle 2">
       <option value="">Seleccionar calle...</option>
       {% for calle in proyecto.calles.all %}
       <option value="{{ calle.id }}" {% if nodo.calle_2.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
@@ -26,7 +26,7 @@
   <td class="px-2 py-1">
     <div class="flex items-center gap-1">
       <label class="text-xs text-gray-600">PC N°</label>
-      <input type="number" name="numero_pc" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm" value="{{ nodo.numero_pc|default:'' }}" min="1" max="99">
+      <input type="number" name="numero_pc" id="nodo-numero-pc-{{ nodo.id }}" aria-label="Número de punto de control" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm" value="{{ nodo.numero_pc|default:'' }}" min="1" max="99">
       {% if nodo.is_pc %}
       <span class="text-xs font-semibold text-indigo-600 ml-1">{{ nodo.nombre_pc }}</span>
       {% endif %}
@@ -36,7 +36,7 @@
 
 
   <td class="px-2 py-1 flex gap-1">
-    <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors" data-action="update"
+    <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn" data-action="update"
       hx-put="{% url 'nodo_update' nodo.id %}"
       hx-include="closest tr"
       hx-target="closest tr"
@@ -46,7 +46,7 @@
       <span id="save-indicator-{{ nodo.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
       Actualizar
     </button>
-    <button type="button" class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors" data-action="delete"
+    <button type="button" class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors action-btn" data-action="delete"
       hx-delete="{% url 'nodo_delete' nodo.id %}"
       hx-target="closest tr"
       hx-swap="outerHTML transition:true swap:1s"

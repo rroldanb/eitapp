@@ -20,14 +20,18 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('[id$="-menu"]').forEach(otherMenu => {
                 if (otherMenu.id !== dropdownId) {
                     otherMenu.classList.add('hidden');
+                    const btn = document.querySelector(`[data-dropdown="${otherMenu.id}"]`);
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
                 }
             });
             
             // Toggle actual
             if (isHidden) {
                 menu.classList.remove('hidden');
+                toggle.setAttribute('aria-expanded', 'true');
             } else {
                 menu.classList.add('hidden');
+                toggle.setAttribute('aria-expanded', 'false');
             }
         });
     });
@@ -37,6 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!e.target.closest('.relative')) {
             document.querySelectorAll('[id$="-menu"]').forEach(menu => {
                 menu.classList.add('hidden');
+                const btn = document.querySelector(`[data-dropdown="${menu.id}"]`);
+                if (btn) btn.setAttribute('aria-expanded', 'false');
             });
         }
     });

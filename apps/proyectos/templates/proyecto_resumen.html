@@ -10,12 +10,12 @@
         <!-- Calles Preview Box -->
         <div class="mb-3">
             <a href="{% url 'calles_list' proyecto.id %}" class="no-underline">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col">
                     <div class="bg-indigo-600 text-white px-4 py-3 flex justify-between items-center">
-                        <h5 class="mb-0 font-semibold">🛣️ Calles</h5>
+                        <h3 class="mb-0 font-semibold">Calles</h3>
                         <span class="bg-white text-indigo-600 px-2 py-1 rounded-full text-sm">{{ calles|length }}</span>
                     </div>
-                    <div class="p-4">
+                    <div class="p-4 flex-1">
                         {% if calles %}
                             <ul class="list-none mb-0 space-y-2">
                                 {% for calle in calles|slice:":5" %}
@@ -41,12 +41,12 @@
         <!-- Nodos Preview Box -->
         <div class="mb-3">
             <a href="{% url 'nodos_list' proyecto.id %}" class="no-underline">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col">
                     <div class="bg-green-600 text-white px-4 py-3 flex justify-between items-center">
-                        <h5 class="mb-0 font-semibold">📍 Nodos</h5>
+                        <h3 class="mb-0 font-semibold">Nodos</h3>
                         <span class="bg-white text-green-600 px-2 py-1 rounded-full text-sm">{{ nodos|length }}</span>
                     </div>
-                    <div class="p-4">
+                    <div class="p-4 flex-1">
                         {% if nodos %}
                             <ul class="list-none mb-0 space-y-2">
                                 {% for nodo in nodos|slice:":5" %}
@@ -79,12 +79,12 @@
         <!-- Arcos Preview Box -->
         <div class="mb-3">
             <a href="{% url 'arcos_list' proyecto.id %}" class="no-underline">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col">
                     <div class="bg-cyan-600 text-white px-4 py-3 flex justify-between items-center">
-                        <h5 class="mb-0 font-semibold">↔️ Arcos</h5>
+                        <h3 class="mb-0 font-semibold">Arcos</h3>
                         <span class="bg-white text-cyan-600 px-2 py-1 rounded-full text-sm">{{ arcos|length }}</span>
                     </div>
-                    <div class="p-4">
+                    <div class="p-4 flex-1">
                         {% if arcos %}
                             <ul class="list-none mb-0 space-y-2">
                                 {% for arco in arcos|slice:":5" %}
@@ -113,31 +113,36 @@
             </a>
         </div>
 
-        <!-- Portada Preview Box -->
+        <!-- Puntos de Control Preview Box -->
         <div class="mb-3">
-            <a href="{% url 'proyecto_detail' proyecto.id %}" class="no-underline">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer">
-                    <div class="bg-cyan-500 text-white px-4 py-3 flex justify-between items-center">
-                        <h5 class="mb-0 font-semibold">🏠 Portada</h5>
+            <a href="{% url 'puntos_control_list' proyecto.id %}" class="no-underline">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col">
+                    <div class="bg-violet-600 text-white px-4 py-3 flex justify-between items-center">
+                        <h3 class="mb-0 font-semibold">Puntos Control</h3>
+                        <span class="bg-white text-violet-600 px-2 py-1 rounded-full text-sm">{{ puntos_control|length }}</span>
                     </div>
-                    <div class="p-4">
-                        <ul class="list-none mb-0 space-y-2">
-                            <li>
-                                <small>Nombre proyecto: <strong>{{ proyecto.title|truncatechars:25 }}</strong> </small>
-                            </li>
-                            <li>
-                                <small>Mandante: <strong>{{ proyecto.mandante|truncatechars:25 }}</strong> </small>
-                            </li>
-                            <li>
-                                <small>Fecha de inicio : <strong>{{ proyecto.date_started|date:"d/m/Y" }}</strong> </small>
-                            </li>
-                            <li>
-                                <small>Fecha de finalización : <strong>{{ proyecto.date_completed|date:"d/m/Y" }}</strong> </small>
-                            </li>
-                        </ul>
+                    <div class="p-4 flex-1">
+                        {% if puntos_control %}
+                            <ul class="list-none mb-0 space-y-2">
+                                {% for pc in puntos_control|slice:":5" %}
+                                    <li>
+                                        <small>
+                                            <strong>{{ pc.nombre }}</strong>
+                                            Nodo {{ pc.nodo.numero }}
+                                            {% if pc.movimiento %}- {{ pc.get_movimiento_display|default:pc.movimiento }}{% endif %}
+                                        </small>
+                                    </li>
+                                {% endfor %}
+                                {% if puntos_control|length > 5 %}
+                                    <li class="text-gray-500"><small>+ {{ puntos_control|length|add:"-5" }} más...</small></li>
+                                {% endif %}
+                            </ul>
+                        {% else %}
+                            <p class="text-gray-500 mb-0">No hay puntos de control registrados</p>
+                        {% endif %}
                     </div>
                     <div class="bg-gray-50 px-4 py-2 text-center">
-                        <span class="text-sm text-primary font-medium">Ver y Editar Detalles</span>
+                        <span class="text-sm text-violet-600 font-medium">Ver y Editar Puntos de Control</span>
                     </div>
                 </div>
             </a>
@@ -148,10 +153,10 @@
     <div class="mt-4">
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="bg-gray-700 text-white px-4 py-3">
-                <h5 class="mb-0 font-semibold">Resumen de Red Vial</h5>
+                <h2 class="mb-0 font-semibold">Resumen de Red Vial</h2>
             </div>
             <div class="p-4">
-                <div class="grid grid-cols-3 text-center">
+                <div class="grid grid-cols-4 text-center">
                     <div>
                         <h3 class="text-2xl font-bold text-indigo-600">{{ calles|length }}</h3>
                         <p class="text-gray-500">Calles</p>
@@ -163,6 +168,10 @@
                     <div>
                         <h3 class="text-2xl font-bold text-cyan-600">{{ arcos|length }}</h3>
                         <p class="text-gray-500">Arcos</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-violet-600">{{ puntos_control|length }}</h3>
+                        <p class="text-gray-500">Puntos Control</p>
                     </div>
                 </div>
             </div>

@@ -55,7 +55,7 @@
           {{ mov.label }}
         </label>
         {% empty %}
-        <span class="text-gray-400 text-xs">Selecciona PC(s)</span>
+        <span class="text-gray-500 text-xs">Selecciona PC(s)</span>
         {% endfor %}
       </div>
     </div>
@@ -79,7 +79,7 @@
         <label class="flex items-center gap-1.5 text-sm cursor-pointer hover:bg-slate-100 px-1 rounded">
           <input type="checkbox" name="periodo" value="{{ p.id }}" class="filter-checkbox"
             {% if p.id|stringformat:"s" in selected_periodos %}checked{% endif %}>
-          {{ p.codigo }} ({{ p.hora_inicio|time:"H:i" }}–{{ p.hora_fin|time:"H:i" }})
+          {{ p.codigo }} ({{ p.hora_inicio|time:"H:i" }}-{{ p.hora_fin|time:"H:i" }})
         </label>
         {% endfor %}
       </div>
@@ -105,11 +105,13 @@
         Limpiar
       </a>
       <button type="button"
-        class="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+        class="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors"
         hx-post="{% url 'analisis_flujos' proyecto.id %}"
         hx-vals='{"action": "recalcular"}'
         hx-target="#recalcular-msg"
-        hx-swap="innerHTML">
+        hx-swap="innerHTML"
+        hx-indicator="#recalcular-indicator">
+        <span id="recalcular-indicator" class="inline-block w-3 h-3 border-2 border-t-transparent border-white rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
         Recalcular
       </button>
     </div>

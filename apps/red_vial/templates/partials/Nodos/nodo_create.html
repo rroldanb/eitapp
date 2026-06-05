@@ -26,18 +26,18 @@
       {% endif %}
       <div class="flex flex-wrap items-center gap-4 justify-center">
         
-        <input type="number" id="new_number" name="numero" 
+        <input type="number" id="new_number" name="numero" aria-label="Número de nodo"
           class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50"
           value="{{ proyecto.nodos.count|add:1 }}" min="1" max="999"/>
 
-        <select class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50" name="calle_1">
+        <select class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50" name="calle_1" aria-label="Calle 1">
           <option value="">Calle 1...</option>
           {% for calle in proyecto.calles.all %}
           <option value="{{ calle.id }}">{{ calle.nombre }}</option>
           {% endfor %}
         </select>
 
-        <select class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50" name="calle_2">
+        <select class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50" name="calle_2" aria-label="Calle 2">
           <option value="">Calle 2...</option>
           {% for calle in proyecto.calles.all %}
           <option value="{{ calle.id }}">{{ calle.nombre }}</option>
@@ -46,10 +46,10 @@
 
         <div class="flex items-center gap-1">
           <label class="text-xs text-gray-600  whitespace-nowrap">PC N°</label>
-          <input type="number" name="numero_pc" class="w-14 bg-gray-100 px-1 py-1 border border-gray-300 rounded text-xs" placeholder="N°" min="1" max="99" />
+          <input type="number" name="numero_pc" aria-label="Número de punto de control" class="w-14 bg-gray-100 px-1 py-1 border border-gray-300 rounded text-xs" placeholder="N°" min="1" max="99" />
         </div>
 
-        <button type="submit" class="px-2 py-1 text-xs border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors" data-action="create">
+        <button type="submit" class="px-2 py-1 text-xs border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors action-btn" data-action="create">
           Crear
         </button>
 

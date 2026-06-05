@@ -45,10 +45,9 @@ body::before {
     position: sticky;
     top: 0;
     align-self: flex-start;
-    min-height: 100vh;
     /* background-color: #f9fafb; */
     border-right: 1px solid #e5e7eb;
-    transition: all 0.3s ease;
+    transition: width 0.3s ease, border-color 0.3s ease;
 }
 
 
@@ -114,7 +113,7 @@ body::before {
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: all 0.2s;
+    transition: color 0.2s, background-color 0.2s;
     white-space: nowrap;
 }
 
@@ -165,7 +164,7 @@ body::before {
    3. PROJECT HEADER - Encabezado de proyectos
    ============================================================================ */
 .project-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     color: white;
     padding: 2rem;
     border-radius: 10px;
@@ -235,11 +234,11 @@ body::before {
    ============================================================================ */
 #results.htmx-swapping {
     opacity: 0;
-    transition: opacity 1s ease;
+    transition: opacity 0.3s ease;
 }
 
 #results.htmx-settling {
-    animation: fadeIn 1s both;
+    animation: fadeIn 0.3s both;
 }
 
 tr.row-fade-out td {
@@ -293,8 +292,8 @@ tr.row-fade-out {
     transition: color 150ms ease;
 }
 .sortable-active::after {
-    transition: transform 150ms ease, opacity 150ms ease;
-    opacity: 0.999; /* ensure visible for transform */
+    transition: transform 150ms ease;
+    opacity: 0.999;
 }
 
 
@@ -303,18 +302,10 @@ tr.row-fade-out {
     100% { opacity: 1; }
 }
 
-.htmx-request {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
 .htmx-indicator {
     display: none;
 }
 
-.htmx-request .htmx-indicator {
-    display: inline-block !important;
-}
 .htmx-request .btn { 
     opacity: 0.5; 
     pointer-events: none; 
@@ -323,7 +314,7 @@ tr.row-fade-out {
 tr.htmx-swapping td {
   opacity: 0;
   background-color: rgb(30, 0, 255) !important;
-  transition: opacity 1s ease-out;
+  transition: opacity 0.3s ease-out;
 }
 
 /* .htmx-swapping {
@@ -385,7 +376,17 @@ tr.htmx-swapping td {
 }
 
 .form-control{
-    background-color: #f8fafc;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    outline: none;
 }
 /* ============================================================================
    7. TABLE STATES - Estados de tablas (edición inline)
@@ -550,7 +551,7 @@ tr.htmx-swapping td {
 }
 
 .bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
 }
 
 
@@ -564,7 +565,49 @@ tr.htmx-swapping td {
 
 
 /* ============================================================================
-   11. SEADRAGON VIEWER - Estilos específicos para el visor de imágenes (seadragon)
+   11. TOUCH TARGETS - WCAG 2.2 minimum 44×44px
+   ============================================================================ */
+.action-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================================================================
+   13. FOCUS-VISIBLE - Estilos de foco accesibles
+   ============================================================================ */
+:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+a:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 0;
+    border-color: #667eea;
+}
+
+.sidebar-toggle:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* ============================================================================
+   12. SEADRAGON VIEWER - Estilos específicos para el visor de imágenes (seadragon)
    ============================================================================ */
         .sd-details {
             /* margin: 20px 0; */

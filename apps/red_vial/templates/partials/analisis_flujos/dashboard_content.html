@@ -6,7 +6,7 @@
   <!-- == SECCIÓN 1: TABLA RESUMEN == -->
   <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="bg-indigo-600 text-white px-4 py-3">
-      <h5 class="mb-0 font-semibold">Resumen por PC y Período</h5>
+      <h2 class="mb-0 font-semibold text-base">Resumen por PC y Período</h2>
     </div>
     <div class="p-0 overflow-x-auto">
       <table class="w-full divide-y divide-gray-200">
@@ -41,7 +41,7 @@
     <!-- == SECCIÓN 2: RANKING PCs == -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="bg-emerald-600 text-white px-4 py-3">
-        <h5 class="mb-0 font-semibold">Ranking de PCs por Flujo Total</h5>
+        <h2 class="mb-0 font-semibold text-base">Ranking de PCs por Flujo Total</h2>
       </div>
       <div class="p-0 overflow-x-auto">
         <table class="w-full divide-y divide-gray-200">
@@ -74,7 +74,7 @@
     <!-- == SECCIÓN 3: COMPARACIÓN POR PERIODO == -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="bg-amber-600 text-white px-4 py-3">
-        <h5 class="mb-0 font-semibold">Comparación por Período</h5>
+        <h2 class="mb-0 font-semibold text-base">Comparación por Período</h2>
       </div>
       <div class="p-0 overflow-x-auto">
         <table class="w-full divide-y divide-gray-200">
@@ -109,7 +109,7 @@
   <!-- == SECCIÓN 4: GRÁFICO == -->
   <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="bg-violet-600 text-white px-4 py-3">
-      <h5 class="mb-0 font-semibold">Flujo Total por PC y Período</h5>
+      <h2 class="mb-0 font-semibold text-base">Flujo Total por PC y Período</h2>
     </div>
     <div class="p-4">
       <canvas id="flujosChart" width="800" height="350"></canvas>
@@ -168,7 +168,7 @@
   {% else %}
   <div class="text-center py-12 bg-white rounded-lg shadow">
     <p class="text-gray-500 text-lg mb-2">No hay datos de flujo para los filtros seleccionados.</p>
-    <p class="text-gray-400 text-sm">Selecciona PC(s) y Período(s) arriba, o <a href="{% url 'periodizacion_list' proyecto.id %}" class="text-indigo-600 hover:underline">genera registros en Periodización</a> primero.</p>
+    <p class="text-gray-500 text-sm">Selecciona PC(s) y Período(s) arriba, o <a href="{% url 'periodizacion_list' proyecto.id %}" class="text-indigo-600 hover:underline">genera registros en Periodización</a> primero.</p>
   </div>
   {% endif %}
 

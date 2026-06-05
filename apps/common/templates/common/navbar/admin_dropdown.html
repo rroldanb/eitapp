@@ -1,0 +1,20 @@
+<div class="relative group">
+    <button class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors dropdown-toggle" data-dropdown="admin-menu" aria-expanded="false" aria-label="Menú de administración">
+        <i class="fas fa-shield-alt mr-1" aria-hidden="true"></i>
+        Admin
+        <i class="fas fa-chevron-down ml-1 text-xs" aria-hidden="true"></i>
+    </button>
+
+    <div id="admin-menu" class="hidden lg:absolute left-0 mt-2 w-full lg:w-56 bg-slate-600/80 lg:bg-gray-800 rounded-lg shadow-xl py-2 z-50">
+        <a href="{% url 'user_management' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+            <i class="fas fa-users mr-2" aria-hidden="true"></i> Gesti&oacute;n Usuarios
+        </a>
+        <a href="{% url 'generar_planilla' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+            <i class="fas fa-file-excel mr-2" aria-hidden="true"></i> Generar plantilla Excel
+        </a>
+        <hr class="my-2 border-gray-700">
+        <a href="/admin/" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+            <i class="fas fa-cog mr-2" aria-hidden="true"></i> Admin Django
+        </a>
+    </div>
+</div>

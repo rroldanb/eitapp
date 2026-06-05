@@ -11,6 +11,7 @@ urlpatterns = [
     path("<uuid:proyecto_id>/reactivar/", proyecto_reactivar_view, name="proyecto_reactivar"),
     path("<uuid:proyecto_id>/resumen/", proyecto_resumen_view, name="proyecto_resumen"),
     path("<uuid:proyecto_id>/generar-dat/", proyecto_generar_dat_view, name="proyecto_generar_dat"),
+    path("<uuid:proyecto_id>/generar-planilla/", proyecto_generar_plantilla_view, name="proyecto_generar_plantilla"),
     path("<uuid:proyecto_id>/generar-parametros-arco/", proyecto_generar_parametros_arco_view, name="proyecto_generar_parametros_arco"),
     path("<uuid:proyecto_id>/generar-fases-semaforicas/", proyecto_generar_fases_semaforicas_view, name="proyecto_generar_fases_semaforicas"),
 ]

@@ -5,29 +5,25 @@
 <!-- Hero Section with Gradient -->
 <section class="bg-gradient-primary text-white py-20">
     <div class="container mx-auto px-4 text-center">
-        <h1 class="text-5xl md:text-6xl font-bold mb-6">Gestor de Medición de Tránsito</h1>
-        <p class="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">Solución integral para gestión de proyectos viales</p>
+        <h1 class="text-4xl md:text-5xl font-bold mb-6">Gestor de Medición de Tránsito</h1>
+        <p class="text-lg md:text-xl mb-8 opacity-90 max-w-3xl mx-auto">Soluci&oacute;n integral para gesti&oacute;n de proyectos viales</p>
         
         {% if user.is_authenticated %}
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="{% url 'proyectos' %}" 
                 class="px-8 py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
-                    <i class="fas fa-project-diagram mr-2"></i> Ir a Proyectos
+                    <i class="fas fa-project-diagram mr-2" aria-hidden="true"></i> Ir a Proyectos
                 </a>
                 <a href="{% url 'mandantes' %}" 
                 class="px-8 py-3 bg-white text-secondary font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
-                    <i class="fas fa-building mr-2"></i> Ver Mandantes
+                    <i class="fas fa-building mr-2" aria-hidden="true"></i> Ver Mandantes
                 </a>
             </div>
         {% else %}
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="{% url 'signin' %}" 
                 class="px-8 py-3 bg-white text-secondary font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
-                    <i class="fas fa-sign-in-alt mr-2"></i> Iniciar Sesión
-                </a>
-                <a href="{% url 'signup' %}" 
-                class="px-8 py-3 bg-white bg-opacity-20 text-secondary font-bold rounded-lg border-2 border-white hover:bg-opacity-30 transition-colors">
-                    <i class="fas fa-user-plus mr-2"></i> Registrarse
+                    <i class="fas fa-sign-in-alt mr-2" aria-hidden="true"></i> Iniciar Sesión
                 </a>
             </div>
         {% endif %}
@@ -38,8 +34,8 @@
 <main class="container mx-auto px-4 py-16">
     <section class="bg-white p-12 rounded-lg shadow-md">
         <h2 class="text-4xl font-bold text-center text-secondary mb-8">Acerca de EIT</h2>
-        <p class="text-gray-700 text-lg leading-relaxed mb-6 max-w-3xl mx-auto">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio optio est consequatur esse quae unde autem, molestiae dignissimos quasi nulla recusandae repudiandae officia iusto asperiores, accusantium voluptatibus aliquid? Ratione at ab possimus soluta! Fuga laboriosam ad aspernatur? Consequatur nam sint minima porro officiis illo dolorem fugit assumenda aliquam dignissimos asperiores tempore repudiandae consectetur aperiam animi ad, magnam optio recusandae id quibusdam soluta commodi iste harum? Eaque cupiditate non itaque numquam repudiandae iure iusto aliquid id vitae magni! Tempore at tempora mollitia dolor laborum sunt fuga voluptatem, culpa eligendi maxime facere totam aliquam dolorum voluptatum sed aliquid ut nulla iste sit.
+        <p class="text-gray-700 text-lg leading-relaxed max-w-3xl mx-auto">
+            Plataforma profesional para la gesti&oacute;n de proyectos de medici&oacute;n de tr&aacute;nsito, incluyendo la administraci&oacute;n de la red vial (calles, nodos, arcos, puntos de control), periodizaci&oacute;n de datos de flujo vehicular, an&aacute;lisis de tr&aacute;nsito, y generaci&oacute;n de archivos de simulaci&oacute;n TRANSYT 8S.
         </p>
     </section>
 </main>

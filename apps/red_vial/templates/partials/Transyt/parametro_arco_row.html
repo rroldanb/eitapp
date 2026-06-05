@@ -1,34 +1,35 @@
 {% load l10n %}
 <tr id="parametro-arco-row-{{ item.id }}" class="parametro-arco-row hover:bg-gray-50" data-parametro-id="{{ item.id }}">
-  <td class="px-2 py-1 whitespace-nowrap font-medium text-gray-700">{{ item.punto_control.nombre }}</td>
+  <td class="px-2 py-1 whitespace-nowrap font-medium text-gray-700 max-w-48 truncate" title="{{ item.punto_control.nombre }}">{{ item.punto_control.nombre }}</td>
   <td class="px-2 py-1 whitespace-nowrap text-gray-600">{{ item.punto_control.get_movimiento_display|default:item.punto_control.movimiento }}</td>
   <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="flujo_saturacion" value="{{ item.flujo_saturacion }}" step="10"
+    <input type="number" name="flujo_saturacion" id="param-flujo-{{ item.id }}" value="{{ item.flujo_saturacion }}" step="10" aria-label="Flujo de saturación"
       class="w-24 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
   </td>
   <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="ponderador_demora" value="{{ item.ponderador_demora }}" step="0.01"
+    <input type="number" name="ponderador_demora" id="param-demora-{{ item.id }}" value="{{ item.ponderador_demora }}" step="0.01" aria-label="Ponderador de demora"
       class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
   </td>
   <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="ponderador_detencion" value="{{ item.ponderador_detencion }}" step="0.01"
+    <input type="number" name="ponderador_detencion" id="param-detencion-{{ item.id }}" value="{{ item.ponderador_detencion }}" step="0.01" aria-label="Ponderador de detención"
       class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
   </td>
   <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="capacidad_cola" value="{{ item.capacidad_cola|default:'' }}" step="0.1"
+    <input type="number" name="capacidad_cola" id="param-cola-{{ item.id }}" value="{{ item.capacidad_cola|default:'' }}" step="0.1" aria-label="Capacidad de cola"
       class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
   </td>
   <td class="px-2 py-1 text-center whitespace-nowrap">
-    <input type="checkbox" name="tiene_tarjeta_38" class="form-check-input" {% if item.tiene_tarjeta_38 %}checked{% endif %} value="true">
+    <input type="checkbox" name="tiene_tarjeta_38" id="param-tarjeta-{{ item.id }}" class="form-check-input" aria-label="Tiene tarjeta 38" {% if item.tiene_tarjeta_38 %}checked{% endif %} value="true">
   </td>
   <td class="px-2 py-1 flex gap-1 whitespace-nowrap">
     <button type="button"
-      class="px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors"
+      class="px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn"
       hx-put="{% url 'parametro_arco_update' item.id %}"
       hx-include="closest tr"
       hx-target="closest tr"
       hx-swap="outerHTML"
-      hx-indicator="#save-indicator-{{ item.id }}">
+      hx-indicator="#save-indicator-{{ item.id }}"
+      aria-label="Guardar parámetro">
       <span id="save-indicator-{{ item.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
       OK
     </button>
@@ -37,8 +38,9 @@
       hx-delete="{% url 'parametro_arco_delete' item.id %}"
       hx-target="closest tr"
       hx-swap="outerHTML"
-      hx-confirm="Eliminar parametro {{ item.punto_control.nombre }}?">
-      X
+      hx-confirm="Eliminar parametro {{ item.punto_control.nombre }}?"
+      aria-label="Eliminar parametro">
+      <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </td>
 </tr>

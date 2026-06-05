@@ -4,7 +4,7 @@
 
 <div class="container mx-auto mt-4 px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-800">{% if coeficiente %}Editar{% else %}Nuevo{% endif %} Coeficiente</h3>
+        <h1 class="text-xl font-semibold text-gray-800">{% if coeficiente %}Editar{% else %}Nuevo{% endif %} Coeficiente</h1>
         <a href="{% url 'coeficientes_list' %}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium">Volver</a>
     </div>
 
@@ -14,7 +14,7 @@
                 {% csrf_token %}
                 {{ form.as_p }}
                 <div class="flex gap-3">
-                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors font-medium">Guardar</button>
+                    <button type="submit" onclick="this.disabled=true; this.form.submit();" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors font-medium">Guardar</button>
                     <a href="{% url 'coeficientes_list' %}" class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors font-medium">Cancelar</a>
                 </div>
             </form>

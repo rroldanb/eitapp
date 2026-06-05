@@ -5,13 +5,13 @@
 
 <main class="container mx-auto px-4 py-8">
     <div class="flex justify-center">
-        <div class="mt-12 bg-gray-100 p-6 rounded-lg shadow-md w-full max-w-4xl">
+        <div class="mt-12 bg-gray-100 p-6 rounded-lg shadow-md w-full sm:max-w-4xl">
             <h1 class="text-center text-3xl font-bold bg-gradient-primary text-white py-4 px-6 rounded-lg mb-6">
                 {{ list_title }}
             </h1>
 
             <!-- Tabs -->
-            <div class="flex border-b border-gray-200 mb-0 bg-white rounded-t-lg overflow-hidden">
+            <div class="flex flex-col sm:flex-row border-b border-gray-200 mb-0 bg-white rounded-t-lg overflow-hidden">
                 <button type="button" data-tab="active"
                     class="tab-btn flex-1 px-6 py-3 text-sm font-medium text-center transition-colors border-b-2 border-indigo-600 text-indigo-700 bg-indigo-50/50"
                     onclick="switchTab('active')">
@@ -36,7 +36,7 @@
                     <li>
                         <a href="{% url 'proyecto_resumen' proyecto.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
                             <div class="flex justify-between items-start">
-                                <h5 class="text-lg font-semibold text-gray-800">{{ proyecto.title }}</h5>
+                                <h2 class="text-lg font-semibold text-gray-800">{{ proyecto.title }}</h2>
                                 <span class="text-sm text-gray-500 whitespace-nowrap ml-4">{{ proyecto.mandante }}</span>
                             </div>
                             <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
@@ -49,7 +49,7 @@
                 </ul>
                 {% else %}
                 <div class="p-8 text-center text-gray-500">
-                    <i class="fas fa-folder-open text-3xl mb-3 text-gray-300"></i>
+                    <i class="fas fa-folder-open text-3xl mb-3 text-gray-400"></i>
                     <p class="text-sm">No hay proyectos vigentes.</p>
                     <a href="{% url 'proyecto_create' %}" class="inline-block mt-3 text-sm text-indigo-600 hover:text-indigo-800 font-medium">Crear un proyecto</a>
                 </div>
@@ -65,8 +65,8 @@
                         <a href="{% url 'proyecto_resumen' proyecto.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h5 class="text-lg font-semibold text-gray-800">{{ proyecto.title }}</h5>
-                                    <span class="text-xs text-gray-400">{{ proyecto.mandante }}</span>
+                                    <h2 class="text-lg font-semibold text-gray-800">{{ proyecto.title }}</h2>
+                                    <span class="text-xs text-gray-500">{{ proyecto.mandante }}</span>
                                 </div>
                                 <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full whitespace-nowrap ml-4">Completado</span>
                             </div>
@@ -82,7 +82,7 @@
                 </ul>
                 {% else %}
                 <div class="p-8 text-center text-gray-500">
-                    <i class="fas fa-check-circle text-3xl mb-3 text-gray-300"></i>
+                    <i class="fas fa-check-circle text-3xl mb-3 text-gray-400"></i>
                     <p class="text-sm">No hay proyectos terminados.</p>
                 </div>
                 {% endif %}

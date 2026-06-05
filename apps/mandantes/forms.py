@@ -7,7 +7,11 @@ class MandanteForm(forms.ModelForm):
     class Meta:
         model = Mandante
         fields = ["name", "location", "details"]
-
+        labels = {
+            "name": "Nombre",
+            "location": "Ubicación",
+            "details": "Detalles",
+        }
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "location": forms.TextInput(attrs={"class": "form-control"}),
@@ -20,7 +24,14 @@ class ContactoForm(forms.ModelForm):
     class Meta:
         model = Contacto
         fields = ["name", "email", "phone","cargo", "position", "details"]
-
+        labels = {
+            "name": "Nombre",
+            "email": "Correo electrónico",
+            "phone": "Teléfono",
+            "cargo": "Cargo",
+            "position": "Posición",
+            "details": "Detalles",
+        }
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),

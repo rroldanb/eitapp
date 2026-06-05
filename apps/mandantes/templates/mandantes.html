@@ -14,10 +14,10 @@
                         <li>
                             <a href="{% url 'mandante_detail' mandante.id %}" class="block hover:bg-gray-50 transition-colors p-4 no-underline">
                                 <div class="flex justify-between items-center">
-                                    <h5 class="text-lg font-semibold text-gray-800">{{ mandante.name }}</h5>
+                                    <h2 class="text-lg font-semibold text-gray-800">{{ mandante.name }}</h2>
                                     <p class="text-sm text-gray-600">{{ mandante.location }}</p>
                                 </div>
-                                <p class="text-gray-600 mt-2 text-sm">Descripción: {{ mandante.details }}</p>
+                                <p class="text-gray-600 mt-2 text-sm">{{ mandante.contactos_count }} contacto{{ mandante.contactos_count|pluralize }} asociado{{ mandante.contactos_count|pluralize }}</p>
                             </a>
                         </li>
                     {% endfor %}

@@ -22,25 +22,25 @@
       </div>
       {% endif %}
       <div class="flex flex-wrap items-center gap-4 justify-center">
-        <select name="nodo_origen" class="bg-slate-50 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+        <select name="nodo_origen" aria-label="Nodo origen" class="bg-slate-50 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
           <option value="">Nodo Origen...</option>
           {% for nodo in proyecto.nodos.all %}
             <option value="{{ nodo.id }}">{{ nodo }}</option>
           {% endfor %}
         </select>
 
-        <select name="nodo_destino" class="bg-slate-50 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+        <select name="nodo_destino" aria-label="Nodo destino" class="bg-slate-50 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
           <option value="">Nodo Destino...</option>
           {% for nodo in proyecto.nodos.all %}
             <option value="{{ nodo.id }}">{{ nodo }}</option>
           {% endfor %}
         </select>
 
-        <input type="number" name="longitud" step="0.1" 
+        <input type="number" name="longitud" aria-label="Longitud" step="0.1" 
         placeholder="Longitud (m)" 
         class="bg-slate-50 px-2 py-1 border border-gray-300 rounded w-28 focus:ring-2 focus:ring-indigo-500" />
 
-        <button type="submit" class="px-2 py-1 text-xs border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors" data-action="create">
+        <button type="submit" class="px-2 py-1 text-xs border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors action-btn" data-action="create">
           Crear
         </button>
 

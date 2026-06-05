@@ -13,5 +13,7 @@ data.json
 DESIGN.md
 PRODUCT.md
 skills*
-gitignore
+.gitignore
 .impeccable
+audit_report.md 
+plantilla_importacion_eitapp.xlsx 

@@ -1,0 +1,98 @@
+<table class="w-full text-sm" id="users-table">
+  <thead>
+    <tr class="bg-gray-800 text-white text-left">
+      <th class="px-4 py-3 font-medium" aria-sort="{% if sort_by == 'username' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button" href="?sort_by=username&sort_order={% if sort_by == 'username' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-get="?sort_by=username&sort_order={% if sort_by == 'username' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-target="#users-table" hx-swap="outerHTML" hx-push-url="true"
+           class="inline-flex items-center gap-1 hover:text-indigo-300 {% if sort_by == 'username' %}text-indigo-200{% endif %}">
+          Usuario
+          {% if sort_by == 'username' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="px-4 py-3 font-medium" aria-sort="{% if sort_by == 'role' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button" href="?sort_by=role&sort_order={% if sort_by == 'role' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-get="?sort_by=role&sort_order={% if sort_by == 'role' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-target="#users-table" hx-swap="outerHTML" hx-push-url="true"
+           class="inline-flex items-center gap-1 hover:text-indigo-300 {% if sort_by == 'role' %}text-indigo-200{% endif %}">
+          Rol
+          {% if sort_by == 'role' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="px-4 py-3 font-medium" aria-sort="{% if sort_by == 'is_active' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+        <a role="button" href="?sort_by=is_active&sort_order={% if sort_by == 'is_active' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-get="?sort_by=is_active&sort_order={% if sort_by == 'is_active' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+           hx-target="#users-table" hx-swap="outerHTML" hx-push-url="true"
+           class="inline-flex items-center gap-1 hover:text-indigo-300 {% if sort_by == 'is_active' %}text-indigo-200{% endif %}">
+          Estado
+          {% if sort_by == 'is_active' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="px-4 py-3 font-medium text-right">Acciones</th>
+    </tr>
+  </thead>
+  <tbody class="divide-y divide-gray-200">
+    {% for u in users %}
+    <tr class="hover:bg-gray-50 transition-colors">
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold shrink-0">
+            {{ u.username|first|upper }}
+          </div>
+          <div class="min-w-0">
+            <span class="font-medium text-gray-900 block truncate">{{ u.username }}</span>
+            <span class="text-xs text-gray-500 block">ID: {{ u.id }}</span>
+          </div>
+        </div>
+      </td>
+      <td class="px-4 py-3">
+        {% if u.is_superuser %}
+          <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full whitespace-nowrap">Superadmin</span>
+        {% elif u.is_staff %}
+          <span class="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs font-semibold rounded-full whitespace-nowrap">Admin</span>
+        {% else %}
+          <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full whitespace-nowrap">Usuario</span>
+        {% endif %}
+      </td>
+      <td class="px-4 py-3">
+        {% if u.is_active %}
+          <span class="flex items-center gap-1 text-green-700 text-xs font-medium">
+            <i class="fas fa-circle text-[8px]" aria-hidden="true"></i> Activo
+          </span>
+        {% else %}
+          <span class="flex items-center gap-1 text-red-700 text-xs font-medium">
+            <i class="fas fa-circle text-[8px]" aria-hidden="true"></i> Inactivo
+          </span>
+        {% endif %}
+      </td>
+      <td class="px-4 py-3 text-right">
+        <div class="flex items-center justify-end gap-1.5 flex-wrap">
+          <button onclick="openPasswordModal({{ u.id }}, '{{ u.username|escapejs }}')"
+            class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-xs font-medium flex items-center gap-1">
+            <i class="fas fa-key" aria-hidden="true"></i>
+            Password
+          </button>
+          {% if u != request.user %}
+            <form method="POST" action="{% url 'user_toggle_staff' u.id %}" class="inline">
+              {% csrf_token %}
+              <button type="submit"
+                class="px-3 py-1.5 {% if u.is_staff %}bg-amber-100 text-amber-700 hover:bg-amber-200{% else %}bg-indigo-100 text-indigo-700 hover:bg-indigo-200{% endif %} rounded-lg transition-colors text-xs font-medium flex items-center gap-1">
+                <i class="fas fa-{% if u.is_staff %}user{% else %}shield-alt{% endif %}" aria-hidden="true"></i>
+                {% if u.is_staff %}Quitar Admin{% else %}Hacer Admin{% endif %}
+              </button>
+            </form>
+            <form method="POST" action="{% url 'user_toggle_active' u.id %}" class="inline">
+              {% csrf_token %}
+              <button type="submit"
+                class="px-3 py-1.5 {% if u.is_active %}bg-red-100 text-red-700 hover:bg-red-200{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %} rounded-lg transition-colors text-xs font-medium flex items-center gap-1">
+                <i class="fas fa-{% if u.is_active %}ban{% else %}check-circle{% endif %}" aria-hidden="true"></i>
+                {% if u.is_active %}Deshabilitar{% else %}Habilitar{% endif %}
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

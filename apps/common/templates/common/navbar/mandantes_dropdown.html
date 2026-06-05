@@ -1,15 +1,15 @@
 <div class="relative group">
-    <button class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors dropdown-toggle {% if '/mandantes' in request.path %}bg-gray-800 text-white{% endif %}" data-dropdown="mandantes-menu">
+    <button class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors dropdown-toggle {% if '/mandantes' in request.path %}bg-gray-800 text-white{% endif %}" data-dropdown="mandantes-menu" aria-expanded="false" aria-label="Menú de mandantes">
         Mandantes
-        <i class="fas fa-chevron-down ml-1 text-xs"></i>
+        <i class="fas fa-chevron-down ml-1 text-xs" aria-hidden="true"></i>
     </button>
     
     <div id="mandantes-menu" class="hidden lg:absolute left-0 mt-2 w-full lg:w-48 bg-slate-600/80 lg:bg-gray-800 rounded-lg shadow-xl py-2 z-50">
         <a href="{% url 'mandantes' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'mandantes' %}bg-gray-700 text-white{% endif %}">
-            <i class="fas fa-list mr-2"></i> Listar Mandantes
+            <i class="fas fa-list mr-2" aria-hidden="true"></i> Listar Mandantes
         </a>
         <a href="{% url 'mandante_create' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'mandante_create' %}bg-gray-700 text-white{% endif %}">
-            <i class="fas fa-plus mr-2"></i> Crear Mandante
+            <i class="fas fa-plus mr-2" aria-hidden="true"></i> Crear Mandante
         </a>
     </div>
 </div>

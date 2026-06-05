@@ -1,27 +1,121 @@
-# eitapp
+# EIT App — Gestión de Proyectos de Ingeniería de Transporte
 
+Backend Django para gestión de proyectos de ingeniería de transporte, modelado de red vial, conteos vehiculares, análisis de flujos y exportación a TRANSYT 8S.
 
-# 🚦 Transit App - Gestión de Proyectos de Tráfico
+## Características
 
-Backend Django para gestión de proyectos de ingeniería de transporte y análisis de tráfico.
+- **Mandantes y Contactos**: Gestión de clientes/organizaciones con contactos asociados. Interfaz en español.
+- **Proyectos**: Creación, seguimiento, imágenes (drag-drop / paste / file picker), estados (activo / finalizado).
+- **Red Vial**: Modelado completo de red — calles, nodos (intersecciones), arcos (tramos), regulaciones (PARE/CEDA/SEMÁFORO/LIBRE), puntos de control (movimientos por intersección).
+- **Periodización**: Conteos vehiculares manuales en intervalos de 15 minutos por punto de control y período. 8 tipos vehiculares (VL, TXC, TXB, C2E, C_mas2E, peatón, ciclista, moto) con cálculo automático de flujo total (ftot) usando factores de equivalencia.
+- **Coeficientes de Cruce**: Factores de equivalencia vehicular en dos niveles — estándares globales + sobrescritura por proyecto. Resolución por herencia.
+- **Análisis de Flujos**: Dashboard con tabla de datos, ranking de puntos de control por flujo, tabla comparativa (PCs vs períodos), y gráfico Chart.js de barras agrupadas. Recalculo agregado desde periodización.
+- **TRANSYT 8S**: Configuración global (ciclo, W, K), parámetros de arco (flujo de saturación, ponderadores), fases semafóricas (verde inicio/fin). Generación de archivo .dat en formato TRANSYT-8S (ancho fijo 80 columnas) con cards header/1/2/11/31/32. Exportación por período individual (.dat) o múltiple (.zip).
+- **Autenticación**: Registro, inicio de sesión, cierre de sesión. Protección `@login_required` en todas las vistas.
+- **UI**: Diseño consistente con Tailwind CSS, modales, tablas editables inline con HTMX, formularios con labels en español, campos editables con contraste mejorado.
 
-## 📋 Características
-
-- **Mandantes**: Gestión de clientes/organizaciones
-- **Proyectos**: Creación y seguimiento de proyectos de tráfico
-- **Red Vial**: Modelo de red (calles, nodos, arcos, movimientos)
-- **Tráfico**: Conteos vehiculares, flujos, períodos
-- **Usuarios**: Autenticación y permisos
-
-## 🛠️ Tech Stack
+## Stack Tecnológico
 
 - Django 4.2+
-- SQLite (dev) / PostgreSQL (prod)
-- HTMX para interactividad
-- WhiteNoise para static files
-- dotenv para configuración
+- SQLite (desarrollo) / PostgreSQL (producción)
+- HTMX para interactividad (CRUD inline)
+- Tailwind CSS (modo desarrollo con `python manage.py tailwind.dev`)
+- WhiteNoise para archivos estáticos
+- Chart.js para gráficos de análisis
+- Font Awesome para iconografía
+- python-dotenv para configuración
 
-## 🚀 Inicio Rápido
+## Estructura de Apps
+
+| App | Descripción | Estado |
+|-----|-------------|--------|
+| mandantes | Clientes (mandantes) y contactos | ✅ |
+| proyectos | Proyectos de tráfico con imágenes y estados | ✅ |
+| red_vial | Red vial, periodización, análisis, TRANSYT | ✅ |
+| usuarios | Autenticación y perfiles | ✅ |
+| tasks | Demo / pruebas (eliminar pronto) | ⚠️ |
+
+## Flujo de Trabajo (Mini Manual)
+
+```
+1. REGISTRO → /signup/
+   Crear cuenta de usuario.
+
+2. MANDANTE → /mandantes/
+   Crear cliente/organización.
+   Agregar contactos asociados (nombre, email, teléfono, cargo).
+
+3. PROYECTO → /proyectos/ → "Crear Proyecto"
+   Asociar a un mandante. Completar datos generales, subir imagen.
+   El proyecto puede estar Activo o Finalizado.
+
+4. RED VIAL → /proyectos/<id>/resumen/
+   Resumen del proyecto con cantidades de calles, nodos, arcos, PCs.
+   Acceso a cada sección de modelado:
+
+   a. Calles → Definir calles del área de estudio
+   b. Nodos → Definir intersecciones (cruce de 2 calles)
+   c. Arcos → Conectar nodos (origen → destino) con longitud
+   d. Regulaciones → PARE / CEDA / SEMÁFORO / LIBRE
+   e. Puntos de Control → Asignar movimiento (6 direcciones),
+      viraje (DIR/DER/IZQ), arco entrada/salida, regulación, pistas
+   f. Períodos → Definir ventanas de análisis (AM-L, PM-L, etc.)
+   g. Coeficientes de Cruce → Factores de equivalencia vehicular
+      (estándar global + sobreescritura por proyecto)
+
+5. PERIODIZACIÓN → /proyectos/<id>/periodizacion/
+   Seleccionar nodos (PCs), períodos, movimiento, fecha.
+   "Generar" → crea filas de intervalos de 15 min.
+   Ingresar conteos por tipo vehicular (VL, TXC, TXB, etc.).
+   ftot se calcula automáticamente.
+
+6. ANÁLISIS DE FLUJOS → /proyectos/<id>/analisis-flujos/
+   Filtrar por nodo, período, movimiento, fecha.
+   Visualizar:
+   - Tabla detalle (flujo total, promedio, registros)
+   - Ranking (PCs ordenados por flujo descendente)
+   - Comparativa (PCs vs períodos, tabla pivote)
+   - Gráfico Chart.js (barras agrupadas por PC y período)
+   "Recalcular" para agregar datos de periodización a ResumenFlujo.
+
+7. TRANSYT → /proyectos/<id>/configuracion-transyt/
+   a. Configuración global → ciclo, W, K, pérdida/ganancia
+   b. Parámetros de Arco → flujo saturación, ponderadores
+      (1 por PC, con generación automática de defaults)
+   c. Fases Semafóricas → verde inicio/fin por PC y fase
+      (con generación automática de fase 1 por PC)
+
+8. EXPORTAR .dat → Desde detalle del proyecto
+   Validar datos completos. Seleccionar período o "todos".
+   Genera archivo TRANSYT-8S (.dat por período, .zip para todos).
+   Formato ancho fijo 80 columnas con validación de salida.
+```
+
+## URLs Principales
+
+| Ruta | Vista |
+|------|-------|
+| `/` | Dashboard / Home |
+| `/signin/` | Iniciar sesión |
+| `/signup/` | Registrarse |
+| `/mandantes/` | Lista de mandantes |
+| `/mandantes/create/` | Crear mandante |
+| `/mandantes/<id>/` | Detalle / editar mandante |
+| `/proyectos/` | Lista de proyectos |
+| `/proyectos/<id>/` | Detalle del proyecto |
+| `/proyectos/<id>/resumen/` | Resumen de red vial |
+| `/proyectos/<id>/generar-dat/` | Exportar TRANSYT .dat |
+| `/red-vial/proyecto/<id>/calles/` | Gestión de calles |
+| `/red-vial/proyecto/<id>/nodos/` | Gestión de nodos |
+| `/red-vial/proyecto/<id>/arcos/` | Gestión de arcos |
+| `/red-vial/proyecto/<id>/puntos-control/` | Puntos de control |
+| `/red-vial/proyecto/<id>/periodizacion/` | Conteos vehiculares |
+| `/red-vial/proyecto/<id>/analisis-flujos/` | Dashboard de flujos |
+| `/red-vial/proyecto/<id>/configuracion-transyt/` | Configuración TRANSYT |
+| `/red-vial/proyecto/<id>/parametros-arco/` | Parámetros de arco |
+| `/red-vial/proyecto/<id>/fases-semaforicas/` | Fases semafóricas |
+
+## Inicio Rápido
 
 ```bash
 # Clonar y crear entorno virtual
@@ -42,29 +136,12 @@ python manage.py createsuperuser
 
 # Ejecutar
 python manage.py runserver
+
+# Modo desarrollo (Tailwind):
+python manage.py tailwind.dev
 ```
 
-## 📁 Estructura de Apps
-
-| App | Descripción | Estado |
-|-----|-------------|--------|
-| mandantes | Clientes y contactos | ✅ |
-| proyectos | Proyectos de tráfico | 🟡 |
-| red_vial | Red vial, nodos, arcos | 🟡 |
-| trafico | Conteos y flujos | 🟡 |
-| usuarios | Auth y perfiles | ⚠️ |
-| tasks | Demo (eliminar) | ⚠️ |
-
-## 🌐 URLs Principales
-
-- `/` - Dashboard
-- `/mandantes/` - Clientes
-- `/proyectos/` - Proyectos
-- `/proyectos/<id>/red-vial/` - Red vial del proyecto
-- `/signin/` - Iniciar sesión
-- `/signup/` - Registrarse
-
-## 📝 Variables de Entorno
+## Variables de Entorno
 
 ```
 SECRET_KEY=...
@@ -72,10 +149,19 @@ DEBUG=True
 DATABASE_URL=...
 ```
 
-## 📄 Licencia
+## Mejoras Recientes de UI
+
+- Consistencia visual en todas las pantallas de mandantes y contactos (cards, títulos, botones)
+- Labels de formularios traducidos al español
+- Campos editables con contraste mejorado (fondo blanco, borde visible)
+- Botones de acción en grid de 2 columnas para ancho uniforme
+- Contador de contactos en lista de mandantes
+- Jerarquía de encabezados corregida para accesibilidad
+- Atributos `aria-label` y `aria-hidden` en iconos y botones
+- Enlace skip-to-content y foco visible (`focus-visible`) en todos los elementos interactivos
+- Contraste de color mejorado (`text-gray-400` → `text-gray-500`)
+- Protección double-submit en formularios POST
+
+## Licencia
 
 MIT
-```
-
----
-

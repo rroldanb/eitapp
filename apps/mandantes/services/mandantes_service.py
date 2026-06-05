@@ -1,8 +1,9 @@
+from django.db.models import Count
 from apps.mandantes.models import Mandante, Contacto
 
 
 def get_all_mandantes():
-    return Mandante.objects.all()
+    return Mandante.objects.annotate(contactos_count=Count('contactos'))
 
 
 def get_mandante_by_id(mandante_id):

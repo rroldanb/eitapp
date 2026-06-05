@@ -15,6 +15,7 @@ from apps.proyectos.models import Proyecto
 from apps.imagenes.services.storage_service import upload_project_image, delete_project_image
 from apps.imagenes.utils.image_processor import get_image_from_request
 from apps.red_vial.services.generador_dat import DatGenerator, generar_parametros_arco, generar_fases_semaforicas
+from apps.common.utils.excel_utils import generar_plantilla_bytes
 from apps.red_vial.models import Periodo
 
 @login_required
@@ -159,12 +160,14 @@ def proyecto_resumen_view(request, proyecto_id):
     calles = proyecto.calles.all()
     nodos = proyecto.nodos.all().select_related('calle_1', 'calle_2')
     arcos = proyecto.arcos.all().select_related('nodo_origen', 'nodo_destino')
+    puntos_control = proyecto.puntos_control.all().select_related('nodo')
 
     return render(request, 'proyecto_resumen.html', {
         'proyecto': proyecto,
         'calles': calles,
         'nodos': nodos,
         'arcos': arcos,
+        'puntos_control': puntos_control,
         'active_section': 'resumen'
     })
 
@@ -223,6 +226,20 @@ def proyecto_generar_fases_semaforicas_view(request, proyecto_id):
     count = generar_fases_semaforicas(proyecto)
     messages.success(request, f'Se crearon {count} fases semafóricas.')
     return redirect('fases_semaforicas_list', proyecto_id=proyecto_id)
+
+
+@login_required
+@require_GET
+def proyecto_generar_plantilla_view(request, proyecto_id):
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    buf = generar_plantilla_bytes()
+    filename = f'plantilla_importacion_{proyecto.title.replace(" ", "_")}.xlsx'
+    response = HttpResponse(
+        buf.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 # ========== PROJECT SECTIONS ==========

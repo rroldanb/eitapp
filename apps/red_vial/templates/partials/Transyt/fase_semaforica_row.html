@@ -1,27 +1,28 @@
 {% load l10n %}
 <tr id="fase-semaforica-row-{{ item.id }}" class="fase-semaforica-row hover:bg-gray-50" data-fase-id="{{ item.id }}">
-  <td class="px-2 py-1 whitespace-nowrap font-medium text-gray-700">{{ item.punto_control.nombre }}</td>
+  <td class="px-2 py-1 whitespace-nowrap font-medium text-gray-700 max-w-48 truncate" title="{{ item.punto_control.nombre }}">{{ item.punto_control.nombre }}</td>
   <td class="px-2 py-1 whitespace-nowrap text-gray-600">{{ item.punto_control.get_movimiento_display|default:item.punto_control.movimiento }}</td>
   <td class="px-2 py-1 whitespace-nowrap text-center">
-    <input type="number" name="fase_numero" value="{{ item.fase_numero }}" min="1"
+    <input type="number" name="fase_numero" id="fase-numero-{{ item.id }}" value="{{ item.fase_numero }}" min="1" aria-label="Número de fase"
       class="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:ring-2 focus:ring-indigo-500 bg-slate-50">
   </td>
   <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="verde_inicio" value="{{ item.verde_inicio }}" step="0.1"
+    <input type="number" name="verde_inicio" id="fase-verde-inicio-{{ item.id }}" value="{{ item.verde_inicio }}" step="0.1" aria-label="Verde inicio"
       class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
   </td>
   <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="verde_fin" value="{{ item.verde_fin }}" step="0.1"
+    <input type="number" name="verde_fin" id="fase-verde-fin-{{ item.id }}" value="{{ item.verde_fin }}" step="0.1" aria-label="Verde fin"
       class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
   </td>
   <td class="px-2 py-1 flex gap-1 whitespace-nowrap">
     <button type="button"
-      class="px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors"
+      class="px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn"
       hx-put="{% url 'fase_semaforica_update' item.id %}"
       hx-include="closest tr"
       hx-target="closest tr"
       hx-swap="outerHTML"
-      hx-indicator="#save-indicator-{{ item.id }}">
+      hx-indicator="#save-indicator-{{ item.id }}"
+      aria-label="Guardar fase semafórica">
       <span id="save-indicator-{{ item.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
       OK
     </button>
@@ -30,8 +31,9 @@
       hx-delete="{% url 'fase_semaforica_delete' item.id %}"
       hx-target="closest tr"
       hx-swap="outerHTML"
-      hx-confirm="Eliminar fase {{ item.fase_numero }} de {{ item.punto_control.nombre }}?">
-      X
+      hx-confirm="Eliminar fase {{ item.fase_numero }} de {{ item.punto_control.nombre }}?"
+      aria-label="Eliminar fase semaforica">
+      <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </td>
 </tr>

@@ -1,14 +1,16 @@
 from django.contrib import admin
 from django.urls import path, include
 from apps.usuarios import views as user_views
+from apps.admin_views import descargar_plantilla
 from django.conf import settings
 
 urlpatterns = [
+    path('admin/generar-planilla/', descargar_plantilla, name='generar_planilla'),
     path('admin/', admin.site.urls),
     path('', user_views.home, name='home'),
-    path('signup/', user_views.signup, name='signup'),
     path('logout/', user_views.signout, name='signout'),
     path('signin/', user_views.signin, name='signin'),
+    path('usuarios/', include('apps.usuarios.urls')),
 
 
 

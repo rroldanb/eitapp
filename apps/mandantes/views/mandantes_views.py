@@ -68,8 +68,10 @@ def mandante_delete_view(request, mandante_id):
 
 def contactos_view(request, mandante_id):
     contactos = get_contactos_by_mandante(mandante_id)
+    mandante = get_object_or_404(Mandante, id=mandante_id)
     return render(request, "contactos.html", {
         "contactos": contactos,
+        "mandante": mandante,
         "list_title": "Contactos"
     })
 

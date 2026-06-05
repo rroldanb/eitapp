@@ -1,16 +1,12 @@
 {% load l10n %}
 <tr id="periodizacion-row-{{ item.id }}" class="periodizacion-row hover:bg-gray-50">
-  <td class="px-1 py-0.5 color-slate-900 text-lg font-medium text-gray-700 whitespace-nowrap">{{ item.pc.nombre }}</td>
-  {% comment %} <td class="px-1 py-0.5 color-slate-900 text-lg text-gray-600 whitespace-nowrap">
-    {% if item.pc.nodo.calle_1 %}{{ item.pc.nodo.calle_1.nombre }}{% else %}—{% endif %}
-    /
-    {% if item.pc.nodo.calle_2 %}{{ item.pc.nodo.calle_2.nombre }}{% else %}—{% endif %}
-  </td> {% endcomment %}
+  <td class="px-1 py-0.5 color-slate-900 text-lg font-medium text-gray-700 whitespace-nowrap max-w-48 truncate" title="{{ item.pc.nombre }}">{{ item.pc.nombre }}</td>
+
   <td class="px-1 py-0.5 color-slate-900 text-lg text-gray-700 text-center whitespace-nowrap">{{ item.hora|time:"H:i" }}</td>
   <td class="px-1 py-0.5 color-slate-900 text-lg text-gray-700 text-center whitespace-nowrap">{{ item.pc.movimiento }}</td>
   <td class="px-1 py-0.5 color-slate-900 text-lg text-gray-700 text-center whitespace-nowrap">{{ item.periodo.codigo }}</td>
   <td class="px-1 py-0.5">
-    <input type="number" name="vl" value="{{ item.vl|unlocalize }}" min="0"
+    <input type="number" name="vl" id="per-vl-{{ item.id }}" value="{{ item.vl|unlocalize }}" min="0" aria-label="VL"
       class="w-14 px-1 py-0.5 border border-gray-300 rounded text-center color-slate-900 text-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
       hx-put="{% url 'periodizacion_update' item.id %}"
       hx-include="closest tr"
@@ -19,7 +15,7 @@
       hx-trigger="change">
   </td>
   <td class="px-1 py-0.5">
-    <input type="number" name="txc" value="{{ item.txc|unlocalize }}" min="0"
+    <input type="number" name="txc" id="per-txc-{{ item.id }}" value="{{ item.txc|unlocalize }}" min="0" aria-label="TXC"
       class="w-14 px-1 py-0.5 border border-gray-300 rounded text-center color-slate-900 text-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
       hx-put="{% url 'periodizacion_update' item.id %}"
       hx-include="closest tr"
@@ -28,7 +24,7 @@
       hx-trigger="change">
   </td>
   <td class="px-1 py-0.5">
-    <input type="number" name="txb" value="{{ item.txb|unlocalize }}" min="0"
+    <input type="number" name="txb" id="per-txb-{{ item.id }}" value="{{ item.txb|unlocalize }}" min="0" aria-label="TXB"
       class="w-14 px-1 py-0.5 border border-gray-300 rounded text-center color-slate-900 text-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
       hx-put="{% url 'periodizacion_update' item.id %}"
       hx-include="closest tr"
@@ -37,7 +33,7 @@
       hx-trigger="change">
   </td>
   <td class="px-1 py-0.5">
-    <input type="number" name="c2e" value="{{ item.c2e|unlocalize }}" min="0"
+    <input type="number" name="c2e" id="per-c2e-{{ item.id }}" value="{{ item.c2e|unlocalize }}" min="0" aria-label="C2E"
       class="w-14 px-1 py-0.5 border border-gray-300 rounded text-center color-slate-900 text-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
       hx-put="{% url 'periodizacion_update' item.id %}"
       hx-include="closest tr"
@@ -46,7 +42,7 @@
       hx-trigger="change">
   </td>
   <td class="px-1 py-0.5">
-    <input type="number" name="c_mas2e" value="{{ item.c_mas2e|unlocalize }}" min="0"
+    <input type="number" name="c_mas2e" id="per-cm2e-{{ item.id }}" value="{{ item.c_mas2e|unlocalize }}" min="0" aria-label="C+2E"
       class="w-14 px-1 py-0.5 border border-gray-300 rounded text-center color-slate-900 text-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
       hx-put="{% url 'periodizacion_update' item.id %}"
       hx-include="closest tr"
@@ -55,7 +51,7 @@
       hx-trigger="change">
   </td>
   <td class="px-1 py-0.5">
-    <input type="number" name="peat" value="{{ item.peat|unlocalize }}" min="0"
+    <input type="number" name="peat" id="per-peat-{{ item.id }}" value="{{ item.peat|unlocalize }}" min="0" aria-label="PEAT"
       class="w-14 px-1 py-0.5 border border-gray-300 rounded text-center color-slate-900 text-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
       hx-put="{% url 'periodizacion_update' item.id %}"
       hx-include="closest tr"
@@ -64,7 +60,7 @@
       hx-trigger="change">
   </td>
   <td class="px-1 py-0.5">
-    <input type="number" name="cicl" value="{{ item.cicl|unlocalize }}" min="0"
+    <input type="number" name="cicl" id="per-cicl-{{ item.id }}" value="{{ item.cicl|unlocalize }}" min="0" aria-label="CICL"
       class="w-14 px-1 py-0.5 border border-gray-300 rounded text-center color-slate-900 text-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
       hx-put="{% url 'periodizacion_update' item.id %}"
       hx-include="closest tr"
@@ -73,7 +69,7 @@
       hx-trigger="change">
   </td>
   <td class="px-1 py-0.5">
-    <input type="number" name="moto" value="{{ item.moto|unlocalize }}" min="0"
+    <input type="number" name="moto" id="per-moto-{{ item.id }}" value="{{ item.moto|unlocalize }}" min="0" aria-label="MOTO"
       class="w-14 px-1 py-0.5 border border-gray-300 rounded text-center color-slate-900 text-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
       hx-put="{% url 'periodizacion_update' item.id %}"
       hx-include="closest tr"
@@ -84,12 +80,13 @@
   <td class="px-1 py-0.5 color-slate-900 text-lg font-bold text-gray-800 text-center whitespace-nowrap bg-gray-50">{{ item.ftot|floatformat:2 }}</td>
   <td class="px-1 py-0.5 text-center">
     <button type="button"
-      class="px-1.5 py-0.5 color-slate-900 text-lg border border-red-400 text-red-500 rounded hover:bg-red-500 hover:text-white transition-colors"
+      class="px-1.5 py-0.5 color-slate-900 text-lg border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors action-btn"
       hx-delete="{% url 'periodizacion_delete' item.id %}"
       hx-target="closest tr"
       hx-swap="outerHTML"
-      hx-confirm="¿Eliminar esta fila?">
-      X
+      hx-confirm="¿Eliminar esta fila?"
+      aria-label="Eliminar fila de periodizacion">
+      <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </td>
 </tr>
