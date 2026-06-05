@@ -2,7 +2,7 @@
 
 
 <tr id="new-nodo-form-row"> 
-  <td colspan="5" class="px-2 py-3 {% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
+  <td colspan="6" class="px-2 py-3 {% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
     <form id="new-nodo-form"
       data-action="create"
       hx-post="{% url 'nodo_create' proyecto.id %}"

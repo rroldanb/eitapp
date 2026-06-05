@@ -42,3 +42,43 @@ def bulk_update_nodos(items_data):
     # Definir campos que permitimos actualizar en lote
     fields = ['numero', 'is_pc', 'numero_pc', 'interseccion']
     return bulk_update_items(Nodo, items_data, fields)
+
+
+def _update_nodo_file_field(nodo_id, file, field):
+    """Sube un archivo a Supabase y actualiza un campo URL del nodo."""
+    from apps.imagenes.services.storage_service import upload_image, delete_image
+    nodo = Nodo.objects.get(id=nodo_id)
+    old_url = getattr(nodo, field, None)
+    if old_url:
+        delete_image(old_url)
+    setattr(nodo, field, upload_image(file))
+    nodo.save()
+    return nodo
+
+
+def _delete_nodo_file_field(nodo_id, field):
+    """Elimina un archivo de Supabase y limpia un campo URL del nodo."""
+    from apps.imagenes.services.storage_service import delete_image
+    nodo = Nodo.objects.get(id=nodo_id)
+    old_url = getattr(nodo, field, None)
+    if old_url:
+        delete_image(old_url)
+    setattr(nodo, field, None)
+    nodo.save()
+    return nodo
+
+
+def update_nodo_image(nodo_id, file):
+    return _update_nodo_file_field(nodo_id, file, 'imagen')
+
+
+def delete_nodo_image(nodo_id):
+    return _delete_nodo_file_field(nodo_id, 'imagen')
+
+
+def update_nodo_plano(nodo_id, file):
+    return _update_nodo_file_field(nodo_id, file, 'plano')
+
+
+def delete_nodo_plano(nodo_id):
+    return _delete_nodo_file_field(nodo_id, 'plano')

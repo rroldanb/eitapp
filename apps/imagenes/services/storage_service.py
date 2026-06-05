@@ -44,3 +44,7 @@ def delete_project_image(image_url):
         supabase.storage.from_(BUCKET).remove([file_name])
     except Exception as e:
         raise Exception(f"Error eliminando imagen de Supabase: {str(e)}")
+
+
+upload_image = upload_project_image
+delete_image = delete_project_image

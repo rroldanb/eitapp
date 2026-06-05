@@ -35,6 +35,25 @@
 
 
 
+  <td class="px-2 py-1 text-center">
+    <div class="flex items-center justify-center gap-1">
+      {# Imagen (mapa) #}
+      <button type="button" onclick="openNodoFileModal('{{ nodo.id }}', 'imagen', '{% if nodo.imagen %}{{ nodo.imagen|escapejs }}{% endif %}')"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors
+        {% if nodo.imagen %}bg-green-100 text-green-600 hover:bg-green-200{% else %}bg-gray-100 text-gray-400 hover:bg-gray-200{% endif %}"
+        title="{% if nodo.imagen %}Gestionar imagen (mapa){% else %}Agregar imagen (mapa){% endif %}">
+        <i class="{% if nodo.imagen %}fas{% else %}far{% endif %} fa-map text-sm"></i>
+      </button>
+      {# Plano (esquema) #}
+      <button type="button" onclick="openNodoFileModal('{{ nodo.id }}', 'plano', '{% if nodo.plano %}{{ nodo.plano|escapejs }}{% endif %}')"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors
+        {% if nodo.plano %}bg-green-100 text-green-600 hover:bg-green-200{% else %}bg-gray-100 text-gray-400 hover:bg-gray-200{% endif %}"
+        title="{% if nodo.plano %}Gestionar plano (esquema){% else %}Agregar plano (esquema){% endif %}">
+        <i class="{% if nodo.plano %}fas{% else %}far{% endif %} fa-draw-polygon text-sm"></i>
+      </button>
+    </div>
+  </td>
+
   <td class="px-2 py-1 flex gap-1">
     <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn" data-action="update"
       hx-put="{% url 'nodo_update' nodo.id %}"

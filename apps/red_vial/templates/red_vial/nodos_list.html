@@ -16,10 +16,457 @@
   </div>
 </div>
 
+{# ========== FILE MODAL (Imagen + Plano) ========== #}
+<div id="nodo-file-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="nodo-file-modal-title" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-gray-900/60 transition-opacity" onclick="closeNodoFileModal()"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all">
+      <div class="bg-indigo-600 text-white px-6 py-4 rounded-t-xl flex items-center gap-3">
+        <i class="fas fa-image text-lg" aria-hidden="true"></i>
+        <div>
+          <h2 class="font-bold text-lg">Gestionar Archivos del Nodo</h2>
+          <p class="text-sm text-indigo-200">Sube, reemplaza o elimina imágenes del nodo</p>
+        </div>
+      </div>
+
+      {# Tabs #}
+      <div class="flex border-b border-gray-200 px-6 pt-2">
+        <button type="button" class="nodo-file-tab px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+          data-field="imagen"
+          onclick="switchFileTab('imagen')">
+          <i class="fas fa-map mr-1" aria-hidden="true"></i>
+          Imagen (Mapa)
+        </button>
+        <button type="button" class="nodo-file-tab px-4 py-2 text-sm font-medium border-b-2 transition-colors"
+          data-field="plano"
+          onclick="switchFileTab('plano')">
+          <i class="fas fa-draw-polygon mr-1" aria-hidden="true"></i>
+          Plano (Esquema)
+        </button>
+      </div>
+
+      <div class="p-6">
+        <input type="hidden" id="nodo-file-nodo-id" value="">
+        <input type="hidden" id="nodo-file-active-field" value="imagen">
+
+        {% csrf_token %}
+
+        {# Imagen tab content #}
+        <div id="nodo-file-content-imagen" class="nodo-file-content">
+          <input type="file" id="imagen-file-input" accept="image/*" class="hidden">
+          <input type="hidden" id="imagen-file-data" value="">
+          <div id="imagen-preview-container" class="hidden mb-4">
+            <div class="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+              <img id="imagen-preview" class="w-full max-h-48 object-contain bg-gray-50" alt="Previsualización">
+              <button type="button" class="nodo-file-remove-preview absolute top-2 right-2 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors shadow-md" data-field="imagen" title="Eliminar previsualización">
+                <i class="fas fa-times text-sm" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1 text-center">Formato WebP — Arrastra una nueva imagen para reemplazarla</p>
+          </div>
+        </div>
+
+        {# Plano tab content #}
+        <div id="nodo-file-content-plano" class="nodo-file-content hidden">
+          <input type="file" id="plano-file-input" accept="image/*" class="hidden">
+          <input type="hidden" id="plano-file-data" value="">
+          <div id="plano-preview-container" class="hidden mb-4">
+            <div class="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+              <img id="plano-preview" class="w-full max-h-48 object-contain bg-gray-50" alt="Previsualización">
+              <button type="button" class="nodo-file-remove-preview absolute top-2 right-2 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors shadow-md" data-field="plano" title="Eliminar previsualización">
+                <i class="fas fa-times text-sm" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1 text-center">Formato WebP — Arrastra una nueva imagen para reemplazarla</p>
+          </div>
+        </div>
+
+        {# Shared drop zone #}
+        <div id="nodo-file-drop-zone"
+          class="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all duration-200 hover:border-indigo-400 hover:bg-indigo-50/30 cursor-pointer"
+          role="button" tabindex="0">
+
+          <div id="nodo-file-drop-content">
+            <div class="flex flex-col items-center gap-3">
+              <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-cloud-upload-alt text-2xl text-indigo-600"></i>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-700">
+                  <span class="text-indigo-600 hover:text-indigo-700">Selecciona un archivo</span>
+                  o arrastra aquí
+                </p>
+                <p class="text-xs text-gray-500 mt-1">PNG, JPG, WebP — También puedes pegar desde el portapapeles (<kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Ctrl+V</kbd>)</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="nodo-file-drop-overlay" class="hidden absolute inset-0 bg-indigo-600/90 rounded-lg flex items-center justify-center">
+            <div class="text-white text-center">
+              <i class="fas fa-file-image text-4xl mb-2"></i>
+              <p class="text-lg font-semibold">Suelta la imagen aquí</p>
+            </div>
+          </div>
+        </div>
+
+        {# Actions #}
+        <div class="mt-6 flex flex-wrap gap-3 justify-end border-t border-gray-200 pt-4">
+          <button type="button" onclick="closeNodoFileModal()"
+            class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
+            Cancelar
+          </button>
+          <button type="button" id="nodo-file-delete-btn"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2 hidden">
+            <i class="fas fa-trash-alt" aria-hidden="true"></i>
+            <span id="nodo-file-delete-label">Eliminar</span>
+          </button>
+          <button type="button" id="nodo-file-upload-btn"
+            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center gap-2 opacity-50 cursor-not-allowed"
+            disabled>
+            <i class="fas fa-upload" aria-hidden="true"></i>
+            <span id="nodo-file-upload-label">Subir</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 <div id="data-crud-config" data-table-id="nodos-table" data-model-name="Nodo" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
 
 {% block extra_js %}
+{% url 'nodo_upload_image' item_id='00000000-0000-0000-0000-000000000000' as upload_imagen_url %}
+{% url 'nodo_delete_image' item_id='00000000-0000-0000-0000-000000000000' as delete_imagen_url %}
+{% url 'nodo_upload_plano' item_id='00000000-0000-0000-0000-000000000000' as upload_plano_url %}
+{% url 'nodo_delete_plano' item_id='00000000-0000-0000-0000-000000000000' as delete_plano_url %}
 <script src="{% static 'js/crud_events.js' %}"></script>
+<script>
+(function() {
+  const URLS = {
+    imagen: {
+      upload: '{{ upload_imagen_url|escapejs }}',
+      delete: '{{ delete_imagen_url|escapejs }}',
+    },
+    plano: {
+      upload: '{{ upload_plano_url|escapejs }}',
+      delete: '{{ delete_plano_url|escapejs }}',
+    },
+  };
+  const PLACEHOLDER = '00000000-0000-0000-0000-000000000000';
+
+  function urlFor(field, action, nodoId) {
+    return URLS[field][action].replace(PLACEHOLDER, nodoId);
+  }
+
+  let selectedNodoId = null;
+  let activeField = 'imagen';
+  let hasNewImage = false;
+  let fieldUrls = {}; // {imagen: {currentUrl: '...'}, plano: {currentUrl: '...'}}
+
+  const modal = document.getElementById('nodo-file-modal');
+  const dropZone = document.getElementById('nodo-file-drop-zone');
+  const uploadBtn = document.getElementById('nodo-file-upload-btn');
+  const deleteBtn = document.getElementById('nodo-file-delete-btn');
+  const uploadLabel = document.getElementById('nodo-file-upload-label');
+  const deleteLabel = document.getElementById('nodo-file-delete-label');
+
+  function el(id) { return document.getElementById(id); }
+
+  function fieldEl(suffix) { return el(activeField + '-' + suffix); }
+
+  function getCSRF() {
+    const input = document.querySelector('#nodo-file-modal [name=csrfmiddlewaretoken]');
+    return input ? input.value : '';
+  }
+
+  function showTab(field) {
+    document.querySelectorAll('.nodo-file-content').forEach(function(c) { c.classList.add('hidden'); });
+    document.querySelectorAll('.nodo-file-tab').forEach(function(t) {
+      t.classList.remove('text-indigo-600', 'border-indigo-600');
+      t.classList.add('text-gray-500', 'border-transparent');
+    });
+    el('nodo-file-content-' + field).classList.remove('hidden');
+    var tabBtn = document.querySelector('.nodo-file-tab[data-field="' + field + '"]');
+    if (tabBtn) {
+      tabBtn.classList.remove('text-gray-500', 'border-transparent');
+      tabBtn.classList.add('text-indigo-600', 'border-indigo-600');
+    }
+  }
+
+  function resetField(field) {
+    el(field + '-file-input').value = '';
+    el(field + '-file-data').value = '';
+    el(field + '-preview-container').classList.add('hidden');
+    el(field + '-preview').src = '';
+  }
+
+  function syncUI() {
+    var previewContainer = fieldEl('preview-container');
+    var previewImg = fieldEl('preview');
+    var fileInput = fieldEl('file-input');
+    var base64Input = fieldEl('file-data');
+
+    if (fieldUrls[activeField] && fieldUrls[activeField].currentUrl) {
+      previewImg.src = fieldUrls[activeField].currentUrl;
+      previewContainer.classList.remove('hidden');
+      deleteBtn.classList.remove('hidden');
+      deleteLabel.textContent = activeField === 'imagen' ? 'Eliminar imagen' : 'Eliminar plano';
+    } else {
+      previewContainer.classList.add('hidden');
+      previewImg.src = '';
+      deleteBtn.classList.add('hidden');
+    }
+
+    hasNewImage = false;
+    uploadBtn.disabled = true;
+    uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    uploadLabel.textContent = activeField === 'imagen' ? 'Subir imagen' : 'Subir plano';
+    fileInput.value = '';
+    base64Input.value = '';
+  }
+
+  function enableUpload(enable) {
+    hasNewImage = enable;
+    if (enable) {
+      uploadBtn.disabled = false;
+      uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+      uploadBtn.disabled = true;
+      uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+  }
+
+  window.switchFileTab = function(field) {
+    activeField = field;
+    el('nodo-file-active-field').value = field;
+    showTab(field);
+    syncUI();
+  };
+
+  window.openNodoFileModal = function(nodoId, field, fileUrl) {
+    selectedNodoId = nodoId;
+    activeField = field;
+    el('nodo-file-nodo-id').value = nodoId;
+    el('nodo-file-active-field').value = field;
+
+    if (!fieldUrls[field]) fieldUrls[field] = {};
+    fieldUrls[field].currentUrl = fileUrl || null;
+
+    // Reset both fields
+    resetField('imagen');
+    resetField('plano');
+
+    showTab(field);
+    syncUI();
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeNodoFileModal = function() {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    selectedNodoId = null;
+  };
+
+  // Drop zone click → active file input
+  dropZone.addEventListener('click', function() {
+    fieldEl('file-input').click();
+  });
+  dropZone.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') fieldEl('file-input').click();
+  });
+
+  // Drag & Drop
+  dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.classList.add('border-indigo-500', 'bg-indigo-50');
+  });
+  dropZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.classList.remove('border-indigo-500', 'bg-indigo-50');
+  });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.classList.remove('border-indigo-500', 'bg-indigo-50');
+    var files = e.dataTransfer.files;
+    if (files.length > 0 && files[0].type.startsWith('image/')) {
+      handleFile(files[0]);
+    }
+  });
+
+  // File input change
+  document.addEventListener('change', function(e) {
+    if (e.target.matches('.nodo-file-content input[type="file"]')) {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    }
+  });
+
+  // Paste
+  document.addEventListener('paste', function(e) {
+    if (modal.classList.contains('hidden')) return;
+    var items = e.clipboardData.items;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        e.preventDefault();
+        var blob = items[i].getAsFile();
+        if (blob) {
+          handlePaste(blob);
+        }
+        break;
+      }
+    }
+  });
+
+  // Remove preview
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.nodo-file-remove-preview')) {
+      var field = e.target.closest('.nodo-file-remove-preview').getAttribute('data-field');
+      el(field + '-preview-container').classList.add('hidden');
+      el(field + '-preview').src = '';
+      el(field + '-file-input').value = '';
+      el(field + '-file-data').value = '';
+      if (field === activeField) {
+        enableUpload(false);
+      }
+    }
+  });
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) return;
+    showPreview(file);
+    var dt = new DataTransfer();
+    dt.items.add(file);
+    fieldEl('file-input').files = dt.files;
+    fieldEl('file-data').value = '';
+    enableUpload(true);
+  }
+
+  function handlePaste(blob) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var base64 = e.target.result;
+      showPreviewFromUrl(base64);
+      fieldEl('file-data').value = base64;
+      fieldEl('file-input').value = '';
+      enableUpload(true);
+    };
+    reader.readAsDataURL(blob);
+  }
+
+  function showPreview(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      fieldEl('preview').src = e.target.result;
+      fieldEl('preview-container').classList.remove('hidden');
+      deleteBtn.classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showPreviewFromUrl(url) {
+    fieldEl('preview').src = url;
+    fieldEl('preview-container').classList.remove('hidden');
+    deleteBtn.classList.add('hidden');
+  }
+
+  function buildFormData() {
+    var fd = new FormData();
+    fd.append('csrfmiddlewaretoken', getCSRF());
+    var fi = fieldEl('file-input');
+    var b64 = fieldEl('file-data');
+    if (fi.files.length > 0) {
+      fd.append('image', fi.files[0]);
+    } else if (b64.value) {
+      fd.append('image_file', b64.value);
+    }
+    return fd;
+  }
+
+  function onUploadComplete() {
+    var row = document.getElementById('nodo-row-' + selectedNodoId);
+    if (row) row.outerHTML = this;
+    closeNodoFileModal();
+  }
+
+  window.uploadNodoFile = async function() {
+    if (!selectedNodoId || !hasNewImage) return;
+    var fd = buildFormData();
+    if (!fd.has('image') && !fd.has('image_file')) return;
+
+    uploadBtn.disabled = true;
+    uploadLabel.textContent = 'Subiendo...';
+
+    try {
+      var resp = await fetch(urlFor(activeField, 'upload', selectedNodoId), {
+        method: 'POST', body: fd,
+      });
+      if (resp.ok) {
+        var html = await resp.text();
+        var row = document.getElementById('nodo-row-' + selectedNodoId);
+        if (row) row.outerHTML = html;
+        closeNodoFileModal();
+      } else {
+        var msg = 'Error al subir';
+        try { var j = await resp.json(); msg = j.error || msg; } catch(_) {}
+        alert(msg);
+      }
+    } catch(e) {
+      alert('Error de red');
+    } finally {
+      uploadLabel.textContent = 'Subir';
+      enableUpload(false);
+    }
+  };
+
+  window.deleteNodoFile = async function() {
+    if (!selectedNodoId) return;
+    if (!confirm('Eliminar ' + (activeField === 'imagen' ? 'la imagen' : 'el plano') + ' del nodo?')) return;
+
+    var fd = new FormData();
+    fd.append('csrfmiddlewaretoken', getCSRF());
+
+    deleteBtn.disabled = true;
+    deleteLabel.textContent = 'Eliminando...';
+
+    try {
+      var resp = await fetch(urlFor(activeField, 'delete', selectedNodoId), {
+        method: 'POST', body: fd,
+      });
+      if (resp.ok) {
+        var html = await resp.text();
+        var row = document.getElementById('nodo-row-' + selectedNodoId);
+        if (row) row.outerHTML = html;
+        closeNodoFileModal();
+      } else {
+        var msg = 'Error al eliminar';
+        try { var j = await resp.json(); msg = j.error || msg; } catch(_) {}
+        alert(msg);
+      }
+    } catch(e) {
+      alert('Error de red');
+    } finally {
+      deleteBtn.disabled = false;
+      deleteLabel.textContent = 'Eliminar';
+    }
+  };
+
+  uploadBtn.addEventListener('click', uploadNodoFile);
+  deleteBtn.addEventListener('click', deleteNodoFile);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeNodoFileModal();
+  });
+  modal.addEventListener('click', function(e) {
+    if (e.target === this) closeNodoFileModal();
+  });
+})();
+</script>
 {% endblock %}
