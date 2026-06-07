@@ -93,7 +93,8 @@ def proyecto_create_view(request):
 
             proyecto.save()
 
-            return redirect("proyectos")
+            messages.success(request, "Proyecto creado correctamente.")
+            return redirect("proyecto_detail", proyecto_id=proyecto.id)
 
         except Exception as e:
             return render(request, "proyecto_create.html", {

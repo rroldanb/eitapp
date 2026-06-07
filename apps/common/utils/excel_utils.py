@@ -85,37 +85,83 @@ def fk(desc):
     return f"{desc} (ID existente)"
 
 
+BASE_DATE = "17/03/2025"
+
+
+def _base_val(hour, minute, peak_low, peak_high, off_peak_low, off_peak_high):
+    """interpolate between off-peak and peak values based on time proximity to peak."""
+    minutes = hour * 60 + minute
+    if 7 * 60 <= minutes <= 9 * 60:
+        frac = (minutes - 7 * 60) / 120
+        return int(peak_low + (peak_high - peak_low) * (1 - abs(frac - 0.5) * 2))
+    if 18 * 60 <= minutes <= 20 * 60:
+        frac = (minutes - 18 * 60) / 120
+        return int(peak_low + (peak_high - peak_low) * (1 - abs(frac - 0.5) * 2))
+    return (off_peak_low + off_peak_high) // 2
+
+
+def _periodizacion_rows():
+    rows = []
+    combos = [
+        ("Estudio de Semaforos Av. Libertador", "PC-01", "PM-L", 6, 9),
+        ("Estudio de Semaforos Av. Libertador", "PC-01", "PT-L", 18, 21),
+        ("Estudio de Semaforos Av. Libertador", "PC-02", "PM-L", 6, 9),
+        ("Estudio de Semaforos Av. Libertador", "PC-02", "PT-L", 18, 21),
+        ("Auditoria Red Vial Centro", "PC-01", "PM-L", 6, 9),
+        ("Auditoria Red Vial Centro", "PC-01", "PT-L", 18, 21),
+        ("Auditoria Red Vial Centro", "PC-02", "PM-L", 6, 9),
+        ("Auditoria Red Vial Centro", "PC-02", "PT-L", 18, 21),
+    ]
+    for proj, pc, period, h_start, h_end in combos:
+        for hour in range(h_start, h_end):
+            for minute in (0, 15, 30, 45):
+                hora = f"{hour:02d}:{minute:02d}"
+                vl = _base_val(hour, minute, 750, 1100, 300, 500)
+                txc = _base_val(hour, minute, 80, 150, 30, 60)
+                txb = _base_val(hour, minute, 25, 55, 10, 20)
+                c2e = _base_val(hour, minute, 18, 40, 8, 15)
+                c_mas2e = _base_val(hour, minute, 6, 18, 2, 5)
+                peat = _base_val(hour, minute, 150, 350, 60, 120)
+                cicl = _base_val(hour, minute, 25, 70, 10, 20)
+                moto = _base_val(hour, minute, 35, 100, 15, 30)
+                rows.append((BASE_DATE, hora, pc, period, proj, vl, txc, txb, c2e, c_mas2e, peat, cicl, moto))
+    return rows
+
+
 def generar_plantilla():
     wb = Workbook()
 
     ws_readme = wb.active
-    ws_readme.title = "📖 README"
+    ws_readme.title = "\U0001f4d6 README"
 
     readme_content = [
-        ("PLANTILLA DE IMPORTACIÓN — EIT App", ""),
+        ("PLANTILLA DE IMPORTACION \u2014 EIT App", ""),
         ("", ""),
         ("Cada hoja representa una tabla del sistema.", ""),
-        ("Las columnas con fondo AZUL son REQUERIDAS (no pueden estar vacías).", ""),
+        ("Las columnas con fondo AZUL son REQUERIDAS (no pueden estar vacias).", ""),
         ("Las columnas con fondo GRIS son OPCIONALES.", ""),
-        ("Las columnas con fondo NARANJO son claves foráneas (referencian otra tabla).", ""),
+        ("Las columnas con fondo NARANJO son claves foraneas (referencian otra tabla).", ""),
         ("", ""),
         ("INSTRUCCIONES:", ""),
         ("1. NO modifiques la fila 1 (cabeceras) ni la fila 2 (tipos).", ""),
         ("2. Reemplaza los datos de ejemplo (filas verde claro) con tus datos reales.", ""),
         ("3. Respeta el orden de las columnas.", ""),
-        ("4. Respeta los formatos: fechas como DD/MM/AAAA, números sin separadores.", ""),
+        ("4. Respeta los formatos: fechas como DD/MM/AAAA, numeros sin separadores.", ""),
         ("5. Las columnas FK (naranjo) deben contener IDs existentes en el sistema.", ""),
         ("6. Puedes importar una sola hoja o varias a la vez.", ""),
-        ("7. NO elimines hojas ni cabeceras — el importador las necesita.", ""),
+        ("7. NO elimines hojas ni cabeceras \u2014 el importador las necesita.", ""),
         ("", ""),
         ("ORDEN RECOMENDADO DE CARGA:", ""),
-        ("1. Mandante  →  2. Contacto  →  3. Proyecto  →  4. Calle", ""),
-        ("5. Nodo  →  6. Arco  →  7. Regulacion  →  8. CoeficienteCruce", ""),
-        ("9. Periodo  →  10. PuntoControl  →  11. Periodizacion", ""),
-        ("12. ParametroArco  →  13. FaseSemaforica  →  14. ConfiguracionTransyt", ""),
+        ("1. Mandante  \u2192  2. Contacto  \u2192  3. Proyecto  \u2192  4. Calle", ""),
+        ("5. Nodo  \u2192  6. Arco  \u2192  7. Regulacion  \u2192  8. CoeficienteCruce", ""),
+        ("9. Periodo  \u2192  10. PuntoControl  \u2192  11. Periodizacion", ""),
+        ("12. ParametroArco  \u2192  13. FaseSemaforica  \u2192  14. ConfiguracionTransyt", ""),
         ("", ""),
-        ("NOTA: Si importas todo de una vez, el sistema resolverá las FK automáticamente", ""),
-        ("usando los identificadores únicos que proporciones.", ""),
+        ("NOTA: Si importas todo de una vez, el sistema resolbera las FK automaticamente", ""),
+        ("usando los identificadores unicos que proporciones.", ""),
+        ("", ""),
+        ("NOTA: Los datos de ejemplo en verde son consistentes entre todas las hojas", ""),
+        ("y pueden importarse exitosamente como demostracion.", ""),
     ]
 
     for r, (text, _) in enumerate(readme_content, 1):
@@ -127,7 +173,7 @@ def generar_plantilla():
         else:
             cell.font = Font(name="Calibri", size=11)
 
-    ws_readme.column_dimensions["A"].width = 90
+    ws_readme.column_dimensions["A"].width = 95
     ws_readme.sheet_properties.tabColor = "1F4E79"
 
     sheets_data = [
@@ -137,7 +183,7 @@ def generar_plantilla():
             ("details", "Texto", False, "Notas u observaciones"),
         ], [
             ("Municipalidad de Santiago", "Santiago Centro", "Comuna piloto"),
-            ("Gobierno Regional RM", "Santiago", ""),
+            ("Gobierno Regional Metropolitano", "Santiago", ""),
         ], "NOTA: El ID se genera automaticamente. El sistema asignara UUIDs."),
 
         ("Contacto", [
@@ -150,7 +196,7 @@ def generar_plantilla():
             ("mandante", "FK", True, fk("Mandante.name")),
         ], [
             ("Juan Perez", "jperez@msantiago.cl", "+56912345678", "Jefe de Transito", "Dpto. Vialidad", "", "Municipalidad de Santiago"),
-            ("Maria Rojas", "", "", "Ingeniera", "Obras", "", "Gobierno Regional RM"),
+            ("Maria Rojas", "", "", "Ingeniera", "Obras", "", "Gobierno Regional Metropolitano"),
         ], "NOTA: 'mandante' debe coincidir con el campo 'name' de la hoja Mandante."),
 
         ("Proyecto", [
@@ -160,7 +206,7 @@ def generar_plantilla():
             ("mandante", "FK", True, fk("Mandante.name")),
         ], [
             ("Estudio de Semaforos Av. Libertador", "Actualizacion de planes de tiempo", "01/03/2025", "Municipalidad de Santiago"),
-            ("Auditoria Red Vial Centro", "Levantamiento y analisis de flujos", "15/01/2025", "Municipalidad de Santiago"),
+            ("Auditoria Red Vial Centro", "Levantamiento y analisis de flujos", "15/01/2025", "Gobierno Regional Metropolitano"),
         ], "NOTA: El usuario y fechas de completado se asignan en el sistema. 'mandante' debe existir en la hoja Mandante."),
 
         ("Calle", [
@@ -168,9 +214,12 @@ def generar_plantilla():
             ("numero", "Entero", True, "Numero identificador unico por proyecto"),
             ("proyecto", "FK", True, fk("Proyecto.title")),
         ], [
-            ("Av. Libertador Bernardo O'Higgins", 1, "Estudio de Semaforos Av. Libertador"),
+            ("Av. Libertador", 1, "Estudio de Semaforos Av. Libertador"),
             ("Av. Providencia", 2, "Estudio de Semaforos Av. Libertador"),
             ("Av. Manuel Montt", 3, "Estudio de Semaforos Av. Libertador"),
+            ("Av. Santa Maria", 1, "Auditoria Red Vial Centro"),
+            ("Av. Los Leones", 2, "Auditoria Red Vial Centro"),
+            ("Av. Tobalaba", 3, "Auditoria Red Vial Centro"),
         ], "NOTA: La combinacion 'numero + proyecto' debe ser unica."),
 
         ("Nodo", [
@@ -183,8 +232,10 @@ def generar_plantilla():
             ("imagen", "URL", False, "Link a foto del nodo"),
             ("proyecto", "FK", True, fk("Proyecto.title")),
         ], [
-            (1, "Av. Libertador con Av. Providencia", "Av. Libertador Bernardo O'Higgins", "Av. Providencia", 1, "", "", "Estudio de Semaforos Av. Libertador"),
-            (2, "Av. Libertador con Av. Manuel Montt", "Av. Libertador Bernardo O'Higgins", "Av. Manuel Montt", 2, "", "", "Estudio de Semaforos Av. Libertador"),
+            (1, "Av. Libertador con Av. Providencia", "Av. Libertador", "Av. Providencia", 1, "", "", "Estudio de Semaforos Av. Libertador"),
+            (2, "Av. Libertador con Av. Manuel Montt", "Av. Libertador", "Av. Manuel Montt", 2, "", "", "Estudio de Semaforos Av. Libertador"),
+            (1, "Av. Santa Maria con Av. Los Leones", "Av. Santa Maria", "Av. Los Leones", 1, "", "", "Auditoria Red Vial Centro"),
+            (2, "Av. Santa Maria con Av. Tobalaba", "Av. Santa Maria", "Av. Tobalaba", 2, "", "", "Auditoria Red Vial Centro"),
         ], "NOTA: 'calle_1' y 'calle_2' deben coincidir con 'nombre' en hoja Calle. 'numero_pc' asigna un PC al nodo."),
 
         ("Arco", [
@@ -195,7 +246,8 @@ def generar_plantilla():
         ], [
             (1, 2, 150.0, "Estudio de Semaforos Av. Libertador"),
             (2, 1, 150.0, "Estudio de Semaforos Av. Libertador"),
-            (2, 3, 200.5, "Estudio de Semaforos Av. Libertador"),
+            (1, 2, 120.0, "Auditoria Red Vial Centro"),
+            (2, 1, 120.0, "Auditoria Red Vial Centro"),
         ], "NOTA: 'nodo_origen' y 'nodo_destino' se resuelven por 'numero + proyecto'. La terna (origen, destino, proyecto) debe ser unica."),
 
         ("Regulacion", [
@@ -226,9 +278,10 @@ def generar_plantilla():
             ("es_laboral", "SI/NO", True, "¿Es periodo laboral?"),
             ("proyecto", "FK", True, fk("Proyecto.title")),
         ], [
-            ("PM-L", "07:30", "09:30", "SI", "Estudio de Semaforos Av. Libertador"),
-            ("PN-L", "12:00", "14:00", "SI", "Estudio de Semaforos Av. Libertador"),
-            ("PT-L", "17:30", "20:00", "SI", "Estudio de Semaforos Av. Libertador"),
+            ("PM-L", "06:00", "09:00", "SI", "Estudio de Semaforos Av. Libertador"),
+            ("PT-L", "18:00", "21:00", "SI", "Estudio de Semaforos Av. Libertador"),
+            ("PM-L", "06:00", "09:00", "SI", "Auditoria Red Vial Centro"),
+            ("PT-L", "18:00", "21:00", "SI", "Auditoria Red Vial Centro"),
         ], "NOTA: Codigos: PM=Manana, PN=Mediodia, PT=Tarde, PE=Noche; L=Laboral, S=Sabado, F=Festivo. La combinacion (codigo, proyecto) debe ser unica."),
 
         ("PuntoControl", [
@@ -242,8 +295,10 @@ def generar_plantilla():
             ("numero_pistas", "Decimal", False, "Numero de pistas (ej: 2.5)"),
             ("proyecto", "FK", True, fk("Proyecto.title")),
         ], [
-            (1, "12", "DIR", "SI", "1>2", "2>3", "SEM01", 2.0, "Estudio de Semaforos Av. Libertador"),
-            (1, "13", "DER", "NO", "1>2", "", "", 1.0, "Estudio de Semaforos Av. Libertador"),
+            (1, "12", "DIR", "SI", "1>2", "2>1", "SEM01", 2.0, "Estudio de Semaforos Av. Libertador"),
+            (2, "21", "DIR", "SI", "2>1", "1>2", "SEM01", 2.0, "Estudio de Semaforos Av. Libertador"),
+            (1, "12", "DIR", "SI", "1>2", "2>1", "SEM01", 2.0, "Auditoria Red Vial Centro"),
+            (2, "21", "DIR", "SI", "2>1", "1>2", "SEM01", 2.0, "Auditoria Red Vial Centro"),
         ], "NOTA: 'arco_entrada' y 'arco_salida' se indican como 'origen>destino' (ej: 1>2). 'movimiento' son 2 digitos: nodo_origen + nodo_destino."),
 
         ("Periodizacion", [
@@ -251,6 +306,7 @@ def generar_plantilla():
             ("hora", "Hora HH:MM", True, "Hora del conteo"),
             ("pc", "FK (PuntoControl.nombre)", True, fk("PuntoControl (ej: PC-01 o Nodo-XX)")),
             ("periodo", "FK (Periodo.codigo)", True, fk("Periodo.codigo (ej: PM-L)")),
+            ("proyecto", "FK (Proyecto.title)", True, fk("Proyecto.title")),
             ("vl", "Entero", True, "Vehiculos Livianos"),
             ("txc", "Entero", True, "Taxi Colectivo"),
             ("txb", "Entero", True, "Taxi Bus"),
@@ -259,11 +315,7 @@ def generar_plantilla():
             ("peat", "Entero", True, "Peatones"),
             ("cicl", "Entero", True, "Ciclistas"),
             ("moto", "Entero", True, "Motocicletas"),
-        ], [
-            ("15/03/2025", "08:00", "PC-01", "PM-L", 850, 120, 45, 30, 15, 200, 50, 80),
-            ("15/03/2025", "08:15", "PC-01", "PM-L", 920, 130, 40, 35, 12, 180, 55, 75),
-            ("15/03/2025", "08:30", "PC-01", "PM-L", 780, 110, 38, 28, 10, 190, 45, 65),
-        ], "NOTA: 'ftot' (flujo total) se calcula automaticamente. La combinacion (fecha, pc, periodo, hora) debe ser unica."),
+        ], _periodizacion_rows(), "NOTA: 'ftot' (flujo total) se calcula automaticamente. La combinacion (fecha, pc, periodo, hora) debe ser unica."),
 
         ("ParametroArco", [
             ("punto_control", "FK", True, fk("PuntoControl (nombre: PC-XX o Nodo-XX)")),
@@ -276,6 +328,8 @@ def generar_plantilla():
         ], [
             ("PC-01", 1800.0, 1.0, 1.0, 10.0, "SI", "Estudio de Semaforos Av. Libertador"),
             ("PC-02", 1600.0, 1.2, 0.8, "", "NO", "Estudio de Semaforos Av. Libertador"),
+            ("PC-01", 1750.0, 1.0, 1.0, 12.0, "SI", "Auditoria Red Vial Centro"),
+            ("PC-02", 1550.0, 1.1, 0.9, "", "NO", "Auditoria Red Vial Centro"),
         ], "NOTA: Cada PuntoControl tiene UN ParametroArco (relacion 1 a 1)."),
 
         ("FaseSemaforica", [
@@ -288,6 +342,11 @@ def generar_plantilla():
             ("PC-01", 1, 0.0, 25.0, "Estudio de Semaforos Av. Libertador"),
             ("PC-01", 2, 30.0, 55.0, "Estudio de Semaforos Av. Libertador"),
             ("PC-02", 1, 0.0, 20.0, "Estudio de Semaforos Av. Libertador"),
+            ("PC-02", 2, 25.0, 45.0, "Estudio de Semaforos Av. Libertador"),
+            ("PC-01", 1, 0.0, 30.0, "Auditoria Red Vial Centro"),
+            ("PC-01", 2, 35.0, 60.0, "Auditoria Red Vial Centro"),
+            ("PC-02", 1, 0.0, 22.0, "Auditoria Red Vial Centro"),
+            ("PC-02", 2, 28.0, 50.0, "Auditoria Red Vial Centro"),
         ], "NOTA: La combinacion (punto_control, fase_numero) debe ser unica. Los tiempos son relativos al inicio del ciclo."),
 
         ("ConfiguracionTransyt", [
@@ -299,6 +358,7 @@ def generar_plantilla():
             ("ganancia_final", "Decimal", True, "Ganancia final en segundos (ej: 1.0)"),
         ], [
             ("Estudio de Semaforos Av. Libertador", 60, 10.0, 0.5, 2.0, 1.0),
+            ("Auditoria Red Vial Centro", 70, 12.0, 0.4, 3.0, 1.5),
         ], "NOTA: Cada proyecto tiene UNA configuracion TRANSYT (relacion 1 a 1)."),
     ]
 

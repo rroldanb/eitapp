@@ -1,0 +1,102 @@
+{% if error %}
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700 mb-4">{{ error }}</div>
+{% endif %}
+
+{% if validation %}
+  <div class="space-y-4">
+    <p class="text-sm text-gray-600">
+      Resumen de validación:
+      {% if validation.total_valid %}<strong class="text-green-700">{{ validation.total_valid }} filas nuevas</strong>{% endif %}
+      {% if validation.total_duplicates %}, <strong class="text-amber-700">{{ validation.total_duplicates }} duplicados</strong>{% endif %}
+      {% if validation.total_errors %}, <strong class="text-red-700">{{ validation.total_errors }} filas con errores</strong>{% endif %}
+    </p>
+
+    <div class="grid gap-3">
+      {% for sheet_name, result in validation.results.items %}
+        {% with has_duplicates=result.duplicates|length has_errors=result.errors|length has_valid=result.valid|length %}
+        <div class="rounded-lg border {% if has_errors %}border-yellow-200{% elif has_duplicates %}border-amber-200{% else %}border-green-200{% endif %} overflow-hidden">
+          <div class="px-4 py-2 flex items-center justify-between {% if has_errors %}bg-yellow-50{% elif has_duplicates %}bg-amber-50{% else %}bg-green-50{% endif %}">
+            <span class="text-sm font-medium text-gray-800">{{ sheet_name }}</span>
+            <span class="text-xs space-x-2">
+              {% if has_valid %}<span class="text-green-700">{{ has_valid }} nueva{{ has_valid|pluralize:',s' }}</span>{% endif %}
+              {% if has_duplicates %}<span class="text-amber-700">{{ has_duplicates }} duplicado{{ has_duplicates|pluralize:',s' }}</span>{% endif %}
+              {% if has_errors %}<span class="text-red-700">{{ has_errors }} error{{ has_errors|pluralize:',es' }}</span>{% endif %}
+            </span>
+          </div>
+
+          {% if has_duplicates %}
+          <div class="px-4 py-2 bg-amber-50 border-b border-amber-100">
+            <p class="text-xs text-amber-800 mb-2"><i class="fas fa-info-circle mr-1"></i>Se encontraron {{ has_duplicates }} registro{{ has_duplicates|pluralize:',s' }} ya existente{{ has_duplicates|pluralize:',s' }} en la base de datos:</p>
+            <div class="flex items-center gap-4 text-sm">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="dup_{{ sheet_name }}" value="update" checked class="w-4 h-4 text-indigo-600">
+                <span class="text-xs text-gray-700">Actualizar existentes</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="dup_{{ sheet_name }}" value="skip" class="w-4 h-4 text-gray-600">
+                <span class="text-xs text-gray-700">Descartar duplicados</span>
+              </label>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if has_errors %}
+          <div class="px-4 py-2 bg-red-50">
+            <ul class="text-xs text-red-700 space-y-1">
+              {% for err in result.errors %}
+                <li>• Fila {{ err.row }}: {{ err.errors|join:', ' }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+        {% endwith %}
+      {% endfor %}
+    </div>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+      <i class="fas fa-info-circle mr-1"></i>
+      Se importarán <strong>{{ validation.total_valid }} filas nuevas</strong>
+      {% if validation.total_duplicates %}y se {{ update_duplicates_verb|default:'actualizarán' }} <strong>{{ validation.total_duplicates }} duplicados</strong>{% endif %}
+      en total. Las filas con errores serán omitidas.
+    </div>
+
+    <form hx-post="{% url 'import_execute' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML" class="flex justify-between gap-3 pt-4 border-t border-gray-200">
+      {% for sheet_name, result in validation.results.items %}
+        {% if result.duplicates|length %}
+          <input type="hidden" name="dup_{{ sheet_name }}" value="update" class="dup-input">
+        {% endif %}
+      {% endfor %}
+      <div class="flex gap-2">
+        <button type="button" hx-post="{% url 'import_goto_selection' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50"><i class="fas fa-arrow-left mr-1"></i>Volver a selección</button>
+        <button type="button" hx-post="{% url 'import_cancel' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Cancelar</button>
+      </div>
+      {% if validation.total_valid or validation.total_duplicates %}
+        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+          <i class="fas fa-play mr-1"></i> Ejecutar importación
+        </button>
+      {% else %}
+        <button type="button" disabled class="px-6 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed">Sin datos válidos para importar</button>
+      {% endif %}
+    </form>
+  </div>
+{% endif %}
+
+<script>
+(function() {
+  var inputs = document.querySelectorAll('[name^="dup_"]');
+  var hiddenInputs = {};
+
+  inputs.forEach(function(input) {
+    var name = input.name;
+    if (input.type === 'radio') {
+      input.addEventListener('change', function() {
+        var hidden = document.querySelector('input[type="hidden"][name="' + name + '"]');
+        if (hidden) {
+          hidden.value = this.value;
+        }
+      });
+    }
+  });
+})();
+</script>

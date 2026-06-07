@@ -85,6 +85,7 @@ def nodo_images_json_view(request, item_id):
     return JsonResponse({
         'imagen': nodo.imagen or '',
         'plano': nodo.plano or '',
+        'nombre': str(nodo),
     })
 
 

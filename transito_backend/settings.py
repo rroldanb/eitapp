@@ -112,12 +112,12 @@ WSGI_APPLICATION = 'transito_backend.wsgi.application'
 ####### DEFAULT DATABASE CONFIGURATION #######
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 ####### LOCAL PG DATABASE CONFIGURATION #######
 
@@ -132,17 +132,25 @@ DATABASES = {
 
 ####### CLOUD PG DATABASE CONFIGURATION #######
 
-# USER = os.getenv("user")
-# PASSWORD = os.getenv("password")
-# HOST = os.getenv("host")
-# PORT = os.getenv("port")
-# DBNAME = os.getenv("dbname")
+USER = os.getenv("user")
+PASSWORD = os.getenv("password")
+HOST = os.getenv("host")
+PORT = os.getenv("port")
+DBNAME = os.getenv("dbname")
 
-# DATABASE_URL = f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
+DATABASE_URL = f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
 
-# DATABASES = {
-#     "default": dj_database_url.parse(DATABASE_URL)
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    },
+    # "supa": dj_database_url.parse(DATABASE_URL),
+    # 'pg_local': dj_database_url.config(
+    #     default='postgresql://postgres:1234@localhost:5432/eitapp',
+    #     conn_max_age=600
+    # )
+}
 
 
 # Password validation

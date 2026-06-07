@@ -45,6 +45,17 @@ class Nodo(BaseModel):
         """Retorna 'PC-03' o None."""
         return f"PC-{self.numero_pc:02d}" if self.is_pc else None
 
+    def delete(self, *args, **kwargs):
+        from apps.imagenes.services.storage_service import delete_image
+        for field in ('imagen', 'plano'):
+            url = getattr(self, field, None)
+            if url:
+                try:
+                    delete_image(url)
+                except Exception:
+                    pass
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         pc_tag = f" [{self.nombre_pc}]" if self.is_pc else ""
         calle_1_nombre = self.calle_1.nombre if self.calle_1 else 'Sin calle'

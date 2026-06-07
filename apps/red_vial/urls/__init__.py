@@ -9,4 +9,5 @@ from .periodizacion_urls import urlpatterns as periodizacion_urlpatterns
 from .analisis_flujos_urls import urlpatterns as analisis_flujos_urlpatterns
 from .all_urls import urlpatterns as all_urlpatterns
 from .transyt_urls import urlpatterns as transyt_urlpatterns
-urlpatterns = calle_urlpatterns + nodo_urlpatterns + arco_urlpatterns + regulacion_urlpatterns + punto_control_urlpatterns + coeficiente_cruce_urlpatterns + periodo_urlpatterns + periodizacion_urlpatterns + analisis_flujos_urlpatterns + all_urlpatterns + transyt_urlpatterns
+from .import_urls import urlpatterns as import_urlpatterns
+urlpatterns = calle_urlpatterns + nodo_urlpatterns + arco_urlpatterns + regulacion_urlpatterns + punto_control_urlpatterns + coeficiente_cruce_urlpatterns + periodo_urlpatterns + periodizacion_urlpatterns + analisis_flujos_urlpatterns + all_urlpatterns + transyt_urlpatterns + import_urlpatterns

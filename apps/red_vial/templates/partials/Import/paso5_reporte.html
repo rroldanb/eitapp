@@ -1,0 +1,104 @@
+<div class="space-y-4">
+  <div class="flex items-center gap-2 text-lg font-semibold text-gray-800">
+    <i class="fas fa-check-circle text-green-500"></i>
+    Importación completada
+  </div>
+
+  {% if report %}
+    <div class="grid gap-3">
+      {% for sheet_name, sr in report.items %}
+        <div class="rounded-lg border {% if sr.rejected %}border-yellow-200{% else %}border-green-200{% endif %} overflow-hidden">
+          <div class="px-4 py-2 flex items-center justify-between {% if sr.rejected %}bg-yellow-50{% else %}bg-green-50{% endif %}">
+            <span class="text-sm font-medium text-gray-800">{{ sheet_name }}</span>
+            <span class="text-xs space-x-3">
+              {% if sr.inserted %}<span class="text-green-700"><i class="fas fa-plus-circle"></i> {{ sr.inserted }} insertada{{ sr.inserted|pluralize:',s' }}</span>{% endif %}
+              {% if sr.updated %}<span class="text-blue-700"><i class="fas fa-sync-alt"></i> {{ sr.updated }} actualizada{{ sr.updated|pluralize:',s' }}</span>{% endif %}
+              {% if sr.skipped_duplicates %}<span class="text-amber-700"><i class="fas fa-skip-forward"></i> {{ sr.skipped_duplicates }} omitida{{ sr.skipped_duplicates|pluralize:',s' }}</span>{% endif %}
+              {% if sr.rejected %}<span class="text-red-700"><i class="fas fa-exclamation-circle"></i> {{ sr.rejected|length }} rechazada{{ sr.rejected|length|pluralize:',s' }}</span>{% endif %}
+            </span>
+          </div>
+          {% if sr.rejected %}
+            <div class="px-4 py-2 bg-red-50">
+              <ul class="text-xs text-red-700 space-y-1">
+                {% for rej in sr.rejected %}
+                  <li>• Fila {{ rej.row }}: {{ rej.reason }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+      <div class="grid grid-cols-4 gap-4 text-center">
+        <div>
+          <span class="block text-2xl font-bold text-green-600">{{ report_totals.inserted }}</span>
+          <span class="text-xs text-gray-500">Insertadas</span>
+        </div>
+        <div>
+          <span class="block text-2xl font-bold text-blue-600">{{ report_totals.updated }}</span>
+          <span class="text-xs text-gray-500">Actualizadas</span>
+        </div>
+        <div>
+          <span class="block text-2xl font-bold text-amber-600">{{ report_totals.skipped|default:0 }}</span>
+          <span class="text-xs text-gray-500">Omitidas</span>
+        </div>
+        <div>
+          <span class="block text-2xl font-bold text-red-600">{{ report_totals.rejected }}</span>
+          <span class="text-xs text-gray-500">Rechazadas</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-between gap-3 pt-4 border-t border-gray-200">
+      <a href="{% url 'proyecto_detail' proyecto.id %}" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">
+        <i class="fas fa-arrow-left mr-1"></i> Volver al proyecto
+      </a>
+      <div class="flex gap-2">
+        <button type="button" onclick="downloadReport()" class="px-4 py-2 text-sm text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+          <i class="fas fa-download mr-1"></i> Descargar reporte
+        </button>
+        <a href="{% url 'import_start' proyecto.id %}" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
+          <i class="fas fa-file-import mr-1"></i> Importar otro archivo
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+function downloadReport() {
+  var lines = ['=== REPORTE DE IMPORTACION ===', '', 'Resumen:'];
+  var report = {{ report_json|safe }};
+  var totals = {{ report_totals_json|safe }};
+  lines.push('  Insertadas: ' + totals.inserted);
+  lines.push('  Actualizadas: ' + totals.updated);
+  lines.push('  Omitidas: ' + (totals.skipped || 0));
+  lines.push('  Rechazadas: ' + totals.rejected);
+  lines.push('');
+  for (var sheet in report) {
+    var sr = report[sheet];
+    lines.push('--- ' + sheet + ' ---');
+    lines.push('  Insertadas: ' + (sr.inserted || 0));
+    lines.push('  Actualizadas: ' + (sr.updated || 0));
+    lines.push('  Omitidas: ' + (sr.skipped_duplicates || 0));
+    if (sr.rejected && sr.rejected.length) {
+      lines.push('  Rechazadas:');
+      for (var i = 0; i < sr.rejected.length; i++) {
+        lines.push('    - Fila ' + (sr.rejected[i].row || '?') + ': ' + (sr.rejected[i].reason || ''));
+      }
+    }
+    lines.push('');
+  }
+  lines.push('=== FIN DEL REPORTE ===');
+
+  var blob = new Blob([lines.join('\n')], {type: 'text/plain;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'reporte_importacion.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>

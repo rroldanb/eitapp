@@ -1,5 +1,29 @@
 from django.apps import AppConfig
 
+
 class CommonConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.common'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.common"
+
+    def ready(self):
+        self.check_db_connections()
+
+    def check_db_connections(self):
+        from django.db import connections
+        from django.db.utils import OperationalError
+
+        # dbs = ["default", "pg_local", "supa"]
+        dbs = ["default"]
+
+        for db_name in dbs:
+            try:
+                conn = connections[db_name]
+                conn.ensure_connection()
+                print(f"✅ Base de datos '{db_name}' conectada correctamente.")
+            except OperationalError as e:
+                print(f"❌ Error al conectar con '{db_name}': {e}")
+
+
+# class CommonConfig(AppConfig):
+#     default_auto_field = 'django.db.models.BigAutoField'
+#     name = 'apps.common'

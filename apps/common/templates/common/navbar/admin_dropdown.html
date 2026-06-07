@@ -12,6 +12,15 @@
         <a href="{% url 'generar_planilla' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
             <i class="fas fa-file-excel mr-2" aria-hidden="true"></i> Generar plantilla Excel
         </a>
+        <a href="{% url 'import_project_select' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+            <i class="fas fa-file-import mr-2" aria-hidden="true"></i> Importar datos
+        </a>
+        <a href="{% url 'backup_database' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+            <i class="fas fa-database mr-2" aria-hidden="true"></i> Respaldar base de datos
+        </a>
+        <a href="{% url 'restore_database' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+            <i class="fas fa-upload mr-2" aria-hidden="true"></i> Restaurar base de datos
+        </a>
         <hr class="my-2 border-gray-700">
         <a href="/admin/" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
             <i class="fas fa-cog mr-2" aria-hidden="true"></i> Admin Django

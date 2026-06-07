@@ -189,6 +189,15 @@
     <hr class="my-3 border-gray-300" />
       <li class="nav-item">
         <a
+          class="nav-link {% if 'importar' in request.resolver_match.url_name %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
+          href="{% url 'import_start' proyecto.id %}?from_sidebar=1"
+        >
+          <i class="fas fa-file-import text-lg" aria-hidden="true"></i>
+          <span class="nav-link-text">Importar datos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
           class="nav-link {% if request.resolver_match.url_name == 'proyecto_detail' %}active{% endif %} text-gray-700 hover:bg-gray-200 rounded px-3 py-2 flex items-center gap-3 transition-colors"
           href="{% url 'proyecto_detail' proyecto.id %}"
         >

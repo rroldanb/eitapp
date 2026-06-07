@@ -1,0 +1,17 @@
+<div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100">
+  <ol class="flex items-center gap-0 text-sm">
+    {% for step_num, label in steps_data %}
+      <li class="flex items-center">
+        {% if not forloop.first %}
+          <div class="w-8 h-px {% if step_num <= current_step %}bg-indigo-500{% else %}bg-gray-300{% endif %} mx-2"></div>
+        {% endif %}
+        <span class="flex items-center gap-1.5 whitespace-nowrap {% if step_num == current_step %}text-indigo-700 font-semibold{% elif step_num < current_step %}text-indigo-500{% else %}text-gray-400{% endif %}">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold {% if step_num == current_step %}bg-indigo-600 text-white{% elif step_num < current_step %}bg-indigo-200 text-indigo-700{% else %}bg-gray-200 text-gray-500{% endif %}">
+            {% if step_num < current_step %}&#10003;{% else %}{{ step_num }}{% endif %}
+          </span>
+          <span class="hidden sm:inline">{{ label }}</span>
+        </span>
+      </li>
+    {% endfor %}
+  </ol>
+</div>

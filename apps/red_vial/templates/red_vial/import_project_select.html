@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto mt-10">
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-indigo-600 px-6 py-4">
+      <h1 class="text-xl font-bold text-white"><i class="fas fa-file-import mr-2"></i> Importar datos desde Excel</h1>
+      <p class="text-indigo-200 text-sm mt-1">Selecciona el proyecto al que deseas importar datos</p>
+    </div>
+
+    <div class="p-6">
+      {% if proyectos %}
+        <div class="grid gap-3">
+          {% for p in proyectos %}
+            <a href="{% url 'import_start' p.id %}" class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+              <div>
+                <span class="font-medium text-gray-800">{{ p.title }}</span>
+                <span class="text-xs text-gray-500 ml-2">{{ p.mandante.name }}</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-8 text-gray-500">
+          <i class="fas fa-folder-open text-4xl mb-3"></i>
+          <p>No tienes proyectos. Crea un proyecto primero.</p>
+          <a href="{% url 'proyecto_create' %}" class="inline-block mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">Crear proyecto</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

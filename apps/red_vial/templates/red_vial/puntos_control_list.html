@@ -11,9 +11,24 @@
 {# Preview de imágenes del nodo seleccionado #}
 <div id="nodo-images-preview" class="hidden mb-4 p-4 bg-white rounded-lg shadow">
   <div class="flex gap-4">
+    {# Plan (Esquema) #}
     <div class="flex-1 min-w-0">
       <h4 class="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
-        <i class="fas fa-map text-green-600 mr-1" aria-hidden="true"></i>Imagen (Mapa)
+        <i class="fas fa-draw-polygon text-green-600 mr-1" aria-hidden="true"></i>Plano (Esquema) <span id="preview-plano-label">{{ nodo }}</span>
+        <span class="ml-auto flex gap-1">
+          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="zoom-in" title="Acercar">+</button>
+          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="zoom-out" title="Alejar">−</button>
+          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="reset" title="Restaurar">⟲</button>
+        </span>
+      </h4>
+      <div class="zoom-viewport bg-gray-50 rounded-lg border border-gray-200 overflow-hidden relative min-h-[180px] h-[33vh] cursor-grab active:cursor-grabbing select-none" data-viewport="preview-plano">
+        <img id="preview-plano" class="zoom-img hidden w-full h-full absolute top-0 left-0 object-contain" src="" alt="Plano del nodo" draggable="false">
+        <div id="preview-plano-empty" class="absolute inset-0 flex items-center justify-center"><p class="text-xs text-gray-400">Sin plano</p></div>
+      </div>
+    {# Imagen (Mapa) #}
+    </div>    <div class="flex-1 min-w-0">
+      <h4 class="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
+        <i class="fas fa-map text-green-600  mr-1" aria-hidden="true"></i>Imagen (Mapa) <span id="preview-imagen-label">{{ nodo }}</span>
         <span class="ml-auto flex gap-1">
           <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-imagen" data-action="zoom-in" title="Acercar">+</button>
           <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-imagen" data-action="zoom-out" title="Alejar">−</button>
@@ -25,20 +40,7 @@
         <div id="preview-imagen-empty" class="absolute inset-0 flex items-center justify-center"><p class="text-xs text-gray-400">Sin imagen</p></div>
       </div>
     </div>
-    <div class="flex-1 min-w-0">
-      <h4 class="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
-        <i class="fas fa-draw-polygon text-green-600 mr-1" aria-hidden="true"></i>Plano (Esquema)
-        <span class="ml-auto flex gap-1">
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="zoom-in" title="Acercar">+</button>
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="zoom-out" title="Alejar">−</button>
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="reset" title="Restaurar">⟲</button>
-        </span>
-      </h4>
-      <div class="zoom-viewport bg-gray-50 rounded-lg border border-gray-200 overflow-hidden relative min-h-[180px] h-[33vh] cursor-grab active:cursor-grabbing select-none" data-viewport="preview-plano">
-        <img id="preview-plano" class="zoom-img hidden w-full h-full absolute top-0 left-0 object-contain" src="" alt="Plano del nodo" draggable="false">
-        <div id="preview-plano-empty" class="absolute inset-0 flex items-center justify-center"><p class="text-xs text-gray-400">Sin plano</p></div>
-      </div>
-    </div>
+
   </div>
 </div>
 
@@ -158,6 +160,8 @@
 
     var url = IMAGES_URL_TPL.replace(PLACEHOLDER, nodoId);
 
+    
+
     fetch(url)
       .then(function(r) { return r.json(); })
       .then(function(data) {
@@ -165,6 +169,9 @@
         var pln = document.getElementById('preview-plano');
         var imgEmpty = document.getElementById('preview-imagen-empty');
         var plnEmpty = document.getElementById('preview-plano-empty');
+
+        document.getElementById('preview-plano-label').textContent = data.nombre || '';
+        document.getElementById('preview-imagen-label').textContent = data.nombre || '';
 
         resetZoomFor('preview-imagen');
         resetZoomFor('preview-plano');
@@ -188,8 +195,10 @@
           pln.src = '';
           plnEmpty.classList.remove('hidden');
         }
-
-        preview.classList.remove('hidden');
+        if (data.plano || data.imagen) { 
+          preview.classList.remove('hidden');
+        } else preview.classList.add('hidden');
+        //preview.classList.remove('hidden');
       })
       .catch(function() { preview.classList.add('hidden'); });
   }

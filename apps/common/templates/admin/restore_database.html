@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto mt-10">
+  <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+    <div class="bg-red-600 px-6 py-5">
+      <h1 class="text-xl font-semibold text-white"><i class="fas fa-upload mr-2"></i> Restaurar base de datos</h1>
+      <p class="text-red-200 text-sm mt-1">Al restaurar, se eliminará toda la data ingresada después del respaldo seleccionado.</p>
+    </div>
+    <div class="p-6 space-y-6">
+      {% if error_message %}
+        <div class="rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3">
+          {{ error_message }}
+        </div>
+      {% endif %}
+      {% if success_message %}
+        <div class="rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3">
+          {{ success_message }}
+        </div>
+      {% endif %}
+
+      <div class="rounded-2xl border border-red-200 bg-red-50 p-5">
+        <div class="flex items-start gap-3">
+          <div class="mt-1 p-2 bg-red-100 rounded-full text-red-600">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-red-800">Advertencia de restauración</h2>
+            <p class="text-sm text-red-700 mt-1">Este proceso reemplaza el estado de la base de datos seleccionada con el contenido del archivo de respaldo. Todos los registros creados después de ese respaldo se perderán permanentemente. Se aplicarán migraciones antes de restaurar si son necesarias.</p>
+            <p class="text-sm text-red-700 mt-1">Por defecto, el usuario superadmin que ejecuta la restauración se conservará. Si deseas desmarcar esta opción, el usuario será reemplazado por el del respaldo.</p>
+          </div>
+        </div>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data" class="space-y-6" id="restore-form">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label for="target_database" class="block text-sm font-medium text-gray-700">Base de datos destino</label>
+            <select id="target_database" name="target_database" class="mt-2 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              {% for db_alias in database_choices %}
+                <option value="{{ db_alias }}" {% if db_alias == target_database %}selected{% endif %}>{{ db_alias }}</option>
+              {% endfor %}
+            </select>
+            <p class="mt-2 text-xs text-gray-500">Selecciona a cuál base de datos se restaurará el respaldo.</p>
+          </div>
+
+          <div class="flex items-end pb-0.5">
+            <label for="preserve_superuser" class="flex items-center gap-3 cursor-pointer">
+              <input id="preserve_superuser" name="preserve_superuser" type="checkbox" value="on" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" {% if preserve_requested %}checked{% endif %} />
+              <span class="text-sm font-medium text-gray-700">Conservar superadmin actual</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label for="backup_file" class="block text-sm font-medium text-gray-700">Archivo de respaldo (.zip)</label>
+          <input id="backup_file" name="backup_file" type="file" accept=".zip" class="mt-2 block w-full text-sm text-gray-900 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700" />
+          <p class="mt-2 text-xs text-gray-500">Selecciona el archivo ZIP generado por el proceso de respaldo anterior.</p>
+        </div>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <button type="button" onclick="history.back()" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-times text-sm"></i> Cancelar
+          </button>
+          <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300" id="restore-submit-btn">
+            <i class="fas fa-upload"></i> Restaurar respaldo
+            <span id="restore-spinner" style="display:none;" class="inline-flex items-center justify-center rounded-full bg-white/10 p-2">
+              <svg class="h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var restoreForm = document.getElementById('restore-form');
+  var backupFileInput = document.getElementById('backup_file');
+  var spinner = document.getElementById('restore-spinner');
+
+  if (restoreForm) {
+    restoreForm.addEventListener('submit', function(event) {
+      if (!backupFileInput.value) {
+        event.preventDefault();
+        alert('Debes seleccionar un archivo ZIP de respaldo.');
+        backupFileInput.focus();
+        return;
+      }
+      spinner.style.display = 'inline-flex';
+      restoreForm.querySelector('button[type="submit"]').setAttribute('disabled', 'disabled');
+    });
+  }
+})();
+</script>
+{% endblock %}

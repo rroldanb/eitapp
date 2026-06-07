@@ -1,0 +1,76 @@
+<form hx-post="{% url 'import_validate' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML" class="space-y-4">
+  {% if error %}
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">{{ error }}</div>
+  {% endif %}
+
+  <p class="text-sm text-gray-600">Archivo: <strong>{{ filename }}</strong> &mdash; Selecciona las hojas a importar:</p>
+
+  <div class="flex flex-wrap gap-2 mb-4">
+    <button type="button" class="btn-preset px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors" data-action="check-all">Seleccionar todo</button>
+    <button type="button" class="btn-preset px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors" data-action="check-contactos">Solo contactos</button>
+    <button type="button" class="btn-preset px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors" data-action="check-proyecto">Solo datos proyecto</button>
+    <button type="button" class="btn-preset px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors" data-action="uncheck-all">Deseleccionar todo</button>
+  </div>
+
+  <div class="grid gap-2">
+    {% for sheet_name, rows in parsed.items %}
+      <label class="flex items-center gap-3 p-3 rounded-lg border {% if sheet_name in selected %}border-indigo-300 bg-indigo-50{% else %}border-gray-200 hover:border-gray-300{% endif %} cursor-pointer transition-colors">
+        <input type="checkbox" name="sheets" value="{{ sheet_name }}"
+          class="sheet-checkbox w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+          {% if from_sidebar and sheet_name != "Mandante" and sheet_name != "Contacto" and sheet_name != "Proyecto" %}checked{% elif not from_sidebar and not selected and sheet_name != "Proyecto" %}checked{% endif %}
+          {% if sheet_name in selected %}checked{% endif %}>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-800">{{ sheet_name }}</span>
+            <span class="text-xs text-gray-500">{{ rows|length }} fila{{ rows|length|pluralize:',s' }}</span>
+          </div>
+          <p class="text-xs text-gray-400 truncate">
+            {% if rows.0 %}
+              {{ rows.0.keys|join:', ' }}
+            {% endif %}
+          </p>
+        </div>
+      </label>
+    {% endfor %}
+  </div>
+
+  <div class="flex justify-between gap-3 pt-4 border-t border-gray-200">
+    <div class="flex gap-2">
+      <button type="button" hx-post="{% url 'import_back_step1' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50"><i class="fas fa-arrow-left mr-1"></i>Volver</button>
+      <button type="button" hx-post="{% url 'import_cancel' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Cancelar</button>
+    </div>
+    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
+      <i class="fas fa-check-circle mr-1"></i> Validar selección
+    </button>
+  </div>
+</form>
+
+<script>
+(function() {
+  var checkboxes = document.querySelectorAll('.sheet-checkbox');
+
+  function setAll(checked) {
+    checkboxes.forEach(function(cb) { cb.checked = checked; });
+  }
+
+  document.querySelectorAll('.btn-preset').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var action = this.getAttribute('data-action');
+      if (action === 'check-all') { setAll(true); }
+      else if (action === 'uncheck-all') { setAll(false); }
+      else if (action === 'check-contactos') {
+        setAll(false);
+        document.querySelectorAll('.sheet-checkbox').forEach(function(cb) {
+          if (cb.value === 'Mandante' || cb.value === 'Contacto') cb.checked = true;
+        });
+      }
+      else if (action === 'check-proyecto') {
+        setAll(false);
+        document.querySelectorAll('.sheet-checkbox').forEach(function(cb) {
+          if (cb.value !== 'Mandante' && cb.value !== 'Contacto' && cb.value !== 'Proyecto') cb.checked = true;
+        });
+      }
+    });
+  });
+})();
+</script>

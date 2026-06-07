@@ -306,6 +306,69 @@ class NodoPlanoServiceTest(TestCase):
         mock_delete.assert_not_called()
 
 
+class NodoModelDeleteImageCleanupTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testdel", password="12345")
+        self.mandante = Mandante.objects.create(name="Del Mandante")
+        self.proyecto = Proyecto.objects.create(
+            title="Del Proyecto", user=self.user, mandante=self.mandante,
+        )
+
+    @patch("apps.imagenes.services.storage_service.delete_image")
+    def test_delete_nodo_cleans_up_both_images(self, mock_delete):
+        nodo = Nodo.objects.create(
+            numero=1, proyecto=self.proyecto,
+            imagen="https://bucket.supabase.co/img1.webp",
+            plano="https://bucket.supabase.co/plano1.webp",
+        )
+        nodo.delete()
+        self.assertEqual(mock_delete.call_count, 2)
+        mock_delete.assert_any_call("https://bucket.supabase.co/img1.webp")
+        mock_delete.assert_any_call("https://bucket.supabase.co/plano1.webp")
+
+    @patch("apps.imagenes.services.storage_service.delete_image")
+    def test_delete_nodo_without_images(self, mock_delete):
+        nodo = Nodo.objects.create(numero=2, proyecto=self.proyecto)
+        nodo.delete()
+        mock_delete.assert_not_called()
+
+    @patch("apps.imagenes.services.storage_service.delete_image")
+    def test_delete_nodo_with_only_imagen(self, mock_delete):
+        nodo = Nodo.objects.create(
+            numero=3, proyecto=self.proyecto,
+            imagen="https://bucket.supabase.co/img3.webp",
+        )
+        nodo.delete()
+        mock_delete.assert_called_once_with("https://bucket.supabase.co/img3.webp")
+
+    @patch("apps.imagenes.services.storage_service.delete_image")
+    def test_delete_nodo_with_only_plano(self, mock_delete):
+        nodo = Nodo.objects.create(
+            numero=4, proyecto=self.proyecto,
+            plano="https://bucket.supabase.co/plano4.webp",
+        )
+        nodo.delete()
+        mock_delete.assert_called_once_with("https://bucket.supabase.co/plano4.webp")
+
+    @patch("apps.imagenes.services.storage_service.delete_project_image")
+    def test_proyecto_cascade_cleans_up_nodo_images(self, mock_delete):
+        nodo1 = Nodo.objects.create(
+            numero=10, proyecto=self.proyecto,
+            imagen="https://bucket.supabase.co/n10-img.webp",
+            plano="https://bucket.supabase.co/n10-plano.webp",
+        )
+        nodo2 = Nodo.objects.create(
+            numero=11, proyecto=self.proyecto,
+            imagen="https://bucket.supabase.co/n11-img.webp",
+        )
+        self.proyecto.delete()
+        # 3 images total: nodo1.imagen, nodo1.plano, nodo2.imagen
+        self.assertEqual(mock_delete.call_count, 3)
+        mock_delete.assert_any_call("https://bucket.supabase.co/n10-img.webp")
+        mock_delete.assert_any_call("https://bucket.supabase.co/n10-plano.webp")
+        mock_delete.assert_any_call("https://bucket.supabase.co/n11-img.webp")
+
+
 class NodoImagesJsonViewTest(TestCase):
     def setUp(self):
         self.client = Client()
