@@ -3,7 +3,7 @@
   <thead class="bg-slate-200">
     <tr>
 
-      <th class="pc-col-nodo px-1 py-2 text-center font-bold text-gray-900 uppercase">
+      <th class="pc-col-nodo px-1 py-2 text-center font-bold text-gray-900 uppercase sticky left-0 z-10 bg-slate-200">
         <a role="button" href="?sort_by=nodo&amp;sort_order={% if sort_by == 'nodo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
           hx-get="?sort_by=nodo&amp;sort_order={% if sort_by == 'nodo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
           hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"

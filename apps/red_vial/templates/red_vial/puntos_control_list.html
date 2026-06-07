@@ -9,38 +9,46 @@
 </div>
 
 {# Preview de imágenes del nodo seleccionado #}
-<div id="nodo-images-preview" class="hidden mb-4 p-4 bg-white rounded-lg shadow">
-  <div class="flex gap-4">
-    {# Plan (Esquema) #}
-    <div class="flex-1 min-w-0">
-      <h4 class="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
-        <i class="fas fa-draw-polygon text-green-600 mr-1" aria-hidden="true"></i>Plano (Esquema) <span id="preview-plano-label">{{ nodo }}</span>
-        <span class="ml-auto flex gap-1">
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="zoom-in" title="Acercar">+</button>
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="zoom-out" title="Alejar">−</button>
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="reset" title="Restaurar">⟲</button>
-        </span>
-      </h4>
-      <div class="zoom-viewport bg-gray-50 rounded-lg border border-gray-200 overflow-hidden relative min-h-[180px] h-[33vh] cursor-grab active:cursor-grabbing select-none" data-viewport="preview-plano">
-        <img id="preview-plano" class="zoom-img hidden w-full h-full absolute top-0 left-0 object-contain" src="" alt="Plano del nodo" draggable="false">
-        <div id="preview-plano-empty" class="absolute inset-0 flex items-center justify-center"><p class="text-xs text-gray-400">Sin plano</p></div>
+<div id="nodo-images-preview" class="hidden mb-4 bg-white rounded-lg shadow">
+  <div class="flex items-center justify-between px-4 py-2 cursor-pointer select-none border-b border-gray-200"
+    _="on click toggle .hidden on #nodo-images-preview-body">
+    <span class="text-sm font-bold text-gray-700">Imágenes del nodo <span id="preview-plano-label"></span></span>
+    <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform" aria-hidden="true"
+      _="on click toggle .rotate-180 on me"></i>
+  </div>
+  <div id="nodo-images-preview-body" class="p-4">
+    <div class="flex gap-4">
+      {# Plan (Esquema) #}
+      <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
+          <i class="fas fa-draw-polygon text-green-600 mr-1" aria-hidden="true"></i>Plano (Esquema)
+          <span class="ml-auto flex gap-1">
+            <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="zoom-in" title="Acercar">+</button>
+            <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="zoom-out" title="Alejar">−</button>
+            <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-plano" data-action="reset" title="Restaurar">⟲</button>
+          </span>
+        </h4>
+        <div class="zoom-viewport bg-gray-50 rounded-lg border border-gray-200 overflow-hidden relative min-h-[180px] h-[33vh] cursor-grab active:cursor-grabbing select-none outline-none" data-viewport="preview-plano" tabindex="0">
+          <img id="preview-plano" class="zoom-img hidden w-full h-full absolute top-0 left-0 object-contain" src="" alt="Plano del nodo" draggable="false">
+          <div id="preview-plano-empty" class="absolute inset-0 flex items-center justify-center"><p class="text-xs text-gray-400">Sin plano</p></div>
+        </div>
       </div>
-    {# Imagen (Mapa) #}
-    </div>    <div class="flex-1 min-w-0">
-      <h4 class="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
-        <i class="fas fa-map text-green-600  mr-1" aria-hidden="true"></i>Imagen (Mapa) <span id="preview-imagen-label">{{ nodo }}</span>
-        <span class="ml-auto flex gap-1">
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-imagen" data-action="zoom-in" title="Acercar">+</button>
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-imagen" data-action="zoom-out" title="Alejar">−</button>
-          <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-imagen" data-action="reset" title="Restaurar">⟲</button>
-        </span>
-      </h4>
-      <div class="zoom-viewport bg-gray-50 rounded-lg border border-gray-200 overflow-hidden relative min-h-[180px] h-[33vh] cursor-grab active:cursor-grabbing select-none" data-viewport="preview-imagen">
-        <img id="preview-imagen" class="zoom-img hidden w-full h-full absolute top-0 left-0 object-contain" src="" alt="Imagen del nodo" draggable="false">
-        <div id="preview-imagen-empty" class="absolute inset-0 flex items-center justify-center"><p class="text-xs text-gray-400">Sin imagen</p></div>
+      {# Imagen (Mapa) #}
+      <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
+          <i class="fas fa-map text-green-600  mr-1" aria-hidden="true"></i>Imagen (Mapa)
+          <span class="ml-auto flex gap-1">
+            <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-imagen" data-action="zoom-in" title="Acercar">+</button>
+            <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-imagen" data-action="zoom-out" title="Alejar">−</button>
+            <button type="button" class="zoom-btn text-xs px-1.5 py-0.5 bg-gray-200 rounded hover:bg-gray-300" data-target="preview-imagen" data-action="reset" title="Restaurar">⟲</button>
+          </span>
+        </h4>
+        <div class="zoom-viewport bg-gray-50 rounded-lg border border-gray-200 overflow-hidden relative min-h-[180px] h-[33vh] cursor-grab active:cursor-grabbing select-none outline-none" data-viewport="preview-imagen" tabindex="0">
+          <img id="preview-imagen" class="zoom-img hidden w-full h-full absolute top-0 left-0 object-contain" src="" alt="Imagen del nodo" draggable="false">
+          <div id="preview-imagen-empty" class="absolute inset-0 flex items-center justify-center"><p class="text-xs text-gray-400">Sin imagen</p></div>
+        </div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -53,6 +61,18 @@
 </div>
 
 <div id="puntos-control-list-config" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
+<style>
+#puntos-control-table select,
+#new-punto-control-form select {
+  max-width: 100px;
+}
+#puntos-control-table select:focus,
+#new-punto-control-form select:focus {
+  max-width: 300px;
+  position: relative;
+  z-index: 10;
+}
+</style>
 {% endblock %}
 {% block extra_js %}
 {% url 'nodo_images_json' item_id='00000000-0000-0000-0000-000000000000' as nodo_images_url_template %}
@@ -110,6 +130,7 @@
     vp.addEventListener('mousedown', function(e) {
       if (img.classList.contains('hidden')) return;
       if (e.button !== 0) return;
+      vp.focus();
       var s = zoomState[imgId];
       s.dragging = true;
       s.dragStartX = e.clientX;
@@ -171,7 +192,6 @@
         var plnEmpty = document.getElementById('preview-plano-empty');
 
         document.getElementById('preview-plano-label').textContent = data.nombre || '';
-        document.getElementById('preview-imagen-label').textContent = data.nombre || '';
 
         resetZoomFor('preview-imagen');
         resetZoomFor('preview-plano');
