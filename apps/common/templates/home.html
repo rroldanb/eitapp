@@ -2,149 +2,279 @@
 
 {% block content %}
 
-<!-- Hero Section with Gradient -->
-<section class="bg-gradient-primary text-white py-20">
-    <div class="container mx-auto px-4 text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-6">Gestor de Medición de Tránsito</h1>
-        <p class="text-lg md:text-xl mb-8 opacity-90 max-w-3xl mx-auto">Solución integral para gestión de proyectos viales</p>
-        
-        {% if user.is_authenticated %}
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="{% url 'proyectos' %}" 
-                class="px-8 py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
-                    <i class="fas fa-project-diagram mr-2" aria-hidden="true"></i> Ir a Proyectos
-                </a>
-                <a href="{% url 'mandantes' %}" 
-                class="px-8 py-3 bg-white text-secondary font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
-                    <i class="fas fa-building mr-2" aria-hidden="true"></i> Ver Mandantes
-                </a>
-            </div>
-        {% else %}
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="{% url 'signin' %}" 
-                class="px-8 py-3 bg-white text-secondary font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
-                    <i class="fas fa-sign-in-alt mr-2" aria-hidden="true"></i> Iniciar Sesión
-                </a>
-            </div>
-        {% endif %}
-    </div>
-</section>
-
-<!-- Pending Tasks Alert Banner -->
-{% if user.is_authenticated and pending_tasks_count > 0 %}
-<section class="container mx-auto px-4 mt-6">
-    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow-sm">
-        <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <i class="fas fa-tasks text-yellow-500 text-xl" aria-hidden="true"></i>
-            </div>
-            <div class="ml-3 flex-1">
-                <p class="text-sm text-yellow-700 font-medium">
-                    Tienes {{ pending_tasks_count }} tarea{{ pending_tasks_count|pluralize:"s" }} pendiente{{ pending_tasks_count|pluralize:"s" }}
-                    {% if overdue_tasks_count > 0 %}
-                        <span class="text-red-600">({{ overdue_tasks_count }} vencida{{ overdue_tasks_count|pluralize:"s" }})</span>
-                    {% endif %}
-                </p>
-                <div class="mt-2">
-                    <a href="{% url 'task_list' %}" class="text-sm text-yellow-800 underline hover:text-yellow-900 font-medium">
-                        Ver tareas pendientes →
-                    </a>
-                </div>
-            </div>
+{% if user.is_authenticated %}
+  {# ===== DASHBOARD FOR AUTHENTICATED USERS ===== #}
+<div class="container mx-auto bg-slate-100 rounded-lg shadow mt-2">
+  
+  <section class="bg-primary text-white">
+    <div class="container mx-auto px-4 py-10">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold">Bienvenido, {{ user.username }}</h1>
+          <p class="text-indigo-200 text-sm mt-1">{{ current_date|date:"l j F Y" }}</p>
         </div>
+        <div class="hidden sm:flex gap-2">
+          <a href="{% url 'proyectos' %}" class="px-4 py-2 bg-white text-indigo-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium">
+            <i class="fas fa-folder-open mr-1"></i> Proyectos
+          </a>
+          <a href="{% url 'mandantes' %}" class="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors text-sm font-medium">
+            <i class="fas fa-building mr-1"></i> Mandantes
+          </a>
+        </div>
+      </div>
     </div>
-</section>
-{% endif %}
+  </section>
 
-<!-- Main Content -->
-<main class="container mx-auto px-4 py-16">
-    <section class="bg-white p-12 rounded-lg shadow-md">
-        <h2 class="text-4xl font-bold text-center text-secondary mb-8">Acerca de EIT</h2>
-        <p class="text-gray-700 text-lg leading-relaxed max-w-3xl mx-auto">
-            Plataforma profesional para la gestión de proyectos de medición de tránsito, incluyendo la administración de la red vial (calles, nodos, arcos, puntos de control), periodización de datos de flujo vehicular, análisis de tránsito, y generación de archivos de simulación TRANSYT 8S.
+  <section class="container mx-auto px-4 -mt-5">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <a href="{% url 'proyectos' %}" class="bg-white rounded-lg border border-gray-200 p-4 hover:border-indigo-300 hover:shadow-sm transition-all no-underline">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 leading-none">{{ proyectos_count|default:"0" }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">Proyectos activos</p>
+          </div>
+        </div>
+      </a>
+      <a href="{% url 'mandantes' %}" class="bg-white rounded-lg border border-gray-200 p-4 hover:border-indigo-300 hover:shadow-sm transition-all no-underline">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+            <i class="fas fa-building"></i>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 leading-none">{{ mandantes_count|default:"0" }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">Mandantes</p>
+          </div>
+        </div>
+      </a>
+      <a href="{% url 'task_list' %}" class="bg-white rounded-lg border border-gray-200 p-4 hover:border-indigo-300 hover:shadow-sm transition-all no-underline">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg {% if pending_tasks_count > 0 %}bg-amber-100 text-amber-700{% else %}bg-gray-100 text-gray-600{% endif %} flex items-center justify-center">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 leading-none">{{ pending_tasks_count|default:"0" }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">Tareas pendientes</p>
+          </div>
+        </div>
+      </a>
+      <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i class="fas fa-traffic-light"></i>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 leading-none">{{ puntos_control_count|default:"0" }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">Puntos de control</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# Pending tasks alert #}
+  {% if pending_tasks_count > 0 %}
+  <section class="container mx-auto px-4 mt-6">
+    <div class="bg-amber-50 rounded-lg p-4 flex items-start gap-3">
+      <div class="w-8 h-8 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+        <i class="fas fa-tasks text-sm"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-amber-800">
+          Tienes {{ pending_tasks_count }} tarea{{ pending_tasks_count|pluralize:"s" }} pendiente{{ pending_tasks_count|pluralize:"s" }}
+          {% if overdue_tasks_count > 0 %}<span class="text-red-600">({{ overdue_tasks_count }} vencida{{ overdue_tasks_count|pluralize:"s" }})</span>{% endif %}
         </p>
-    </section>
-</main>
+        <a href="{% url 'task_list' %}" class="text-sm text-amber-700 underline hover:text-amber-800 font-medium inline-block mt-1">Ver tareas pendientes →</a>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {# Split: recent projects + pending tasks #}
+  <section class="container mx-auto px-4 mt-6 pb-16">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 bg-white rounded-lg border border-gray-200">
+        <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Últimos proyectos</h2>
+          <a href="{% url 'proyectos' %}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Ver todos</a>
+        </div>
+        {% if recent_projects %}
+          <ul class="divide-y divide-gray-100">
+            {% for p in recent_projects %}
+              <li>
+                <a href="{% url 'proyecto_detail' p.id %}" class="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors no-underline">
+                  <div class="w-8 h-8 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">
+                    {{ p.title|first|upper }}
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ p.title }}</p>
+                    <p class="text-xs text-gray-500">{{ p.mandante.name }} · {{ p.created_at|date:"d/m/Y" }}</p>
+                  </div>
+                  {% if not p.is_completed %}
+                    <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full shrink-0">Activo</span>
+                  {% else %}
+                    <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full shrink-0">Completado</span>
+                  {% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="px-5 py-8 text-center text-gray-400">
+            <i class="fas fa-folder-open text-2xl mb-2"></i>
+            <p class="text-sm">No hay proyectos aún</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200">
+        <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Tareas pendientes</h2>
+          <a href="{% url 'task_list' %}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Ver todas</a>
+        </div>
+        {% if pending_tasks %}
+          <ul class="divide-y divide-gray-100">
+            {% for task in pending_tasks %}
+              <li>
+                <a href="{% url 'task_detail' task.id %}" class="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors no-underline">
+                  <div class="w-2 h-2 rounded-full {% if task.due_date and task.due_date < now %}bg-red-500{% else %}bg-amber-400{% endif %} shrink-0"></div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-gray-900 truncate {% if task.is_important %}text-red-600{% endif %}">{{ task.title }}</p>
+                    {% if task.due_date %}
+                      <p class="text-xs {% if task.due_date < now %}text-red-500{% else %}text-gray-400{% endif %}">{{ task.due_date|date:"d/m/Y" }}</p>
+                    {% endif %}
+                  </div>
+                  {% if task.assignee %}
+                    <span class="text-xs text-gray-400 shrink-0">{{ task.assignee.username }}</span>
+                  {% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="px-5 py-8 text-center text-gray-400">
+            <i class="fas fa-check-circle text-2xl mb-2"></i>
+            <p class="text-sm">Todo al día</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+
+{% else %}
+  {# ===== LANDING FOR UNAUTHENTICATED USERS ===== #}
+
+  <section class="bg-primary text-white">
+    <div class="container mx-auto px-4 py-24 text-center">
+      <h1 class="text-4xl font-bold mb-3">EIT · Ingeniería de Tránsito</h1>
+      <p class="text-lg text-indigo-200 max-w-2xl mx-auto mb-8">
+        Modelado de redes viales, periodización de flujo vehicular y exportación a TRANSYT 8S
+      </p>
+      <a href="{% url 'signin' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-700 font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+        <i class="fas fa-sign-in-alt"></i> Ingresar al sistema
+      </a>
+    </div>
+  </section>
+
+  <section class="container mx-auto px-4 py-16">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="w-12 h-12 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4">
+          <i class="fas fa-road text-xl"></i>
+        </div>
+        <h3 class="text-base font-semibold text-gray-900 mb-2">Modelado de Red Vial</h3>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Gestión de calles, nodos, arcos y puntos de control. Estructurá la red completa con sus movimientos y virajes.
+        </p>
+      </div>
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="w-12 h-12 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mb-4">
+          <i class="fas fa-chart-bar text-xl"></i>
+        </div>
+        <h3 class="text-base font-semibold text-gray-900 mb-2">Análisis de Flujo</h3>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Periodización de datos vehiculares por período horario. Visualización y validación de aforos de tránsito.
+        </p>
+      </div>
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
+          <i class="fas fa-file-export text-xl"></i>
+        </div>
+        <h3 class="text-base font-semibold text-gray-900 mb-2">Exportación TRANSYT</h3>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Generación de archivos de simulación TRANSYT 8S con configuración de fases semafóricas y parámetros de arcos.
+        </p>
+      </div>
+    </div>
+  </section>
+
+{% endif %}
 
 {% endblock %}
 
 {% block extra_js %}
 {% if user.is_authenticated and pending_tasks_count > 0 and show_pending_modal %}
-<!-- Pending Tasks Modal -->
-<div id="pending-tasks-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="pending-modal-title" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-gray-900/60 transition-opacity" onclick="closePendingModal()"></div>
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all">
-            <div class="bg-yellow-500 text-white px-6 py-4 rounded-t-xl flex items-center gap-3">
-                <i class="fas fa-tasks text-xl" aria-hidden="true"></i>
-                <div>
-                    <h2 class="font-bold text-lg" id="pending-modal-title">Tareas Pendientes</h2>
-                    <p class="text-sm text-yellow-100">Tienes {{ pending_tasks_count }} tarea{{ pending_tasks_count|pluralize:"s" }} por revisar</p>
-                </div>
-            </div>
-            <div class="p-6 max-h-80 overflow-y-auto">
-                {% if overdue_tasks_count > 0 %}
-                    <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p class="text-sm text-red-700 font-medium">
-                            <i class="fas fa-exclamation-triangle mr-1"></i>
-                            {{ overdue_tasks_count }} tarea{{ overdue_tasks_count|pluralize:"s" }} vencida{{ overdue_tasks_count|pluralize:"s" }}
-                        </p>
-                    </div>
-                {% endif %}
-                <ul class="divide-y divide-gray-200">
-                    {% for task in pending_tasks %}
-                        <li class="py-3">
-                            <a href="{% url 'task_detail' task.id %}" class="flex items-start gap-3 hover:bg-gray-50 p-2 rounded-lg transition-colors no-underline" onclick="closePendingModal()">
-                                <div class="w-2 h-2 rounded-full mt-2 {% if task.due_date and task.due_date < now %}bg-red-500{% else %}bg-yellow-500{% endif %} shrink-0"></div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 {% if task.is_important %}text-red-600{% endif %}">{{ task.title }}</p>
-                                    {% if task.description %}
-                                        <p class="text-xs text-gray-500 truncate">{{ task.description }}</p>
-                                    {% endif %}
-                                    {% if task.due_date %}
-                                        <p class="text-xs {% if task.due_date < now %}text-red-500{% else %}text-gray-400{% endif %}">
-                                            <i class="far fa-calendar-alt mr-1"></i>{{ task.due_date|date:"d/m/Y" }}
-                                        </p>
-                                    {% endif %}
-                                </div>
-                                {% if task.assignee %}
-                                    <span class="text-xs text-gray-400 shrink-0">{{ task.assignee.username }}</span>
-                                {% endif %}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-                <a href="{% url 'task_list' %}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium" onclick="closePendingModal()">
-                    Ver todas las tareas →
-                </a>
-                <button onclick="closePendingModal()"
-                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
-                    Cerrar
-                </button>
-            </div>
+<div id="pending-tasks-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-gray-900/60" onclick="closePendingModal()"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg">
+      <div class="bg-indigo-600 text-white px-6 py-4 rounded-t-xl flex items-center gap-3">
+        <i class="fas fa-tasks text-lg"></i>
+        <div>
+          <h2 class="font-bold text-lg">Tareas Pendientes</h2>
+          <p class="text-sm text-indigo-200">{{ pending_tasks_count }} tarea{{ pending_tasks_count|pluralize:"s" }} por revisar</p>
         </div>
+      </div>
+      <div class="p-5 max-h-80 overflow-y-auto">
+        {% if overdue_tasks_count > 0 %}
+          <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 font-medium flex items-center gap-2">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ overdue_tasks_count }} vencida{{ overdue_tasks_count|pluralize:"s" }}
+          </div>
+        {% endif %}
+        <ul class="divide-y divide-gray-100">
+          {% for task in pending_tasks %}
+            <li class="py-2.5">
+              <a href="{% url 'task_detail' task.id %}" class="flex items-start gap-3 hover:bg-gray-50 p-2 rounded-lg transition-colors no-underline" onclick="closePendingModal()">
+                <div class="w-2 h-2 rounded-full mt-1.5 {% if task.due_date and task.due_date < now %}bg-red-500{% else %}bg-amber-400{% endif %} shrink-0"></div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-gray-900 {% if task.is_important %}text-red-600{% endif %}">{{ task.title }}</p>
+                  {% if task.due_date %}
+                    <p class="text-xs {% if task.due_date < now %}text-red-500{% else %}text-gray-400{% endif %}">
+                      {{ task.due_date|date:"d/m/Y" }}
+                    </p>
+                  {% endif %}
+                </div>
+                {% if task.assignee %}
+                  <span class="text-xs text-gray-400 shrink-0">{{ task.assignee.username }}</span>
+                {% endif %}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="px-5 py-4 border-t border-gray-200 flex justify-between items-center">
+        <a href="{% url 'task_list' %}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium" onclick="closePendingModal()">Ver todas →</a>
+        <button onclick="closePendingModal()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">Cerrar</button>
+      </div>
     </div>
+  </div>
 </div>
 <script>
-    function closePendingModal() {
-        var modal = document.getElementById('pending-tasks-modal');
-        if (modal) {
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        var modal = document.getElementById('pending-tasks-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-    });
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closePendingModal();
-    });
+  function closePendingModal() {
+    var el = document.getElementById('pending-tasks-modal');
+    if (el) { el.classList.add('hidden'); document.body.style.overflow = ''; }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('pending-tasks-modal');
+    if (el) { el.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePendingModal();
+  });
 </script>
 {% endif %}
 {% endblock extra_js %}

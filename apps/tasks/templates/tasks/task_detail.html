@@ -3,98 +3,143 @@
 {% block content %}
 <main class="container mx-auto px-4 py-8">
     <div class="flex justify-center">
-        <div class="w-full sm:w-full md:w-1/2 mt-12">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <div class="flex justify-between items-start mb-4">
-                    <h1 class="text-2xl font-bold text-gray-800">Detalles de la Tarea</h1>
-                    <a href="{% url 'task_list' %}" class="text-sm text-indigo-600 hover:text-indigo-800">
-                        <i class="fas fa-arrow-left mr-1"></i>Volver
-                    </a>
-                </div>
+        <div class="mt-12 bg-gray-100 p-6 rounded-lg shadow-md w-full sm:max-w-2xl">
+            <h1 class="text-center text-3xl font-bold bg-gradient-primary text-white py-4 px-6 rounded-lg mb-6">
+                <i class="fas fa-info-circle mr-2" aria-hidden="true"></i> Detalles de la Tarea
+            </h1>
 
+            {% if error %}
+            <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{{ error }}</div>
+            {% endif %}
+
+            <div class="bg-white rounded-lg shadow p-6 mb-4">
                 {% if task.is_important %}
-                    <h2 class="text-xl font-semibold text-red-600 mb-4">{{ task.title }}</h2>
+                    <h2 class="text-xl font-semibold text-red-600 mb-4 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle"></i> {{ task.title }}
+                    </h2>
                 {% else %}
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ task.title }}</h2>
                 {% endif %}
 
-                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
-                    <div>
-                        <span class="text-gray-500">Estado:</span>
-                        <span class="ml-1 font-medium">
-                            {% if task.status == 'pendiente' %}Pendiente
-                            {% elif task.status == 'en_progreso' %}En Progreso
-                            {% elif task.status == 'completada' %}Completada
-                            {% elif task.status == 'cancelada' %}Cancelada
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="text-gray-500 block text-xs uppercase tracking-wide font-medium">Estado</span>
+                        <span class="font-medium">
+                            {% if task.status == 'pendiente' %}
+                                <span class="text-yellow-700">Pendiente</span>
+                            {% elif task.status == 'en_progreso' %}
+                                <span class="text-blue-700">En Progreso</span>
+                            {% elif task.status == 'completada' %}
+                                <span class="text-green-700">Completada</span>
+                            {% elif task.status == 'cancelada' %}
+                                <span class="text-red-700">Cancelada</span>
                             {% endif %}
                         </span>
                     </div>
-                    <div>
-                        <span class="text-gray-500">Asignado:</span>
-                        <span class="ml-1 font-medium">{{ task.assignee.username|default:"—" }}</span>
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="text-gray-500 block text-xs uppercase tracking-wide font-medium">Asignado</span>
+                        <span class="font-medium">{{ task.assignee.username|default:"—" }}</span>
                     </div>
-                    <div>
-                        <span class="text-gray-500">Creado por:</span>
-                        <span class="ml-1 font-medium">{{ task.created_by.username }}</span>
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="text-gray-500 block text-xs uppercase tracking-wide font-medium">Creado por</span>
+                        <span class="font-medium">{{ task.created_by.username }}</span>
                     </div>
-                    <div>
-                        <span class="text-gray-500">Proyecto:</span>
-                        <span class="ml-1 font-medium">{{ task.proyecto.title|default:"—" }}</span>
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="text-gray-500 block text-xs uppercase tracking-wide font-medium">Proyecto</span>
+                        <span class="font-medium">{{ task.proyecto.title|default:"—" }}</span>
                     </div>
                     {% if task.due_date %}
-                    <div>
-                        <span class="text-gray-500">Vence:</span>
-                        <span class="ml-1 font-medium">{{ task.due_date|date:"d/m/Y H:i" }}</span>
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="text-gray-500 block text-xs uppercase tracking-wide font-medium">Vence</span>
+                        <span class="font-medium">{{ task.due_date|date:"d/m/Y H:i" }}</span>
                     </div>
                     {% endif %}
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="text-gray-500 block text-xs uppercase tracking-wide font-medium">Importante</span>
+                        <span class="font-medium">{% if task.is_important %}<span class="text-red-600"><i class="fas fa-check"></i> Sí</span>{% else %}No{% endif %}</span>
+                    </div>
                 </div>
 
                 {% if task.description %}
                 <div class="mb-4">
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Descripción:</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-1">Descripción</h3>
                     <p class="text-gray-700 bg-gray-50 p-3 rounded">{{ task.description }}</p>
                 </div>
                 {% endif %}
+            </div>
 
-                {% if error %}
-                <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                    {{ error }}
-                </div>
-                {% endif %}
-
+            <div class="bg-white rounded-lg shadow p-6">
                 <form method="POST" class="space-y-4">
                     {% csrf_token %}
-                    {% for field in form %}
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.title.label }}</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}<p class="text-red-500 text-xs mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}<p class="text-red-500 text-xs mt-1">{{ form.description.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.errors %}
-                                <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
-                            {% endif %}
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.status.label }}</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}<p class="text-red-500 text-xs mt-1">{{ form.status.errors.0 }}</p>{% endif %}
                         </div>
-                    {% endfor %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.assignee.label }}</label>
+                            {{ form.assignee }}
+                            {% if form.assignee.errors %}<p class="text-red-500 text-xs mt-1">{{ form.assignee.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.proyecto.label }}</label>
+                            {{ form.proyecto }}
+                            {% if form.proyecto.errors %}<p class="text-red-500 text-xs mt-1">{{ form.proyecto.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.due_date.label }}</label>
+                            {{ form.due_date }}
+                            {% if form.due_date.errors %}<p class="text-red-500 text-xs mt-1">{{ form.due_date.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        {{ form.is_important }}
+                        <label class="text-sm font-medium text-gray-700 cursor-pointer">{{ form.is_important.label }}</label>
+                        {% if form.is_important.errors %}<p class="text-red-500 text-xs ml-1">{{ form.is_important.errors.0 }}</p>{% endif %}
+                    </div>
+
                     <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                         onclick="this.disabled=true; this.form.submit();">
-                        Actualizar
+                        <i class="fas fa-save mr-1"></i> Actualizar
                     </button>
                 </form>
 
-                <div class="flex flex-col sm:flex-row justify-around mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
-                    <form action="{% url 'delete_task' task.id %}" method="POST" class="flex-1">
-                        {% csrf_token %}
-                        <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium"
-                            onclick="this.disabled=true; this.form.submit();">
-                            Eliminar
-                        </button>
-                    </form>
-
+                <div class="flex flex-col sm:flex-row gap-2 mt-4">
                     <form action="{% url 'complete_task' task.id %}" method="POST" class="flex-1">
                         {% csrf_token %}
-                        <button type="submit" class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                        <button type="submit" class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
                             onclick="this.disabled=true; this.form.submit();">
-                            Completar
+                            <i class="fas fa-check mr-1"></i> Completar
                         </button>
                     </form>
+                    <form action="{% url 'delete_task' task.id %}" method="POST" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium text-sm"
+                            onclick="this.disabled=true; this.form.submit();">
+                            <i class="fas fa-trash mr-1"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a href="{% url 'task_list' %}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                        <i class="fas fa-arrow-left"></i> Volver a la lista de tareas
+                    </a>
                 </div>
             </div>
         </div>

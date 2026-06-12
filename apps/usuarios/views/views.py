@@ -11,7 +11,16 @@ from apps.usuarios.models import Role
 
 
 def home(request):
-   return render(request, 'home.html')
+    context = {'current_date': timezone.now()}
+    if request.user.is_authenticated:
+        from apps.proyectos.models.proyecto import Proyecto
+        from apps.mandantes.models import Mandante
+        from apps.red_vial.models.punto_control import PuntoControl
+        context['proyectos_count'] = Proyecto.objects.filter(is_completed=False).count()
+        context['mandantes_count'] = Mandante.objects.count()
+        context['puntos_control_count'] = PuntoControl.objects.count()
+        context['recent_projects'] = Proyecto.objects.all().select_related('mandante').order_by('-created_at')[:5]
+    return render(request, 'home.html', context)
 
 def signup(request):
    if request.method == 'GET':
