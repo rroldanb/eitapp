@@ -334,7 +334,7 @@ tr.htmx-swapping td {
   border-spacing: 0;
   min-width: 900px;
 }
-.pc-col-nombre {
+/* .pc-col-nombre {
   width: 88px;
   min-width: 88px;
 }
@@ -361,7 +361,7 @@ tr.htmx-swapping td {
 .pc-col-salida {
   width: 80px;
   min-width: 80px;
-}
+} 
 .pc-col-regul {
   width: 80px;
   min-width: 80px;
@@ -373,7 +373,7 @@ tr.htmx-swapping td {
 .pc-col-accion {
   width: 70px;
   min-width: 70px;
-}
+} */
 
 .form-control{
     background-color: #ffffff;

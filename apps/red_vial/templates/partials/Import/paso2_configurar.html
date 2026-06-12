@@ -1,0 +1,141 @@
+<form hx-post="{% url 'import_configure' %}" hx-target="#import-step-content" hx-swap="innerHTML" class="space-y-6">
+  {% if error %}
+    <div class="rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm">{{ error }}</div>
+  {% endif %}
+
+  {% if analysis and analysis|length > 1 %}
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Conjunto de datos a importar</label>
+      <select name="dataset_title" class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <option value="">Selecciona un conjunto de datos</option>
+        {% for ds in analysis %}
+          <option value="{{ ds.title }}">{{ ds.title }} ({{ ds.sheets|length }} hoja{{ ds.sheets|length|pluralize:',s' }})</option>
+        {% endfor %}
+      </select>
+    </div>
+  {% elif analysis and analysis|length == 1 %}
+    <input type="hidden" name="dataset_title" value="{{ analysis.0.title }}">
+    <div class="rounded-lg bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 text-sm">
+      <i class="fas fa-info-circle mr-1"></i> Conjunto: <strong>{{ analysis.0.title }}</strong> ({{ analysis.0.sheets|length }} hoja{{ analysis.0.sheets|length|pluralize:',s' }})
+    </div>
+  {% endif %}
+
+  <hr class="border-gray-200">
+
+  <div>
+    <span class="block text-sm font-medium text-gray-700 mb-2">Proyecto destino</span>
+    <div class="space-y-3">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="project_mode" value="new" class="project-mode-radio w-4 h-4 text-indigo-600 focus:ring-indigo-500" checked>
+        <span class="text-sm text-gray-700">Crear nuevo proyecto</span>
+      </label>
+      <div class="project-new-fields ml-6 space-y-3">
+        <input type="text" name="project_name" placeholder="Nombre del proyecto"
+               class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <input type="text" name="project_description" placeholder="Descripción (opcional)"
+               class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <input type="text" name="project_date_started" placeholder="Fecha inicio DD/MM/AAAA (opcional)"
+               class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+      </div>
+
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="project_mode" value="existing" class="project-mode-radio w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+        <span class="text-sm text-gray-700">Usar proyecto existente</span>
+      </label>
+      <div class="project-existing-fields ml-6 space-y-2" style="display:none">
+        <select name="existing_project_id" class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+          <option value="">Seleccionar proyecto</option>
+          {% for p in proyectos %}
+            <option value="{{ p.id }}" {% if proyecto and p.id == proyecto.id %}selected{% endif %}>{{ p.title }} — {{ p.mandante.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <hr class="border-gray-200">
+
+  <div>
+    <span class="block text-sm font-medium text-gray-700 mb-2">Mandante</span>
+    <div class="space-y-3">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="mandante_mode" value="new" class="mandante-mode-radio w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+        <span class="text-sm text-gray-700">Crear nuevo mandante</span>
+      </label>
+      <div class="mandante-new-fields ml-6 space-y-3" style="display:none">
+        <input type="text" name="mandante_name" placeholder="Nombre del mandante"
+               class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <input type="text" name="mandante_location" placeholder="Ubicación (opcional)"
+               class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <input type="text" name="mandante_details" placeholder="Notas (opcional)"
+               class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+      </div>
+
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="mandante_mode" value="existing" class="mandante-mode-radio w-4 h-4 text-indigo-600 focus:ring-indigo-500" checked>
+        <span class="text-sm text-gray-700">Usar mandante existente</span>
+      </label>
+      <div class="mandante-existing-fields ml-6 space-y-2">
+        <select name="existing_mandante_id" class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+          <option value="">Seleccionar mandante</option>
+          {% for m in mandantes %}
+            <option value="{{ m.id }}">{{ m.name }} — {{ m.location|default:'' }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <hr class="border-gray-200">
+
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex gap-2">
+      {% if proyecto %}
+        <button type="button" hx-post="{% url 'import_back_step1' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML"
+                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+          <i class="fas fa-arrow-left"></i> Volver
+        </button>
+        <button type="button" hx-post="{% url 'import_cancel' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML"
+                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      {% else %}
+        <a href="{% url 'import_landing' %}"
+           class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+          <i class="fas fa-arrow-left"></i> Volver
+        </a>
+        <a href="{% url 'import_landing' %}"
+           class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+          <i class="fas fa-times"></i> Cancelar
+        </a>
+      {% endif %}
+    </div>
+    <button type="submit"
+            class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+      <i class="fas fa-arrow-right"></i> Continuar a selección de hojas
+    </button>
+  </div>
+</form>
+
+<script>
+(function() {
+  function toggleFields() {
+    var p = document.querySelector('.project-mode-radio:checked');
+    if (p) {
+      var c = p.closest('.space-y-3');
+      c.querySelector('.project-new-fields').style.display = p.value === 'new' ? '' : 'none';
+      c.querySelector('.project-existing-fields').style.display = p.value === 'existing' ? '' : 'none';
+    }
+    var m = document.querySelector('.mandante-mode-radio:checked');
+    if (m) {
+      var c = m.closest('.space-y-3');
+      c.querySelector('.mandante-new-fields').style.display = m.value === 'new' ? '' : 'none';
+      c.querySelector('.mandante-existing-fields').style.display = m.value === 'existing' ? '' : 'none';
+    }
+  }
+  document.querySelectorAll('.project-mode-radio, .mandante-mode-radio').forEach(function(r) {
+    r.addEventListener('change', toggleFields);
+  });
+  toggleFields();
+})();
+</script>

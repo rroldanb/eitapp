@@ -86,6 +86,9 @@ def generar_filas(proyecto, nodo_ids, periodo_ids, fecha, movimiento_ids=None):
     periodos = Periodo.objects.filter(id__in=periodo_ids, proyecto=proyecto)
 
     for pc in pcs:
+        if not pc.arco_salida_id or not pc.arco_entrada_id:
+            continue
+        pc_mov = f"{pc.arco_salida.codigo_arco}_{pc.arco_entrada.codigo_arco}"
         for periodo in periodos:
             if not periodo.hora_inicio or not periodo.hora_fin:
                 continue
@@ -93,10 +96,10 @@ def generar_filas(proyecto, nodo_ids, periodo_ids, fecha, movimiento_ids=None):
             while hora_actual < periodo.hora_fin:
                 _, created = Periodizacion.objects.get_or_create(
                     fecha=fecha,
-                    pc=pc,
-                    periodo=periodo,
+                    pc_mov=pc_mov,
                     hora=hora_actual,
                     defaults={
+                        'pc': pc, 'periodo': periodo,
                         'vl': 0, 'txc': 0, 'txb': 0, 'c2e': 0,
                         'c_mas2e': 0, 'peat': 0, 'cicl': 0, 'moto': 0,
                     },

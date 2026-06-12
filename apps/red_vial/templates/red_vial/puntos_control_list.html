@@ -62,7 +62,7 @@
 
 <div id="puntos-control-list-config" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
 <style>
-#puntos-control-table select,
+{% comment %} #puntos-control-table select,
 #new-punto-control-form select {
   max-width: 100px;
 }
@@ -71,7 +71,7 @@
   max-width: 300px;
   position: relative;
   z-index: 10;
-}
+} {% endcomment %}
 </style>
 {% endblock %}
 {% block extra_js %}

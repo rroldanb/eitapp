@@ -23,57 +23,13 @@ from apps.proyectos.models import Proyecto
 class PuntosControlListView(GenericListView):
     model = PuntoControl
     service_get_function = get_puntos_control_by_proyecto
-    sort_fields = ['nombre', 'nodo', 'movimiento', 'viraje', 'arco_entrada', 'arco_salida']
+    sort_fields = ['nombre', 'nodo', 'movimiento', 'viraje', 'arco_entrada', 'arco_salida','numero_pistas']
     default_sort = 'nombre'
     partial_template = 'partials/PuntosControl/puntos_control_table.html'
     full_template = 'red_vial/puntos_control_list.html'
     context_items_key = 'puntos_control'
     form_class = PuntoControlForm
     
-    # @method_decorator(login_required)
-    # def get(self, request, proyecto_id=None):
-    #     resolver_kwargs = getattr(request, 'resolver_match', None)
-    #     if resolver_kwargs:
-    #         proyecto_id = resolver_kwargs.kwargs.get('proyecto_id', proyecto_id)
-
-    #     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-
-    #     sort_by = request.GET.get('sort_by', self.default_sort)
-    #     sort_order = request.GET.get('sort_order', 'asc')
-
-    #     if sort_by not in self.sort_fields:
-    #         sort_by = self.default_sort
-    #     if sort_order not in ['asc', 'desc']:
-    #         sort_order = 'asc'
-
-    #     try:
-    #         sig = inspect.signature(self.__class__.service_get_function)
-    #         accepted = set(sig.parameters.keys())
-    #     except (ValueError, TypeError):
-    #         accepted = set()
-
-    #     call_kwargs = {'proyecto_id': proyecto_id}
-    #     if 'sort_by' in accepted:
-    #         call_kwargs['sort_by'] = sort_by
-    #     if 'order' in accepted:
-    #         call_kwargs['order'] = sort_order
-
-    #     items = self.__class__.service_get_function(**call_kwargs)
-
-    #     form = PuntoControlForm(proyecto=proyecto)
-
-    #     context = {
-    #         'proyecto': proyecto,
-    #         self.context_items_key: items,
-    #         'sort_by': sort_by,
-    #         'sort_order': sort_order,
-    #         'sort_fields': self.sort_fields,
-    #         'form': form,
-    #     }
-
-    #     if request.headers.get('HX-Request'):
-    #         return render(request, self.partial_template, context)
-    #     return render(request, self.full_template, context)
 
 
 class PuntosControlCreateView(GenericCreateView):
@@ -84,31 +40,7 @@ class PuntosControlCreateView(GenericCreateView):
     form_template = 'partials/PuntosControl/punto_control_create.html'
     form_class = PuntoControlForm
 
-    # @method_decorator(login_required)
-    # @method_decorator(require_http_methods(['POST']))
-    # def post(self, request, proyecto_id):
 
-    #     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-    #     form = self.form_class(request.POST, proyecto=proyecto)
-
-    #     if form.is_valid():
-    #         try:
-    #             service_func = self.__class__.service_create_function
-    #             item = service_func(proyecto, form.cleaned_data)
-    #             singular = self.model._meta.model_name if self.model is not None else 'item'
-    #             context = {'item': item, 'proyecto': proyecto, singular: item}
-    #             print(f"Context for {singular} creation:", context)  # Debug log
-    #             return render(request, self.row_template, context)
-    #         except ValidationError as e:
-    #             return HttpResponseBadRequest(
-    #                 json.dumps({'error': str(e)}),
-    #                 content_type='application/json'
-    #             )
-
-    #     return render(request, self.form_template, {
-    #         'proyecto': proyecto,
-    #         'form': form,
-    #     }, status=400)
 
 
 class PuntosControlUpdateView(GenericUpdateView):

@@ -58,15 +58,16 @@ class PuntoControl(BaseModel):
     arco_salida    = models.ForeignKey(Arco, on_delete=models.CASCADE, related_name='pc_output')
     regulacion     = models.ForeignKey(Regulacion, on_delete=models.SET_NULL, related_name='pc_regulacion', blank=True, null=True)
     numero_pistas  = models.FloatField(blank=True, null=True)
+    interseccion   = models.CharField(max_length=50, blank=True, null=True)
+    vel_ini       = models.FloatField(blank=True, null=True)
+    vel_mod       = models.FloatField(blank=True, null=True)
+
 
     class Meta:
         unique_together = ['nodo', 'movimiento', 'proyecto']
         verbose_name = "Punto_Control"
         verbose_name_plural = "Puntos_Control"
         
-    # @property
-    # def codigo_pc(self):
-    #     return f"{self.arco_entrada.codigo_arco}_{self.arco_salida.codigo_arco}"
     @property
     def nombre(self):
         """PC-03 o 'Sin PC' si el nodo no tiene numero_pc."""
@@ -74,8 +75,8 @@ class PuntoControl(BaseModel):
 
     @property
     def codigo_pc(self):
-        return f"{self.arco_entrada.codigo_arco}_{self.arco_salida.codigo_arco}"
-    
+        return f"{self.arco_salida.codigo_arco}_{self.arco_entrada.codigo_arco}"
+
     @property
     def distancia(self):
         return self.arco_entrada.longitud

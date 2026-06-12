@@ -15,6 +15,8 @@ def get_puntos_control_by_proyecto(proyecto_id, sort_by=None, order='asc'):
         'viraje': 'viraje',
         'arco_entrada': 'arco_entrada__nodo_origen__numero',
         'arco_salida': 'arco_salida__nodo_destino__numero',
+        'regulacion': 'regulacion__codigo',
+        'numero_pistas': 'numero_pistas',
     }
     if sort_by:
         return apply_sort_to_queryset(
@@ -24,14 +26,8 @@ def get_puntos_control_by_proyecto(proyecto_id, sort_by=None, order='asc'):
             valid_fields=valid_sort_fields
     )
 # Default: PC number ASC, movimiento DESC
-    return queryset.order_by('nodo__numero_pc', '-movimiento')
+    return queryset.order_by('nodo__numero_pc', 'movimiento')
 
-    return apply_sort_to_queryset(
-        queryset,
-        sort_by=sort_by,
-        order=order,
-        valid_fields=valid_sort_fields
-    )
 
 
 def create_punto_control(proyecto, data):

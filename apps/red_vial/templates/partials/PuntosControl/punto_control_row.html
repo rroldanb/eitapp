@@ -1,21 +1,24 @@
 <tr id="punto-control-row-{{ item.id }}" class="punto-control-row hover:bg-gray-50" data-pc-id="{{ item.id }}">
+
   <td class="px-1 py-1 sticky left-0 z-1 bg-white hover:bg-gray-50">
-    <select name="nodo" aria-label="Nodo" class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+    <select name="nodo" aria-label="Nodo" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
       {% for v, l in form.nodo.field.choices %}
         <option value="{{ v }}" {% if item.nodo.pk == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
-  <td class="px-1 py-1">
-    <select name="movimiento" aria-label="Movimiento" class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+
+  <td class="px-1 py-1 sticky left-16 z-1 bg-white hover:bg-gray-50">
+    <select name="movimiento" aria-label="Movimiento" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
       <option value="" {% if not item.movimiento %}selected{% endif %}>---</option>
       {% for v, l in form.movimiento.field.choices %}
         <option value="{{ v }}" {% if item.movimiento == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
+
   <td class="px-1 py-1">
-    <select name="viraje" aria-label="Viraje" class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+    <select name="viraje" aria-label="Viraje" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
       <option value="" {% if not item.viraje %}selected{% endif %}>---</option>
       {% for v, l in form.viraje.field.choices %}
         <option value="{{ v }}" {% if item.viraje == v %}selected{% endif %}>{{ l }}</option>
@@ -26,21 +29,21 @@
     <input type="checkbox" name="is_prioritario" id="pc-prioritario-{{ item.id }}" class="mr-1" aria-label="Es prioritario" {% if item.is_prioritario %}checked{% endif %}>
   </td>
   <td class="px-1 py-1">
-    <select name="arco_entrada" aria-label="Arco de entrada" class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+    <select name="arco_entrada" aria-label="Arco de entrada" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
       {% for v, l in form.arco_entrada.field.choices %}
         <option value="{{ v }}" {% if item.arco_entrada.pk == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
   <td class="px-1 py-1">
-    <select name="arco_salida" aria-label="Arco de salida" class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+    <select name="arco_salida" aria-label="Arco de salida" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
       {% for v, l in form.arco_salida.field.choices %}
         <option value="{{ v }}" {% if item.arco_salida.pk == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
   <td class="px-1 py-1 w-max-8">
-    <select name="regulacion" aria-label="Regulación" class="w-max-8 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+    <select name="regulacion" aria-label="Regulación" style="width: 5rem;" class="w-max-4 px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
       <option value="" {% if not item.regulacion_id %}selected{% endif %}>---</option>
       {% for v, l in form.regulacion.field.choices %}
         <option value="{{ v }}" {% if item.regulacion.pk == v %}selected{% endif %}>{{ l }}</option>
@@ -48,7 +51,16 @@
     </select>
   </td>
   <td class="px-1 py-1">
-    <input type="number" name="numero_pistas" id="pc-pistas-{{ item.id }}" aria-label="Número de pistas" class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" step="0.5" value="{{ item.numero_pistas|default:'' }}">
+    <input type="number" name="numero_pistas" id="pc-pistas-{{ item.id }}" aria-label="Número de pistas" class="w-16 px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" step="0.5" value="{{ item.numero_pistas|default:'' }}">
+  </td>
+  <td class="px-1 py-1">
+    <input type="text" name="interseccion" readonly aria-label="Intersección" class="w-16 px-1 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600" value="{{ item.interseccion|default:'' }}">
+  </td>
+  <td class="px-1 py-1">
+    <input type="number" name="vel_ini" readonly aria-label="Velocidad inicial" class="w-16 px-1 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600" step="0.1" value="{{ item.vel_ini|default:'' }}">
+  </td>
+  <td class="px-1 py-1">
+    <input type="number" name="vel_mod" readonly aria-label="Velocidad modelo" class="w-16 px-1 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600" step="1" value="{{ item.vel_mod|default:'' }}">
   </td>
   <td class="px-1 py-1 flex gap-1">
     <button type="button" class="px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn"

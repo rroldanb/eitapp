@@ -22,7 +22,13 @@
     {% include 'partials/Import/stepper.html' %}
   </div>
   <div class="p-6" id="import-step-content" hx-indicator="#import-spinner">
-    {% include 'partials/Import/paso1_upload.html' %}
+    {% if current_step == 1 %}
+      {% include 'partials/Import/paso1_upload.html' %}
+    {% elif current_step == 3 %}
+      {% include 'partials/Import/paso2_seleccion.html' %}
+    {% else %}
+      {% include 'partials/Import/paso1_upload.html' %}
+    {% endif %}
   </div>
 </div>
 

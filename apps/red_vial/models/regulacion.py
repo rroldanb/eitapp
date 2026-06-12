@@ -1,8 +1,5 @@
 from django.db import models
 from apps.common.models import BaseModel
-from apps.proyectos.models.proyecto import Proyecto
-from apps.red_vial.models.nodo import Nodo
-from apps.red_vial.models.arco import Arco
 
 
 class Regulacion(BaseModel):

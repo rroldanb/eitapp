@@ -1,4 +1,4 @@
-from .red_vial_nn import (
+from .regulacion import (
     Regulacion,
     Coeficiente_Cruce,
 )

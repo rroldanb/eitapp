@@ -7,13 +7,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from apps.usuarios.forms import TaskForm
-from apps.tasks.models.tasks import Task
+from apps.usuarios.models import Role
 
 
 def home(request):
-    # return render(request, 'helloworld.html')
-   #  return HttpResponse('<h1>Hello World</h1>')
    return render(request, 'home.html')
 
 def signup(request):
@@ -24,19 +21,16 @@ def signup(request):
 
    else:
        if request.POST['password1'] == request.POST['password2']:
-           #register user
            try:
                user = User.objects.create_user(username=request.POST['username'], password=request.POST['password1'])
                user.save()
                login(request, user)
                return redirect('home')
-            #    return HttpResponse('<h1>User created successfully</h1>')
            except IntegrityError:
-            return render(request, 'signup.html', {
-               'form': UserCreationForm,
-               'error': 'Username already exists'
-           })
-
+             return render(request, 'signup.html', {
+                'form': UserCreationForm,
+                'error': 'Username already exists'
+            })
 
        else:
            return render(request, 'signup.html', {
@@ -54,6 +48,7 @@ def signin(request):
         user = authenticate(request, username=request.POST['username'], password=request.POST['password'])
         if user is not None:
             login(request, user)
+            request.session['show_pending_modal'] = True
             return redirect(request.GET.get('next', 'home'))
         else:
             return render(request, 'signin.html', {
@@ -79,9 +74,11 @@ def admin_create_user_view(request):
         form = AdminUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            user.is_staff = request.POST.get('is_staff') == 'on'
-            user.save()
-            messages.success(request, f'Usuario "{user.username}" creado.')
+            role_value = int(request.POST.get('role', Role.ENCUESTADOR))
+            if hasattr(user, 'profile'):
+                user.profile.role = role_value
+                user.profile.save()
+            messages.success(request, f'Usuario "{user.username}" creado con rol {Role(role_value).label}.')
             return redirect('user_management')
         return render(request, 'admin_create_user.html', {'form': form})
     return redirect('user_management')
@@ -91,7 +88,7 @@ def admin_create_user_view(request):
 def user_management_view(request):
     sort_map = {
         'username': 'username',
-        'role': 'is_superuser',
+        'role': 'profile__role',
         'is_active': 'is_active',
     }
     sort_by = request.GET.get('sort_by', 'role')
@@ -102,7 +99,7 @@ def user_management_view(request):
         sort_order = 'desc'
 
     order_prefix = '-' if sort_order == 'desc' else ''
-    users = User.objects.all().order_by(f'{order_prefix}{sort_map[sort_by]}', 'username')
+    users = User.objects.all().select_related('profile').order_by(f'{order_prefix}{sort_map[sort_by]}', 'username')
     context = {'users': users, 'sort_by': sort_by, 'sort_order': sort_order}
     if request.headers.get('HX-Request'):
         return render(request, '_user_table.html', context)
@@ -125,15 +122,16 @@ def user_toggle_active_view(request, user_id):
 
 @staff_member_required
 @require_POST
-def user_toggle_staff_view(request, user_id):
+def user_change_role_view(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if user == request.user:
         messages.error(request, 'No puedes cambiar tu propio rol.')
     else:
-        user.is_staff = not user.is_staff
-        user.save()
-        action = 'admin' if user.is_staff else 'usuario regular'
-        messages.success(request, f'Usuario "{user.username}" ahora es {action}.')
+        new_role = int(request.POST.get('role', Role.ENCUESTADOR))
+        if hasattr(user, 'profile'):
+            user.profile.role = new_role
+            user.profile.save()
+        messages.success(request, f'Rol de "{user.username}" actualizado a {Role(new_role).label}.')
     return redirect('user_management')
 
 
@@ -149,4 +147,3 @@ def user_change_password_view(request, user_id):
     else:
         form = SetPasswordForm(user)
     return render(request, 'user_change_password.html', {'form': form, 'target_user': user})
-

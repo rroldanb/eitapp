@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="container mx-auto px-4 py-8">
+    <div class="flex justify-center">
+        <div class="w-full sm:w-full md:w-1/2 mt-12">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex justify-between items-start mb-4">
+                    <h1 class="text-2xl font-bold text-gray-800">Detalles de la Tarea</h1>
+                    <a href="{% url 'task_list' %}" class="text-sm text-indigo-600 hover:text-indigo-800">
+                        <i class="fas fa-arrow-left mr-1"></i>Volver
+                    </a>
+                </div>
+
+                {% if task.is_important %}
+                    <h2 class="text-xl font-semibold text-red-600 mb-4">{{ task.title }}</h2>
+                {% else %}
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ task.title }}</h2>
+                {% endif %}
+
+                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div>
+                        <span class="text-gray-500">Estado:</span>
+                        <span class="ml-1 font-medium">
+                            {% if task.status == 'pendiente' %}Pendiente
+                            {% elif task.status == 'en_progreso' %}En Progreso
+                            {% elif task.status == 'completada' %}Completada
+                            {% elif task.status == 'cancelada' %}Cancelada
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Asignado:</span>
+                        <span class="ml-1 font-medium">{{ task.assignee.username|default:"—" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Creado por:</span>
+                        <span class="ml-1 font-medium">{{ task.created_by.username }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Proyecto:</span>
+                        <span class="ml-1 font-medium">{{ task.proyecto.title|default:"—" }}</span>
+                    </div>
+                    {% if task.due_date %}
+                    <div>
+                        <span class="text-gray-500">Vence:</span>
+                        <span class="ml-1 font-medium">{{ task.due_date|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if task.description %}
+                <div class="mb-4">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1">Descripción:</h3>
+                    <p class="text-gray-700 bg-gray-50 p-3 rounded">{{ task.description }}</p>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                        onclick="this.disabled=true; this.form.submit();">
+                        Actualizar
+                    </button>
+                </form>
+
+                <div class="flex flex-col sm:flex-row justify-around mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
+                    <form action="{% url 'delete_task' task.id %}" method="POST" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                            onclick="this.disabled=true; this.form.submit();">
+                            Eliminar
+                        </button>
+                    </form>
+
+                    <form action="{% url 'complete_task' task.id %}" method="POST" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                            onclick="this.disabled=true; this.form.submit();">
+                            Completar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

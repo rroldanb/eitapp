@@ -100,6 +100,8 @@ def _base_val(hour, minute, peak_low, peak_high, off_peak_low, off_peak_high):
     return (off_peak_low + off_peak_high) // 2
 
 
+PC_MOV = {'PC-01': '12', 'PC-02': '21'}
+
 def _periodizacion_rows():
     rows = []
     combos = [
@@ -304,7 +306,7 @@ def generar_plantilla():
         ("Periodizacion", [
             ("fecha", "Fecha (DD/MM/AAAA)", True, "Fecha del conteo"),
             ("hora", "Hora HH:MM", True, "Hora del conteo"),
-            ("pc", "FK (PuntoControl.nombre)", True, fk("PuntoControl (ej: PC-01 o Nodo-XX)")),
+            ("pc", "FK (PuntoControl.nombre)", True, fk("Nombre del PC (ej: PC-01, PC-02)")),
             ("periodo", "FK (Periodo.codigo)", True, fk("Periodo.codigo (ej: PM-L)")),
             ("proyecto", "FK (Proyecto.title)", True, fk("Proyecto.title")),
             ("vl", "Entero", True, "Vehiculos Livianos"),
@@ -315,7 +317,7 @@ def generar_plantilla():
             ("peat", "Entero", True, "Peatones"),
             ("cicl", "Entero", True, "Ciclistas"),
             ("moto", "Entero", True, "Motocicletas"),
-        ], _periodizacion_rows(), "NOTA: 'ftot' (flujo total) se calcula automaticamente. La combinacion (fecha, pc, periodo, hora) debe ser unica."),
+        ], _periodizacion_rows(), "NOTA: 'ftot' (flujo total) se calcula automaticamente. La combinacion (fecha, pc_mov, hora) debe ser unica."),
 
         ("ParametroArco", [
             ("punto_control", "FK", True, fk("PuntoControl (nombre: PC-XX o Nodo-XX)")),

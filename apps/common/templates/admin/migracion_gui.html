@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto mt-10">
+  <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+    {% if report %}
+      {% comment %}──── Reporte ────{% endcomment %}
+      <div class="bg-emerald-600 px-6 py-5">
+        <h1 class="text-xl font-semibold text-white"><i class="fas fa-check-circle mr-2"></i> Migraci&oacute;n completada</h1>
+      </div>
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <span class="text-gray-500 block text-xs uppercase tracking-wide">Proyecto</span>
+            <span class="font-medium">{{ proyecto_data.proyecto_title }}</span>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <span class="text-gray-500 block text-xs uppercase tracking-wide">Mandante</span>
+            <span class="font-medium">{{ proyecto_data.mandante_name }}</span>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Resumen</h2>
+          <div class="overflow-hidden rounded-lg border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <tbody class="divide-y divide-gray-100">
+                {% for sheet, count in stats.items %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-2 text-gray-600">{{ sheet }}</td>
+                  <td class="px-4 py-2 text-right font-medium tabular-nums">{{ count }} filas</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Descargas</h2>
+          <div class="flex flex-wrap gap-2">
+            <a href="{% url 'migracion_descarga_xlsx' token %}"
+               class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
+              <i class="fas fa-file-excel"></i> Excel completo
+            </a>
+            {% for sheet in sheet_names %}
+            <a href="{% url 'migracion_descarga_csv' token sheet %}"
+               class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+              <i class="fas fa-file-csv"></i> CSV {{ sheet }}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <a href="{% url 'migracion_gui' %}"
+             class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-arrow-left"></i> Volver al inicio
+          </a>
+        </div>
+      </div>
+    {% else %}
+      {% comment %}──── Formulario ────{% endcomment %}
+      <div class="bg-indigo-600 px-6 py-5">
+        <h1 class="text-xl font-semibold text-white"><i class="fas fa-exchange-alt mr-2"></i> Migraci&oacute;n TRANSYT</h1>
+        <p class="text-indigo-200 text-sm mt-1">Convierte un archivo origen.xlsx (formato TRANSYT) a la plantilla EIT App.</p>
+      </div>
+      <div class="p-6 space-y-6">
+        {% if error_message %}
+        <div class="rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm">{{ error_message }}</div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+          {% csrf_token %}
+
+          <div>
+            <label for="archivo_origen" class="block text-sm font-medium text-gray-700">Archivo origen (.xlsx)</label>
+            <input id="archivo_origen" name="archivo_origen" type="file" accept=".xlsx" required
+                   class="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500 file:mr-3 file:rounded file:border-0 file:bg-indigo-50 file:px-3 file:py-1 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"/>
+            <p class="mt-2 text-xs text-gray-500">Esquema de Intersecciones, Periodizaci&oacute;n, Resumen Flujos.</p>
+          </div>
+
+          <div>
+            <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha de conteo</label>
+            <input id="fecha" name="fecha" type="text" value="{{ fecha|default:'01/01/2024' }}"
+                   class="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"/>
+            <p class="mt-2 text-xs text-gray-500">Formato DD/MM/AAAA.</p>
+          </div>
+
+          <hr class="border-gray-200">
+
+          <div>
+            <span class="block text-sm font-medium text-gray-700 mb-2">Proyecto destino</span>
+            <div class="space-y-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="destino_tipo" value="existente"
+                       onchange="toggleDestino()" class="accent-indigo-600">
+                <span class="text-sm text-gray-700">Usar existente</span>
+              </label>
+              <div id="destino_existente" class="ml-6 hidden">
+                <select name="proyecto_id" class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                  <option value="">Seleccionar proyecto...</option>
+                  {% for p in proyectos %}
+                  <option value="{{ p.id }}">{{ p.title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="destino_tipo" value="nuevo" checked
+                       onchange="toggleDestino()" class="accent-indigo-600">
+                <span class="text-sm text-gray-700">Crear nuevo</span>
+              </label>
+              <div id="destino_nuevo" class="ml-6 space-y-3">
+                <input name="proyecto_title" type="text" placeholder="Nombre del proyecto"
+                       class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+                <input name="proyecto_description" type="text" placeholder="Descripci&oacute;n (opcional)"
+                       class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+                <input name="proyecto_date_started" type="text" placeholder="Fecha inicio DD/MM/AAAA (opcional)"
+                       class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+
+                <div class="pt-2">
+                  <span class="block text-sm font-medium text-gray-700 mb-2">Mandante</span>
+                  <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" name="mandante_tipo" value="existente"
+                             onchange="toggleMandante()" class="accent-indigo-600">
+                      <span class="text-sm text-gray-700">Existente</span>
+                    </label>
+                    <div id="mandante_existente" class="ml-6">
+                      <select name="mandante_id" class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Seleccionar mandante...</option>
+                        {% for m in mandantes %}
+                        <option value="{{ m.id }}">{{ m.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" name="mandante_tipo" value="nuevo" checked
+                             onchange="toggleMandante()" class="accent-indigo-600">
+                      <span class="text-sm text-gray-700">Nuevo</span>
+                    </label>
+                    <div id="mandante_nuevo" class="ml-6 space-y-2">
+                      <input name="mandante_name_new" type="text" placeholder="Nombre del mandante"
+                             class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+                      <input name="mandante_location_new" type="text" placeholder="Ubicaci&oacute;n (opcional)"
+                             class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+                      <input name="mandante_details_new" type="text" placeholder="Notas (opcional)"
+                             class="block w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-900 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
+            <button type="button" onclick="history.back()"
+                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              <i class="fas fa-play"></i> Migrar y generar reporte
+            </button>
+          </div>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleDestino() {
+  var val = document.querySelector('input[name="destino_tipo"]:checked').value;
+  document.getElementById('destino_existente').classList.toggle('hidden', val !== 'existente');
+  document.getElementById('destino_nuevo').classList.toggle('hidden', val !== 'nuevo');
+}
+function toggleMandante() {
+  var val = document.querySelector('input[name="mandante_tipo"]:checked').value;
+  document.getElementById('mandante_existente').classList.toggle('hidden', val !== 'existente');
+  document.getElementById('mandante_nuevo').classList.toggle('hidden', val !== 'nuevo');
+}
+document.addEventListener('DOMContentLoaded', function() {
+  toggleDestino();
+  toggleMandante();
+});
+</script>
+{% endblock %}

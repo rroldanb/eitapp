@@ -1,5 +1,5 @@
 <tr id="new-punto-control-form-row">
-  <td colspan="10" class="px-2 py-3 {% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
+  <td colspan="12" class="px-2 py-3 {% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
     <form id="new-punto-control-form"
       data-action="create"
       hx-post="{% url 'punto_control_create' proyecto.id %}"
@@ -32,6 +32,9 @@
         {{ form.arco_salida }}
         {{ form.regulacion }}
         {{ form.numero_pistas }}
+        {{ form.interseccion }}
+        {{ form.vel_ini }}
+        {{ form.vel_mod }}
         <button type="submit" class="px-2 py-1 text-xs border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors action-btn">
           + PC
         </button>
@@ -40,3 +43,39 @@
     </form>
   </td>
 </tr>
+<script>
+  (function() {
+    const form = document.getElementById('new-punto-control-form');
+    if (!form) return;
+    const priorCheck = form.querySelector('[name="is_prioritario"]');
+    const pistasInput = form.querySelector('[name="numero_pistas"]');
+    const interseccionInput = form.querySelector('[name="interseccion"]');
+    const velIniInput = form.querySelector('[name="vel_ini"]');
+    const velModInput = form.querySelector('[name="vel_mod"]');
+    function recalcular() {
+      const prior = priorCheck.checked;
+      const pistas = parseFloat(pistasInput.value) || 0;
+      let interseccion, velIni, velMod;
+      if (pistas > 0) {
+        if (prior) {
+          interseccion = 1800 * pistas;
+          velIni = interseccion / pistas / 35;
+        } else {
+          interseccion = 700 * pistas;
+          velIni = 35;
+        }
+        velMod = Math.round(velIni);
+      } else {
+        interseccion = 0;
+        velIni = 0;
+        velMod = 0;
+      }
+      interseccionInput.value = interseccion;
+      velIniInput.value = velIni.toFixed(2);
+      velModInput.value = velMod;
+    }
+    priorCheck.addEventListener('change', recalcular);
+    pistasInput.addEventListener('input', recalcular);
+    recalcular();
+  })();
+</script>

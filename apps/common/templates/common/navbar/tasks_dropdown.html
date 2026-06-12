@@ -1,18 +1,38 @@
 <div class="relative group">
     <button class="text-gray-300 hover:text-white px-3 py-2 rounded transition-colors dropdown-toggle {% if '/tasks' in request.path %}bg-gray-800 text-white{% endif %}" data-dropdown="tasks-menu" aria-expanded="false" aria-label="Menú de tareas">
         Tareas
+        {% if pending_tasks_count > 0 %}
+            <span class="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                {{ pending_tasks_count }}{% if overdue_tasks_count > 0 %}<span class="ml-0.5">!</span>{% endif %}
+            </span>
+        {% endif %}
         <i class="fas fa-chevron-down ml-1 text-xs" aria-hidden="true"></i>
     </button>
-    
-    <div id="tasks-menu" class="hidden lg:absolute left-0 mt-2 w-full lg:w-56 bg-slate-600/80 lg:bg-gray-800 rounded-lg shadow-xl py-2 z-50">
-        <a href="{% url 'tasks' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'tasks' %}bg-gray-700 text-white{% endif %}">
-            <i class="fas fa-spinner mr-2" aria-hidden="true"></i> Tareas Pendientes
+
+    <div id="tasks-menu" class="hidden lg:absolute left-0 mt-2 w-full lg:w-72 bg-slate-600/80 lg:bg-gray-800 rounded-lg shadow-xl py-2 z-50">
+        {% if pending_tasks %}
+            <div class="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+                Tareas pendientes
+                {% if overdue_tasks_count > 0 %}
+                    <span class="text-red-400 ml-1">({{ overdue_tasks_count }} vencidas)</span>
+                {% endif %}
+            </div>
+            {% for task in pending_tasks %}
+                <a href="{% url 'task_detail' task.id %}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if task.due_date and task.due_date < now %}border-l-2 border-red-500{% endif %}">
+                    <div class="flex justify-between items-start">
+                        <span class="truncate {% if task.is_important %}text-red-400 font-medium{% endif %}">{{ task.title }}</span>
+                        {% if task.assignee %}
+                            <span class="text-xs text-gray-500 ml-2 shrink-0">{{ task.assignee.username }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+            <hr class="my-2 border-gray-700">
+        {% endif %}
+        <a href="{% url 'task_list' %}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+            <i class="fas fa-list mr-2" aria-hidden="true"></i> Ver todas
         </a>
-        <a href="{% url 'tasks_completed' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'tasks_completed' %}bg-gray-700 text-white{% endif %}">
-            <i class="fas fa-check-circle mr-2" aria-hidden="true"></i> Tareas Completadas
-        </a>
-        <hr class="my-2 border-gray-700">
-        <a href="{% url 'create_task' %}" class="block px-4 py-2 text-sm lg:text-base text-gray-300 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'create_task' %}bg-gray-700 text-white{% endif %}">
+        <a href="{% url 'create_task' %}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
             <i class="fas fa-plus-circle mr-2" aria-hidden="true"></i> Crear Tarea
         </a>
     </div>

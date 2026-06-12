@@ -18,12 +18,23 @@
             </span>
           </div>
           {% if sr.rejected %}
-            <div class="px-4 py-2 bg-red-50">
-              <ul class="text-xs text-red-700 space-y-1">
+            <div class="px-4 py-2 bg-red-50 border-t border-red-100">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-red-800">
+                  <i class="fas fa-exclamation-circle mr-1"></i>
+                  {{ sr.rejected|length }} fila{{ sr.rejected|length|pluralize:',s' }} rechazada{{ sr.rejected|length|pluralize:',s' }}
+                </span>
+                <button type="button" class="rej-toggle text-xs text-red-700 hover:text-red-900 flex items-center gap-1" data-target="rej-details-{{ forloop.counter }}">
+                  <i class="fas fa-chevron-right text-xs"></i> Ver detalles
+                </button>
+              </div>
+              <div id="rej-details-{{ forloop.counter }}" class="hidden mt-2 max-h-48 overflow-y-auto bg-white rounded border border-red-200 p-2">
                 {% for rej in sr.rejected %}
-                  <li>• Fila {{ rej.row }}: {{ rej.reason }}</li>
+                  <div class="text-xs text-gray-600 py-0.5 border-b border-gray-100 last:border-0">
+                    • Fila {{ rej.row }}: {{ rej.reason }}
+                  </div>
                 {% endfor %}
-              </ul>
+              </div>
             </div>
           {% endif %}
         </div>
@@ -101,4 +112,16 @@ function downloadReport() {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+document.querySelectorAll('.rej-toggle').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var target = document.getElementById(this.dataset.target);
+    var icon = this.querySelector('i');
+    if (target) {
+      target.classList.toggle('hidden');
+      icon.classList.toggle('fa-chevron-right');
+      icon.classList.toggle('fa-chevron-down');
+    }
+  });
+});
 </script>

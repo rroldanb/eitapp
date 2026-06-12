@@ -36,12 +36,14 @@
                         placeholder="Confirmar contraseña" required minlength="8">
                 </div>
 
-                <div class="mb-6">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="is_staff" id="is_staff"
-                            class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-sm text-gray-700">¿Es administrador? (acceso al panel de administración)</span>
-                    </label>
+                <div class="mb-4">
+                    <label for="role" class="block text-gray-700 text-sm font-bold mb-2">Rol</label>
+                    <select name="role" id="role"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="10">Encuestador</option>
+                        <option value="20">Modelador</option>
+                        <option value="30">Admin</option>
+                    </select>
                 </div>
 
                 <button type="submit"

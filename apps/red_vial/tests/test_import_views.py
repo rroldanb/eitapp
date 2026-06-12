@@ -21,6 +21,9 @@ class ImportViewsAuthTest(TestCase):
     def _url(self, name, *args):
         return reverse(f"import_{name}", args=args or [self.proyecto.id])
 
+    def _upload_url(self):
+        return reverse('import_upload')
+
     # Helper to create a minimal valid Excel file
     def _make_excel_bytes(self):
         from openpyxl import Workbook
@@ -45,7 +48,7 @@ class ImportViewsAuthTest(TestCase):
 
     def test_import_upload_requires_login(self):
         self.client.logout()
-        response = self.client.post(self._url('upload'))
+        response = self.client.post(self._upload_url())
         self.assertEqual(response.status_code, 302)
 
     def test_import_validate_requires_login(self):
@@ -73,21 +76,19 @@ class ImportViewsAuthTest(TestCase):
         response = self.client.post(self._url('back_step1'))
         self.assertEqual(response.status_code, 302)
 
-    # --- import_project_select ---
+    # --- import_landing ---
 
-    def test_import_project_select_lists_projects(self):
-        url = reverse('import_project_select')
+    def test_import_landing_renders(self):
+        url = reverse('import_landing')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'TP')
+        self.assertContains(response, 'Subir archivo')
 
-    def test_import_project_select_only_user_projects(self):
-        other_user = User.objects.create_user(username="other", password="12345")
-        other_proj = Proyecto.objects.create(title="OtherProj", user=other_user, mandante=self.mandante)
-        url = reverse('import_project_select')
+    def test_import_landing_requires_login(self):
+        self.client.logout()
+        url = reverse('import_landing')
         response = self.client.get(url)
-        self.assertContains(response, 'TP')
-        self.assertNotContains(response, 'OtherProj')
+        self.assertEqual(response.status_code, 302)
 
     # --- import_start ---
 
@@ -111,34 +112,34 @@ class ImportViewsAuthTest(TestCase):
     def test_import_start_renders_template(self):
         response = self.client.get(self._url('start'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Subir y previsualizar')
+        self.assertContains(response, 'Subir archivo')
 
     # --- import_upload ---
 
     def test_import_upload_success(self):
         excel_content = self._make_excel_bytes()
         file = SimpleUploadedFile('test.xlsx', excel_content, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response = self.client.post(self._url('upload'), {'file': file})
+        response = self.client.post(self._upload_url(), {'file': file})
         self.assertEqual(response.status_code, 200)
         session = self.client.session
         self.assertIn('import_parsed', session)
         self.assertIn('import_filename', session)
-        self.assertContains(response, 'TestMandante')
+        self.assertContains(response, 'Configurar')
 
     def test_import_upload_no_file(self):
-        response = self.client.post(self._url('upload'))
+        response = self.client.post(self._upload_url())
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Debes seleccionar')
 
     def test_import_upload_wrong_extension(self):
         file = SimpleUploadedFile('test.txt', b'data', content_type='text/plain')
-        response = self.client.post(self._url('upload'), {'file': file})
+        response = self.client.post(self._upload_url(), {'file': file})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Solo se aceptan')
 
     def test_import_upload_parse_error(self):
         file = SimpleUploadedFile('test.xlsx', b'not an excel file', content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response = self.client.post(self._url('upload'), {'file': file})
+        response = self.client.post(self._upload_url(), {'file': file})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Error al leer')
 
@@ -147,7 +148,6 @@ class ImportViewsAuthTest(TestCase):
         wb = Workbook()
         ws = wb.active
         ws.title = 'EmptySheet'
-        # Only header, type, description rows — no data rows → no parsed data
         ws.append(['name'])
         ws.append(['TIPO'])
         ws.append(['DESCRIPCION'])
@@ -155,7 +155,7 @@ class ImportViewsAuthTest(TestCase):
         wb.save(buf)
         buf.seek(0)
         file = SimpleUploadedFile('empty.xlsx', buf.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response = self.client.post(self._url('upload'), {'file': file})
+        response = self.client.post(self._upload_url(), {'file': file})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'no contiene datos')
 
@@ -165,7 +165,7 @@ class ImportViewsAuthTest(TestCase):
         session.save()
         excel_content = self._make_excel_bytes()
         file = SimpleUploadedFile('test.xlsx', excel_content, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        self.client.post(self._url('upload'), {'file': file})
+        self.client.post(self._upload_url(), {'file': file})
         session = self.client.session
         self.assertNotIn('import_validation', session)
 
@@ -226,8 +226,8 @@ class ImportViewsAuthTest(TestCase):
         session = self.client.session
         self.assertIn('import_selected', session)
         self.assertIn('import_validation', session)
-        self.assertContains(response, 'Resumen de validación')
-        self.assertContains(response, '1 filas nuevas')
+        self.assertContains(response, 'Importación completada')
+        self.assertContains(response, '1 insertada')
 
     def test_import_validate_no_parsed(self):
         response = self.client.post(self._url('validate'), {'sheets': ['Mandante']})
@@ -349,12 +349,12 @@ class ImportViewsAuthTest(TestCase):
         for key in list(session.keys()):
             self.assertFalse(key.startswith('import_'), f"Session key '{key}' was not cleared")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Subir y previsualizar')
+        self.assertContains(response, 'Subir archivo')
 
     # --- GET on POST-only views ---
 
     def test_upload_get_returns_405(self):
-        response = self.client.get(self._url('upload'))
+        response = self.client.get(self._upload_url())
         self.assertEqual(response.status_code, 405)
 
     def test_validate_get_returns_405(self):

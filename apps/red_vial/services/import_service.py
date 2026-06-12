@@ -40,6 +40,7 @@ DUPLICATE_KEYS = {
     'Periodo': ['codigo', 'proyecto_id'],
     'PuntoControl': ['nodo', 'movimiento', 'proyecto_id'],
     'ParametroArco': ['punto_control'],
+    'Periodizacion': ['fecha', 'pc_mov', 'hora'],
     'FaseSemaforica': ['punto_control', 'fase_numero'],
     'ConfiguracionTransyt': ['proyecto'],
 }
@@ -441,11 +442,24 @@ def _parse_row(sheet_name, row, idx, ctx, raw):
             errors.append("'fecha' no es una fecha válida")
         if data['hora'] is None:
             errors.append("'hora' no es una hora válida")
-        pc_ref = _resolve_fk('Periodizacion', 'pc', row.get('pc', ''), ctx)
+        pc_id_val = str(row.get('pc', '') or row.get('pc_mov', '') or '').strip()
+        pc_ref = _resolve_fk('Periodizacion', 'pc', pc_id_val, ctx)
         if pc_ref is None:
-            errors.append(f"PuntoControl '{row.get('pc', '')}' no encontrado")
+            errors.append(f"PuntoControl '{pc_id_val}' no encontrado")
         else:
             data['pc'] = pc_ref
+            # Auto-generate pc_mov from PuntoControl's arc codigos
+            if isinstance(pc_ref, _VirtualObj):
+                # PuntoControl comes from the same import, can't verify arcs now;
+                # _execute_sheet will recompute pc_mov from the real PC object
+                data['pc_mov'] = pc_id_val
+            else:
+                arco_s = getattr(pc_ref, 'arco_salida', None)
+                arco_e = getattr(pc_ref, 'arco_entrada', None)
+                if arco_s is not None and arco_e is not None:
+                    data['pc_mov'] = f"{arco_s.codigo_arco}_{arco_e.codigo_arco}"
+                else:
+                    errors.append(f"PuntoControl '{pc_id_val}' no tiene arcos de entrada/salida definidos")
         per_ref = _resolve_fk('Periodizacion', 'periodo', row.get('periodo', ''), ctx)
         if per_ref is None:
             errors.append(f"Periodo '{row.get('periodo', '')}' no encontrado")
@@ -624,6 +638,24 @@ def _resolve_arco(val, proyecto, shared_cache=None):
         return None
 
 
+def _resolve_sentinel_arco(proyecto):
+    """Get or create "1>1" sentinel Arco for fallback when PC arco is missing."""
+    if not proyecto:
+        return None
+    try:
+        nodo1, _ = Nodo.objects.get_or_create(
+            numero=1, proyecto=proyecto,
+            defaults={'interseccion': None, 'calle_1': None, 'calle_2': None},
+        )
+        arco, _ = Arco.objects.get_or_create(
+            nodo_origen=nodo1, nodo_destino=nodo1, proyecto=proyecto,
+            defaults={'longitud': 1},
+        )
+        return arco
+    except Exception:
+        return None
+
+
 def _get_model(name):
     models = {
         'Mandante': Mandante,
@@ -707,6 +739,8 @@ def _restore_fk_values(sheet_name, data):
             val = data.get(field)
             if isinstance(val, _VirtualObj):
                 data[field] = val._value
+            elif hasattr(val, '_meta') and hasattr(val, 'nodo_origen'):  # real Arco instance
+                data[field] = f"{val.nodo_origen.numero}>{val.nodo_destino.numero}"
     return data
 
 
@@ -788,174 +822,255 @@ def execute_import(validation_result, proyecto, user, update_duplicates=None):
 def _execute_sheet(sheet_name, rows, proyecto, user, sheet_report):
     for data in rows:
         try:
-            if sheet_name == 'Mandante':
-                obj, created = Mandante.objects.get_or_create(name=data['name'], defaults={'location': data['location'], 'details': data['details']})
-                if not created:
-                    obj.location = data['location']
-                    obj.details = data['details']
-                    obj.save()
-                if created:
-                    sheet_report['inserted'] += 1
-                else:
-                    sheet_report['updated'] += 1
+            with transaction.atomic():
+                if sheet_name == 'Mandante':
+                    obj, created = Mandante.objects.get_or_create(name=data['name'], defaults={'location': data['location'], 'details': data['details']})
+                    if not created:
+                        obj.location = data['location']
+                        obj.details = data['details']
+                        obj.save()
+                    if created:
+                        sheet_report['inserted'] += 1
+                    else:
+                        sheet_report['updated'] += 1
 
-            elif sheet_name == 'Contacto':
-                obj, created = Contacto.objects.get_or_create(
-                    name=data['name'], mandante=data['mandante'],
-                    defaults={'email': data.get('email', ''), 'phone': data.get('phone', ''), 'cargo': data.get('cargo', ''), 'position': data.get('position', ''), 'details': data.get('details', '')}
-                )
-                if not created:
-                    for k in ('email', 'phone', 'cargo', 'position', 'details'):
-                        setattr(obj, k, data.get(k, ''))
-                    obj.mandante = data['mandante']
-                    obj.save()
-                if created:
-                    sheet_report['inserted'] += 1
-                else:
-                    sheet_report['updated'] += 1
-
-            elif sheet_name == 'Proyecto':
-                obj, created = Proyecto.objects.get_or_create(
-                    title=data['title'],
-                    defaults={'description': data.get('description', ''), 'date_started': data['date_started'], 'mandante': data['mandante'], 'user': user}
-                )
-                if not created:
-                    obj.description = data.get('description', '')
-                    obj.date_started = data['date_started']
-                    obj.mandante = data['mandante']
-                    obj.save()
-                if created:
-                    sheet_report['inserted'] += 1
-                else:
-                    sheet_report['updated'] += 1
-
-            elif sheet_name == 'Calle':
-                try:
-                    obj = Calle.objects.get(numero=data['numero'], proyecto=data['proyecto'])
-                    obj.nombre = data['nombre']
-                    obj.save()
-                    sheet_report['updated'] += 1
-                except Calle.DoesNotExist:
-                    Calle.objects.create(nombre=data['nombre'], numero=data['numero'], proyecto=data['proyecto'])
-                    sheet_report['inserted'] += 1
-
-            elif sheet_name == 'Nodo':
-                try:
-                    obj = Nodo.objects.get(numero=data['numero'], proyecto=data['proyecto'])
-                    for k in ('interseccion', 'numero_pc', 'plano', 'imagen', 'calle_1', 'calle_2'):
-                        if k in data:
-                            setattr(obj, k, data[k])
-                    obj.save()
-                    sheet_report['updated'] += 1
-                except Nodo.DoesNotExist:
-                    Nodo.objects.create(proyecto=data.pop('proyecto'), **data)
-                    sheet_report['inserted'] += 1
-
-            elif sheet_name == 'Arco':
-                try:
-                    obj = Arco.objects.get(nodo_origen=data['nodo_origen'], nodo_destino=data['nodo_destino'], proyecto=data['proyecto'])
-                    obj.longitud = data['longitud']
-                    obj.save()
-                    sheet_report['updated'] += 1
-                except Arco.DoesNotExist:
-                    Arco.objects.create(nodo_origen=data['nodo_origen'], nodo_destino=data['nodo_destino'], longitud=data['longitud'], proyecto=data['proyecto'])
-                    sheet_report['inserted'] += 1
-
-            elif sheet_name == 'Regulacion':
-                obj, created = Regulacion.objects.get_or_create(codigo=data['codigo'], defaults={'descripcion': data['descripcion']})
-                if not created:
-                    obj.descripcion = data['descripcion']
-                    obj.save()
-                    sheet_report['updated'] += 1
-                else:
-                    sheet_report['inserted'] += 1
-
-            elif sheet_name == 'CoeficienteCruce':
-                filters = {'nomenclatura': data['nomenclatura']}
-                if data['is_standard']:
-                    filters['proyecto__isnull'] = True
-                elif 'proyecto' in data:
-                    filters['proyecto'] = data['proyecto']
-                try:
-                    obj = CoeficienteCruce.objects.get(**filters)
-                    obj.tipo_transporte = data['tipo_transporte']
-                    obj.coeficiente = data['coeficiente']
-                    obj.is_standard = data['is_standard']
-                    obj.save()
-                    sheet_report['updated'] += 1
-                except CoeficienteCruce.DoesNotExist:
-                    CoeficienteCruce.objects.create(
-                        nomenclatura=data['nomenclatura'], tipo_transporte=data['tipo_transporte'],
-                        coeficiente=data['coeficiente'], is_standard=data['is_standard'],
-                        proyecto=data.get('proyecto'),
+                elif sheet_name == 'Contacto':
+                    obj, created = Contacto.objects.get_or_create(
+                        name=data['name'], mandante=data['mandante'],
+                        defaults={'email': data.get('email', ''), 'phone': data.get('phone', ''), 'cargo': data.get('cargo', ''), 'position': data.get('position', ''), 'details': data.get('details', '')}
                     )
-                    sheet_report['inserted'] += 1
+                    if not created:
+                        for k in ('email', 'phone', 'cargo', 'position', 'details'):
+                            setattr(obj, k, data.get(k, ''))
+                        obj.mandante = data['mandante']
+                        obj.save()
+                    if created:
+                        sheet_report['inserted'] += 1
+                    else:
+                        sheet_report['updated'] += 1
 
-            elif sheet_name == 'Periodo':
-                try:
-                    obj = Periodo.objects.get(codigo=data['codigo'], proyecto=data['proyecto'])
-                    obj.hora_inicio = data.get('hora_inicio')
-                    obj.hora_fin = data.get('hora_fin')
-                    obj.es_laboral = data['es_laboral']
-                    obj.save()
-                    sheet_report['updated'] += 1
-                except Periodo.DoesNotExist:
-                    Periodo.objects.create(codigo=data['codigo'], hora_inicio=data.get('hora_inicio'), hora_fin=data.get('hora_fin'), es_laboral=data['es_laboral'], proyecto=data['proyecto'])
-                    sheet_report['inserted'] += 1
+                elif sheet_name == 'Proyecto':
+                    obj, created = Proyecto.objects.get_or_create(
+                        title=data['title'],
+                        defaults={'description': data.get('description', ''), 'date_started': data['date_started'], 'mandante': data['mandante'], 'user': user}
+                    )
+                    if not created:
+                        obj.description = data.get('description', '')
+                        obj.date_started = data['date_started']
+                        obj.mandante = data['mandante']
+                        obj.save()
+                    if created:
+                        sheet_report['inserted'] += 1
+                    else:
+                        sheet_report['updated'] += 1
 
-            elif sheet_name == 'PuntoControl':
-                data.pop('nombre', None)
-                try:
-                    obj = PuntoControl.objects.get(nodo=data['nodo'], movimiento=data['movimiento'], proyecto=data['proyecto'])
-                    for k in ('viraje', 'is_prioritario', 'arco_entrada', 'arco_salida', 'regulacion', 'numero_pistas'):
-                        if k in data:
+                elif sheet_name == 'Calle':
+                    try:
+                        obj = Calle.objects.get(numero=data['numero'], proyecto=data['proyecto'])
+                        obj.nombre = data['nombre']
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    except Calle.DoesNotExist:
+                        Calle.objects.create(nombre=data['nombre'], numero=data['numero'], proyecto=data['proyecto'])
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'Nodo':
+                    try:
+                        obj = Nodo.objects.get(numero=data['numero'], proyecto=data['proyecto'])
+                        for k in ('interseccion', 'numero_pc', 'plano', 'imagen', 'calle_1', 'calle_2'):
+                            if k in data:
+                                setattr(obj, k, data[k])
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    except Nodo.DoesNotExist:
+                        Nodo.objects.create(proyecto=data.pop('proyecto'), **data)
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'Arco':
+                    try:
+                        obj = Arco.objects.get(nodo_origen=data['nodo_origen'], nodo_destino=data['nodo_destino'], proyecto=data['proyecto'])
+                        obj.longitud = data['longitud']
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    except Arco.DoesNotExist:
+                        Arco.objects.create(nodo_origen=data['nodo_origen'], nodo_destino=data['nodo_destino'], longitud=data['longitud'], proyecto=data['proyecto'])
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'Regulacion':
+                    obj, created = Regulacion.objects.get_or_create(codigo=data['codigo'], defaults={'descripcion': data['descripcion']})
+                    if not created:
+                        obj.descripcion = data['descripcion']
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    else:
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'CoeficienteCruce':
+                    filters = {'nomenclatura': data['nomenclatura']}
+                    if data['is_standard']:
+                        filters['proyecto__isnull'] = True
+                    elif 'proyecto' in data:
+                        filters['proyecto'] = data['proyecto']
+                    try:
+                        obj = CoeficienteCruce.objects.get(**filters)
+                        obj.tipo_transporte = data['tipo_transporte']
+                        obj.coeficiente = data['coeficiente']
+                        obj.is_standard = data['is_standard']
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    except CoeficienteCruce.DoesNotExist:
+                        CoeficienteCruce.objects.create(
+                            nomenclatura=data['nomenclatura'], tipo_transporte=data['tipo_transporte'],
+                            coeficiente=data['coeficiente'], is_standard=data['is_standard'],
+                            proyecto=data.get('proyecto'),
+                        )
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'Periodo':
+                    try:
+                        obj = Periodo.objects.get(codigo=data['codigo'], proyecto=data['proyecto'])
+                        obj.hora_inicio = data.get('hora_inicio')
+                        obj.hora_fin = data.get('hora_fin')
+                        obj.es_laboral = data['es_laboral']
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    except Periodo.DoesNotExist:
+                        Periodo.objects.create(codigo=data['codigo'], hora_inicio=data.get('hora_inicio'), hora_fin=data.get('hora_fin'), es_laboral=data['es_laboral'], proyecto=data['proyecto'])
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'PuntoControl':
+                    data.pop('nombre', None)
+                    for field in ('arco_entrada', 'arco_salida'):
+                        if not isinstance(data.get(field), Arco):
+                            sentinel = _resolve_sentinel_arco(data.get('proyecto'))
+                            if sentinel:
+                                data[field] = sentinel
+                    try:
+                        obj = PuntoControl.objects.get(nodo=data['nodo'], movimiento=data['movimiento'], proyecto=data['proyecto'])
+                        for k in ('viraje', 'is_prioritario', 'arco_entrada', 'arco_salida', 'regulacion', 'numero_pistas'):
+                            if k in data:
+                                setattr(obj, k, data[k])
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    except PuntoControl.DoesNotExist:
+                        PuntoControl.objects.create(proyecto=data.pop('proyecto'), **data)
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'Periodizacion':
+                    data.pop('proyecto', None)
+                    # Recompute pc_mov from re-resolved PuntoControl's arcs
+                    pc = data.get('pc')
+                    if isinstance(pc, PuntoControl) and pc.arco_salida_id and pc.arco_entrada_id:
+                        pc_mov = f"{pc.arco_salida.codigo_arco}_{pc.arco_entrada.codigo_arco}"
+                        data['pc_mov'] = pc_mov
+                    elif 'pc_mov' not in data or not data['pc_mov']:
+                        sheet_report['rejected'].append({'row': data.get('_original_row', '?'), 'reason': 'PuntoControl sin arcos de entrada/salida'})
+                        continue
+                    obj, created = Periodizacion.objects.get_or_create(
+                        fecha=data['fecha'], pc_mov=data['pc_mov'], hora=data['hora'],
+                        defaults={k: data.get(k) for k in ('pc', 'periodo', 'vl', 'txc', 'txb', 'c2e', 'c_mas2e', 'peat', 'cicl', 'moto')},
+                    )
+                    if not created:
+                        for k in ('pc', 'periodo', 'vl', 'txc', 'txb', 'c2e', 'c_mas2e', 'peat', 'cicl', 'moto'):
+                            setattr(obj, k, data.get(k))
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    else:
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'ParametroArco':
+                    try:
+                        obj = ParametroArco.objects.get(punto_control=data['punto_control'])
+                        for k in ('flujo_saturacion', 'ponderador_demora', 'ponderador_detencion', 'capacidad_cola', 'tiene_tarjeta_38'):
+                            if k in data:
+                                setattr(obj, k, data[k])
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    except ParametroArco.DoesNotExist:
+                        ParametroArco.objects.create(proyecto=data.pop('proyecto'), **data)
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'FaseSemaforica':
+                    try:
+                        obj = FaseSemaforica.objects.get(punto_control=data['punto_control'], fase_numero=data['fase_numero'])
+                        obj.verde_inicio = data['verde_inicio']
+                        obj.verde_fin = data['verde_fin']
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    except FaseSemaforica.DoesNotExist:
+                        FaseSemaforica.objects.create(proyecto=data.pop('proyecto'), **data)
+                        sheet_report['inserted'] += 1
+
+                elif sheet_name == 'ConfiguracionTransyt':
+                    obj, created = ConfiguracionTransyt.objects.get_or_create(
+                        proyecto=data['proyecto'],
+                        defaults={'ciclo': data['ciclo'], 'W': data['W'], 'K': data['K'], 'perdida_inicial': data['perdida_inicial'], 'ganancia_final': data['ganancia_final']}
+                    )
+                    if not created:
+                        for k in ('ciclo', 'W', 'K', 'perdida_inicial', 'ganancia_final'):
                             setattr(obj, k, data[k])
-                    obj.save()
-                    sheet_report['updated'] += 1
-                except PuntoControl.DoesNotExist:
-                    PuntoControl.objects.create(proyecto=data.pop('proyecto'), **data)
-                    sheet_report['inserted'] += 1
-
-            elif sheet_name == 'Periodizacion':
-                data.pop('proyecto', None)
-                Periodizacion.objects.create(**data)
-                sheet_report['inserted'] += 1
-
-            elif sheet_name == 'ParametroArco':
-                try:
-                    obj = ParametroArco.objects.get(punto_control=data['punto_control'])
-                    for k in ('flujo_saturacion', 'ponderador_demora', 'ponderador_detencion', 'capacidad_cola', 'tiene_tarjeta_38'):
-                        if k in data:
-                            setattr(obj, k, data[k])
-                    obj.save()
-                    sheet_report['updated'] += 1
-                except ParametroArco.DoesNotExist:
-                    ParametroArco.objects.create(proyecto=data.pop('proyecto'), **data)
-                    sheet_report['inserted'] += 1
-
-            elif sheet_name == 'FaseSemaforica':
-                try:
-                    obj = FaseSemaforica.objects.get(punto_control=data['punto_control'], fase_numero=data['fase_numero'])
-                    obj.verde_inicio = data['verde_inicio']
-                    obj.verde_fin = data['verde_fin']
-                    obj.save()
-                    sheet_report['updated'] += 1
-                except FaseSemaforica.DoesNotExist:
-                    FaseSemaforica.objects.create(proyecto=data.pop('proyecto'), **data)
-                    sheet_report['inserted'] += 1
-
-            elif sheet_name == 'ConfiguracionTransyt':
-                obj, created = ConfiguracionTransyt.objects.get_or_create(
-                    proyecto=data['proyecto'],
-                    defaults={'ciclo': data['ciclo'], 'W': data['W'], 'K': data['K'], 'perdida_inicial': data['perdida_inicial'], 'ganancia_final': data['ganancia_final']}
-                )
-                if not created:
-                    for k in ('ciclo', 'W', 'K', 'perdida_inicial', 'ganancia_final'):
-                        setattr(obj, k, data[k])
-                    obj.save()
-                    sheet_report['updated'] += 1
-                else:
-                    sheet_report['inserted'] += 1
+                        obj.save()
+                        sheet_report['updated'] += 1
+                    else:
+                        sheet_report['inserted'] += 1
 
         except Exception as e:
             sheet_report['rejected'].append({'row': data.get('_original_row', '?'), 'reason': str(e)})
+
+
+def analyze_parsed_data(parsed_data):
+    """Extract available project datasets from parsed Excel data."""
+    proyectos = parsed_data.get('Proyecto', [])
+    datasets = []
+    for p in proyectos:
+        title = (p.get('title') or '').strip()
+        if title:
+            datasets.append({
+                'title': title,
+                'mandante': (p.get('mandante') or '').strip(),
+            })
+    return datasets
+
+
+def filter_by_dataset(parsed_data, dataset_title):
+    """Filter parsed rows to only include those matching the selected project."""
+    dataset_title = dataset_title.strip()
+    filtered = {}
+    for sheet_name, rows in parsed_data.items():
+        if not rows:
+            continue
+        # Find which key in the row corresponds to 'proyecto'
+        proyecto_key = None
+        for key in rows[0]:
+            if key.lower().replace(' ', '_').replace('-', '_') == 'proyecto':
+                proyecto_key = key
+                break
+        if sheet_name == 'Proyecto':
+            filtered[sheet_name] = [r for r in rows
+                                    if (r.get('title') or '').strip() == dataset_title]
+        elif proyecto_key:
+            filtered[sheet_name] = [r for r in rows
+                                    if (r.get(proyecto_key) or '').strip() == dataset_title]
+        else:
+            filtered[sheet_name] = rows
+    return filtered
+
+
+def reassign_to_project(parsed_data, proyecto_title):
+    """Reassign all rows to point to a different project title."""
+    proyecto_title = proyecto_title.strip()
+    for sheet_name, rows in parsed_data.items():
+        if not rows:
+            continue
+        if sheet_name == 'Proyecto':
+            for r in rows:
+                r['title'] = proyecto_title
+            continue
+        proyecto_key = None
+        for key in rows[0]:
+            if key.lower().replace(' ', '_').replace('-', '_') == 'proyecto':
+                proyecto_key = key
+                break
+        if proyecto_key:
+            for r in rows:
+                r[proyecto_key] = proyecto_title

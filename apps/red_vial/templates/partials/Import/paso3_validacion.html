@@ -37,16 +37,37 @@
                 <span class="text-xs text-gray-700">Descartar duplicados</span>
               </label>
             </div>
+            <button type="button" class="dup-toggle text-xs text-amber-700 hover:text-amber-900 mt-1 flex items-center gap-1" data-target="dup-details-{{ sheet_name }}">
+              <i class="fas fa-chevron-right text-xs"></i> Ver detalles
+            </button>
+            <div id="dup-details-{{ sheet_name }}" class="hidden mt-2 max-h-48 overflow-y-auto bg-white rounded border border-amber-200 p-2">
+              {% for dup in result.duplicates %}
+                <div class="text-xs text-gray-600 py-0.5 border-b border-gray-100 last:border-0">
+                  {{ dup|pprint|truncatechars:120 }}
+                </div>
+              {% endfor %}
+            </div>
           </div>
           {% endif %}
 
           {% if has_errors %}
-          <div class="px-4 py-2 bg-red-50">
-            <ul class="text-xs text-red-700 space-y-1">
+          <div class="px-4 py-2 bg-red-50 border-t border-red-100">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-red-800">
+                <i class="fas fa-exclamation-circle mr-1"></i>
+                {{ has_errors }} error{{ has_errors|pluralize:',es' }}
+              </span>
+              <button type="button" class="err-toggle text-xs text-red-700 hover:text-red-900 flex items-center gap-1" data-target="err-details-{{ forloop.counter }}">
+                <i class="fas fa-chevron-right text-xs"></i> Ver detalles
+              </button>
+            </div>
+            <div id="err-details-{{ forloop.counter }}" class="hidden mt-2 max-h-48 overflow-y-auto bg-white rounded border border-red-200 p-2">
               {% for err in result.errors %}
-                <li>• Fila {{ err.row }}: {{ err.errors|join:', ' }}</li>
+                <div class="text-xs text-gray-600 py-0.5 border-b border-gray-100 last:border-0">
+                  • Fila {{ err.row }}: {{ err.errors|join:', ' }}
+                </div>
               {% endfor %}
-            </ul>
+            </div>
           </div>
           {% endif %}
         </div>
@@ -85,8 +106,6 @@
 <script>
 (function() {
   var inputs = document.querySelectorAll('[name^="dup_"]');
-  var hiddenInputs = {};
-
   inputs.forEach(function(input) {
     var name = input.name;
     if (input.type === 'radio') {
@@ -97,6 +116,32 @@
         }
       });
     }
+  });
+  document.querySelectorAll('.dup-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var target = document.getElementById(this.dataset.target);
+      if (target) {
+        target.classList.toggle('hidden');
+        var icon = this.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-chevron-right');
+          icon.classList.toggle('fa-chevron-down');
+        }
+      }
+    });
+  });
+  document.querySelectorAll('.err-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var target = document.getElementById(this.dataset.target);
+      if (target) {
+        target.classList.toggle('hidden');
+        var icon = this.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-chevron-right');
+          icon.classList.toggle('fa-chevron-down');
+        }
+      }
+    });
   });
 })();
 </script>

@@ -7,6 +7,7 @@ from apps.red_vial.models.coeficiente_cruce import CoeficienteCruce
 class Periodizacion(BaseModel):
     fecha   = models.DateField(default=date.today)
     pc      = models.ForeignKey('PuntoControl', on_delete=models.CASCADE, related_name='conteos')
+    pc_mov  = models.CharField(max_length=20, default='')
     periodo = models.ForeignKey('Periodo', on_delete=models.CASCADE, related_name='conteos')
     hora    = models.TimeField()
 
@@ -23,7 +24,7 @@ class Periodizacion(BaseModel):
     ftot = models.FloatField(default=0, editable=False)
 
     class Meta:
-        unique_together = ['fecha', 'pc', 'periodo', 'hora']
+        unique_together = ['fecha', 'pc_mov', 'hora']
 
     def calcular_ftot(self) -> float:
         """

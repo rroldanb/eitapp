@@ -12,7 +12,7 @@
           {% if sort_by == 'nodo' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
         </a>
       </th>
-      <th class="pc-col-mov px-1 py-2 text-center font-bold text-gray-900 uppercase">
+      <th class="pc-col-mov px-1 py-2 text-center font-bold text-gray-900 uppercase sticky left-16 z-10 bg-slate-200">
         <a role="button" href="?sort_by=movimiento&amp;sort_order={% if sort_by == 'movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
           hx-get="?sort_by=movimiento&amp;sort_order={% if sort_by == 'movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
           hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
@@ -50,7 +50,19 @@
         </a>
       </th>
       <th class="pc-col-regul px-1 py-2 text-center font-bold text-gray-900 uppercase">Regul</th>
-      <th class="pc-col-pistas px-1 py-2 text-center font-bold text-gray-900 uppercase">Pistas</th>
+
+      <th class="pc-col-pistas px-1 py-2 text-center font-bold text-gray-900 uppercase">
+        <a role="button" href="?sort_by=numero_pistas&amp;sort_order={% if sort_by == 'numero_pistas' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=numero_pistas&amp;sort_order={% if sort_by == 'numero_pistas' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'numero_pistas' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          Pistas
+          {% if sort_by == 'numero_pistas' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+        </a>
+      </th>
+      <th class="pc-col-interseccion px-1 py-2 text-center font-bold text-gray-900 uppercase">Flujo satur</th>
+      <th class="pc-col-vel_ini px-1 py-2 text-center font-bold text-gray-900 uppercase">Vel cru</th>
+      <th class="pc-col-vel_mod px-1 py-2 text-center font-bold text-gray-900 uppercase">Vel Mod</th>
       <th class="pc-col-accion px-1 py-2 text-center font-bold text-gray-900 uppercase">Acc</th>
     </tr>
   </thead>
@@ -59,3 +71,50 @@
   </tbody>
 </table>
 </div>
+<script>
+  (function() {
+    const tbody = document.getElementById('puntos-control-table-body');
+    if (!tbody) return;
+    function recalcularEnRow(row) {
+      const prior = row.querySelector('[name="is_prioritario"]');
+      const pistas = row.querySelector('[name="numero_pistas"]');
+      const interseccion = row.querySelector('[name="interseccion"]');
+      const velIni = row.querySelector('[name="vel_ini"]');
+      const velMod = row.querySelector('[name="vel_mod"]');
+      if (!prior || !pistas || !interseccion || !velIni || !velMod) return;
+      const p = prior.checked;
+      const n = parseFloat(pistas.value) || 0;
+      let valInt, valVI, valVM;
+      if (n > 0) {
+        if (p) {
+          valInt = 1800 * n;
+          valVI = valInt / n / 35;
+        } else {
+          valInt = 700 * n;
+          valVI = 35;
+        }
+        valVM = Math.round(valVI);
+      } else {
+        valInt = 0;
+        valVI = 0;
+        valVM = 0;
+      }
+      interseccion.value = valInt;
+      velIni.value = valVI.toFixed(2);
+      velMod.value = valVM;
+    }
+    tbody.addEventListener('change', function(e) {
+      const row = e.target.closest('tr.punto-control-row');
+      if (row && (e.target.matches('[name="is_prioritario"]') || e.target.matches('[name="numero_pistas"]'))) {
+        recalcularEnRow(row);
+      }
+    });
+    tbody.addEventListener('input', function(e) {
+      const row = e.target.closest('tr.punto-control-row');
+      if (row && e.target.matches('[name="numero_pistas"]')) {
+        recalcularEnRow(row);
+      }
+    });
+    tbody.querySelectorAll('tr.punto-control-row').forEach(recalcularEnRow);
+  })();
+</script>
