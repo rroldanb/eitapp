@@ -27,8 +27,8 @@
           </div>
           <div>
             <h2 class="text-sm font-semibold text-red-800">Advertencia de restauración</h2>
-            <p class="text-sm text-red-700 mt-1">Este proceso reemplaza el estado de la base de datos seleccionada con el contenido del archivo de respaldo. Todos los registros creados después de ese respaldo se perderán permanentemente. Se aplicarán migraciones antes de restaurar si son necesarias.</p>
-            <p class="text-sm text-red-700 mt-1">Por defecto, el usuario superadmin que ejecuta la restauración se conservará. Si deseas desmarcar esta opción, el usuario será reemplazado por el del respaldo.</p>
+            <p class="text-sm text-red-700 mt-1">Este proceso reemplaza todo el contenido de la base de datos destino con los datos del respaldo. Los registros creados después de ese respaldo se perderán permanentemente. Se aplicarán migraciones antes de restaurar.</p>
+            <p class="text-sm text-red-700 mt-1">El checkbox "<strong>Conservar superadmin actual</strong>" evita que tu usuario pierda acceso: mantiene tu contraseña, email y rol actuales después de la restauración. Si lo desmarcas, tu usuario será reemplazado exactamente como estaba en el respaldo (podrías perder acceso si la contraseña del respaldo es diferente).</p>
           </div>
         </div>
       </div>
@@ -48,10 +48,13 @@
           </div>
 
           <div class="flex items-end pb-0.5">
-            <label for="preserve_superuser" class="flex items-center gap-3 cursor-pointer">
-              <input id="preserve_superuser" name="preserve_superuser" type="checkbox" value="on" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" {% if preserve_requested %}checked{% endif %} />
-              <span class="text-sm font-medium text-gray-700">Conservar superadmin actual</span>
-            </label>
+            <div>
+              <label for="preserve_superuser" class="flex items-center gap-3 cursor-pointer">
+                <input id="preserve_superuser" name="preserve_superuser" type="checkbox" value="on" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" {% if preserve_requested %}checked{% endif %} />
+                <span class="text-sm font-medium text-gray-700">Conservar superadmin actual</span>
+              </label>
+              <p class="mt-1 text-xs text-gray-500 ml-7">Mantiene tu cuenta con la misma contraseña, email y rol. Recomendado para no perder acceso.</p>
+            </div>
           </div>
         </div>
 
@@ -82,24 +85,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-(function() {
-  var restoreForm = document.getElementById('restore-form');
-  var backupFileInput = document.getElementById('backup_file');
-  var spinner = document.getElementById('restore-spinner');
-
-  if (restoreForm) {
-    restoreForm.addEventListener('submit', function(event) {
-      if (!backupFileInput.value) {
-        event.preventDefault();
-        alert('Debes seleccionar un archivo ZIP de respaldo.');
-        backupFileInput.focus();
-        return;
-      }
-      spinner.style.display = 'inline-flex';
-      restoreForm.querySelector('button[type="submit"]').setAttribute('disabled', 'disabled');
-    });
-  }
-})();
-</script>
+<script src="{% static 'js/features/restore.js' %}" defer></script>
 {% endblock %}

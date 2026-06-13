@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
@@ -44,106 +45,12 @@
 </div>
 
 
-<script>
-
-document.addEventListener("DOMContentLoaded", function() {
-  var imagenUrl = "{{ proyecto.image_url }}";
-
-  if (imagenUrl && imagenUrl !== "") {
-      var viewer = OpenSeadragon({
-          id: "seadragon-viewer-proyecto",
-          prefixUrl: "https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/images/",
-          tileSources: {
-              type: 'image',
-              url: imagenUrl,
-              crossOriginPolicy: 'Anonymous',
-          },
-
-          // Configuración de zoom y navegación
-          //            zoomInButton: "zoom-in",
-          //           zoomOutButton: "zoom-out",
-          //        showRotationControl: false,
-          
-          
-          showZoomControl: false,
-          showPanControl: false,
-          showFullPageControl: true,
-          showHomeControl: false,
-          navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT,
-          
-          // Parámetros de zoom
-          zoomPerClick: 2.0,
-          zoomPerScroll: 1.2,
-          minZoomLevel: 0.5,
-          maxZoomLevel: 10,
-          defaultZoomLevel: 1,
-          
-          // Comportamiento
-          gestureSettingsMouse: {
-              clickToZoom: false,
-              dblClickToZoom: true,
-              pinchToZoom: true,
-              flickEnabled: true,
-              flickMinSpeed: 120,
-              flickMomentum: 0.25
-          },
-          
-          // Estilo visual
-          navigatorPosition: "BOTTOM_RIGHT",
-          showNavigator: true,
-          navigatorSizeRatio: 0.1
-      });
-      
-      viewer.addHandler('open-failed', function(event) {
-          console.error("Error al cargar la imagen:", imagenUrl);
-          alert("No se pudo cargar la imagen. Verifica que la ruta sea correcta.");
-      });
-      
-  } else {
-      console.error("No se encontró URL de imagen");
-      document.getElementById('seadragon-viewer-proyecto').innerHTML = 
-          '<div style="color: red; text-align: center; padding: 50px;">⚠️ No se encontró ninguna imagen para este proyecto</div>';
-  }
-});
-
-
-
-
-
-
-  function toggleSidebar() {
-    const sidebar = document.getElementById("projectSidebar");
-    sidebar.classList.toggle("collapsed");
-    sidebar.classList.toggle("expanded");
-
-    // Save preference
-    const isCollapsed = sidebar.classList.contains("collapsed");
-    localStorage.setItem("sidebarCollapsed", isCollapsed);
-  }
-
-
-
-  // Restore sidebar state
-  document.addEventListener("DOMContentLoaded", function () {
-    const sidebar = document.getElementById("projectSidebar");
-    const isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
-
-    if (isCollapsed) {
-      sidebar.classList.remove("expanded");
-      sidebar.classList.add("collapsed");
-    }
-
-    // Tooltips for collapsed sidebar
-    sidebar.querySelectorAll(".nav-link").forEach(function (link) {
-      var textEl = link.querySelector(".nav-link-text");
-      if (textEl && !link.getAttribute("data-tooltip")) {
-        link.setAttribute("data-tooltip", textEl.textContent.trim());
-      }
-    });
-  });
-
-
-
-</script>
+{% if proyecto.image_url %}
+<div id="osd-config" data-image-url="{{ proyecto.image_url }}" hidden></div>
+<script src="{% static 'js/features/osd-viewer.js' %}" defer></script>
+{% endif %}
+{% if proyecto %}
+<script src="{% static 'js/features/sidebar.js' %}" defer></script>
+{% endif %}
 
 {% endblock %}

@@ -153,34 +153,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-  function openCreateModal() {
-    document.getElementById('create-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    document.getElementById('modal-username').focus();
-  }
-  function closeCreateModal() {
-    document.getElementById('create-modal').classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
-  function openPasswordModal(userId, username) {
-    document.getElementById('password-modal-user').textContent = username;
-    document.getElementById('password-form').action = '/usuarios/' + userId + '/change-password/';
-    document.getElementById('password-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    document.getElementById('modal-new-password1').focus();
-  }
-  function closePasswordModal() {
-    document.getElementById('password-modal').classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closeCreateModal();
-      closePasswordModal();
-    }
-  });
-</script>
+<script src="{% static 'js/features/user-modal.js' %}" defer></script>
 {% endblock extra_js %}

@@ -36,8 +36,15 @@
   </td>
 </tr>
 <script>
-  document.getElementById('create-nomenclatura')?.addEventListener('change', function() {
-    var desc = this.options[this.selectedIndex]?.dataset.desc || '';
-    document.getElementById('create-tipo-transporte').value = desc;
-  });
+  /** Autocompleta tipo de transporte desde el dataset.desc de la nomenclatura seleccionada */
+  (function() {
+    var nomenclatura = document.getElementById('create-nomenclatura');
+    if (nomenclatura) {
+      nomenclatura.addEventListener('change', function() {
+        var selected = this.options[this.selectedIndex];
+        var desc = selected ? (selected.dataset.desc || '') : '';
+        document.getElementById('create-tipo-transporte').value = desc;
+      });
+    }
+  })();
 </script>

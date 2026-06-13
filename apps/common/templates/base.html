@@ -25,6 +25,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer fetchpriority="low"></script>
     
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Core modules (always loaded) -->
+    <script src="{% static 'js/core/toast.js' %}" defer></script>
+    <script src="{% static 'js/core/modal.js' %}" defer></script>
+    <script src="{% static 'js/core/htmx-csrf.js' %}" defer></script>
     <script src="{% static 'js/dropdown_handler.js' %}" defer></script>
 </head>
 
@@ -52,12 +57,7 @@
     {% block extra_js %}
     {% endblock %}
 
-    <!-- HTMX CSRF Configuration for Django -->
-    <script>
-        document.body.addEventListener('htmx:configRequest', function(evt) {
-            evt.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-        });
-    </script>
+
 
 </body>
 </html>

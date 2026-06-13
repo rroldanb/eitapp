@@ -3,7 +3,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, get_object_or_404
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.db import transaction
+from django.db.models.signals import post_save
 from django.conf import settings
 from django.urls import reverse
 from io import BytesIO, StringIO
@@ -18,6 +20,8 @@ from .common.utils.excel_utils import generar_plantilla_bytes
 from .common.utils.migra_cli import run_from_bytes
 from apps.mandantes.models import Mandante
 from apps.proyectos.models import Proyecto
+from apps.usuarios.models import UserProfile
+from apps.usuarios.models.profile import create_user_profile, save_user_profile
 
 _migration_cache = {}
 
@@ -104,6 +108,8 @@ def restore_database(request):
                         preserved_superuser['pk'] = getattr(request.user, field.attname)
                     else:
                         preserved_superuser[field.name] = getattr(request.user, field.attname)
+                if hasattr(request.user, 'profile'):
+                    preserved_superuser['profile_role'] = request.user.profile.role
 
             try:
                 with zipfile.ZipFile(backup_file, 'r') as archive:
@@ -118,7 +124,20 @@ def restore_database(request):
                 try:
                     call_command('flush', database=target_database, interactive=False, verbosity=0)
                     call_command('migrate', database=target_database, no_input=True, run_syncdb=True)
-                    call_command('loaddata', tmp_path, database=target_database)
+
+                    # Disconnect post_save signals on User to avoid UNIQUE constraint
+                    # conflicts when loaddata creates UserProfiles from the fixture
+                    # after the signal auto-creates one for each User.
+                    post_save.disconnect(create_user_profile, sender=User)
+                    post_save.disconnect(save_user_profile, sender=User)
+                    try:
+                        call_command('loaddata', tmp_path, database=target_database)
+                    finally:
+                        # Disconnect first to prevent duplicates, then reconnect once
+                        post_save.disconnect(create_user_profile, sender=User)
+                        post_save.disconnect(save_user_profile, sender=User)
+                        post_save.connect(create_user_profile, sender=User)
+                        post_save.connect(save_user_profile, sender=User)
 
                     if preserved_superuser:
                         username_field = UserModel.USERNAME_FIELD
@@ -126,9 +145,16 @@ def restore_database(request):
                         defaults = {
                             key: value
                             for key, value in preserved_superuser.items()
-                            if key != username_field
+                            if key not in (username_field, 'pk', 'profile_role')
                         }
-                        UserModel.objects.using(target_database).update_or_create(defaults=defaults, **lookup)
+                        user, _ = UserModel.objects.using(target_database).update_or_create(defaults=defaults, **lookup)
+
+                        profile_role = preserved_superuser.get('profile_role')
+                        if profile_role is not None:
+                            UserProfile.objects.using(target_database).update_or_create(
+                                user=user,
+                                defaults={'role': profile_role},
+                            )
                 finally:
                     try:
                         os.unlink(tmp_path)
@@ -136,11 +162,12 @@ def restore_database(request):
                         pass
 
                 success_message = (
-                    f'Restauración completada en la base de datos "{target_database}". '
-                    f'Se eliminó toda la data ingresada después del respaldo seleccionado.'
+                    f'Restauración completada en la base de datos "{target_database}".'
                 )
                 if preserved_superuser:
-                    success_message += ' El usuario superadmin que ejecutó la restauración se conservó en la base de datos.'
+                    success_message += ' El usuario superadmin que ejecutó la restauración se conservó (incluyendo su rol y contraseña actuales).'
+                else:
+                    success_message += ' Se eliminó toda la data ingresada después del respaldo seleccionado.'
             except Exception as error:
                 error_message = str(error)
 

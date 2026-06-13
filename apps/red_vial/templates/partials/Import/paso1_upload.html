@@ -1,3 +1,4 @@
+{% load static %}
 <form hx-post="{% url 'import_upload' %}" hx-target="#import-step-content" hx-swap="innerHTML" hx-encoding="multipart/form-data" class="space-y-6">
   {% if error %}
     <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">{{ error }}</div>
@@ -41,20 +42,4 @@
   </div>
 </form>
 
-<script>
-(function() {
-  var input = document.getElementById('excel-file-input');
-  var display = document.getElementById('file-name-display');
-  var text = document.getElementById('file-name-text');
-  var label = document.querySelector('.file-label span');
-  if (input) {
-    input.addEventListener('change', function() {
-      if (this.files && this.files.length > 0) {
-        text.textContent = this.files[0].name;
-        display.classList.remove('hidden');
-        if (label) label.textContent = 'Cambiar archivo';
-      }
-    });
-  }
-})();
-</script>
+<script src="{% static 'js/features/import-steps.js' %}" defer></script>

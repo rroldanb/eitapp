@@ -1,3 +1,4 @@
+{% load static %}
 <form hx-post="{% url 'import_configure' %}" hx-target="#import-step-content" hx-swap="innerHTML" class="space-y-6">
   {% if error %}
     <div class="rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm">{{ error }}</div>
@@ -117,25 +118,4 @@
   </div>
 </form>
 
-<script>
-(function() {
-  function toggleFields() {
-    var p = document.querySelector('.project-mode-radio:checked');
-    if (p) {
-      var c = p.closest('.space-y-3');
-      c.querySelector('.project-new-fields').style.display = p.value === 'new' ? '' : 'none';
-      c.querySelector('.project-existing-fields').style.display = p.value === 'existing' ? '' : 'none';
-    }
-    var m = document.querySelector('.mandante-mode-radio:checked');
-    if (m) {
-      var c = m.closest('.space-y-3');
-      c.querySelector('.mandante-new-fields').style.display = m.value === 'new' ? '' : 'none';
-      c.querySelector('.mandante-existing-fields').style.display = m.value === 'existing' ? '' : 'none';
-    }
-  }
-  document.querySelectorAll('.project-mode-radio, .mandante-mode-radio').forEach(function(r) {
-    r.addEventListener('change', toggleFields);
-  });
-  toggleFields();
-})();
-</script>
+<script src="{% static 'js/features/import-steps.js' %}" defer></script>

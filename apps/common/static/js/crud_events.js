@@ -1,16 +1,18 @@
 /**
- * CRUD Events - Manejador genérico de eventos HTMX para todas las tablas
- * Gestiona: toasts, animaciones, actualizaciones de contador, eventos CRUD
+ * Manejador genérico de eventos HTMX para todas las tablas CRUD.
+ * Gestiona: toasts, animaciones, badge de contador, bulk update, eventos before/after request.
+ * Dependencia: elemento [data-crud-config] en el DOM con dataset.tableId, dataset.modelName, dataset.csrfToken.
  */
+(function() {
 
-// ========== CONFIG ==========
+/* ===== CONFIG ===== */
 
 /**
- * Obtiene config desde el elemento data-crud-config
- * Esperado: data-crud-config data-table-id="..." data-model-name="..." data-csrf-token="..."
+ * Lee configuración desde [data-crud-config] o valores por defecto.
+ * @returns {{tableId: string, modelName: string, csrfToken: string}}
  */
 function getConfig() {
-  const configEl = document.querySelector('[data-crud-config]');
+  var configEl = document.querySelector('[data-crud-config]');
   if (!configEl) {
     return {
       tableId: 'items-table',
@@ -18,7 +20,6 @@ function getConfig() {
       csrfToken: document.querySelector('[name="csrfmiddlewaretoken"]')?.value || '',
     };
   }
-
   return {
     tableId: configEl.dataset.tableId || 'items-table',
     modelName: configEl.dataset.modelName || 'items',
@@ -26,101 +27,81 @@ function getConfig() {
   };
 }
 
-const config = getConfig();
+var config = getConfig();
 
-// ========== TOAST NOTIFICATIONS ==========
+/* ===== TOAST NOTIFICATIONS ===== */
 
 /**
- * Muestra una notificación toast
- * @param {string} message - Mensaje a mostrar
- * @param {boolean} isSuccess - true para éxito, false para error
- * @param {number} duration - Duración en ms (default 3000)
+ * Muestra notificación toast.
+ * @param {string} message  - Texto a mostrar
+ * @param {boolean} isSuccess - true=verde éxito, false=rojo error
+ * @param {number} duration  - Auto-remoción en ms (default 3000)
  */
-function showToast(message, isSuccess = true, duration = 3000, buttonLabel = 'Cerrar')  {
-  const toast = document.createElement('div');
-  const className = isSuccess ? 'toast-success' : 'toast-error';
-  toast.className = `toast-notification ${className}`;
+function showToast(message, isSuccess, duration) {
+  if (isSuccess === undefined) isSuccess = true;
+  if (duration === undefined) duration = 3000;
+  var toast = document.createElement('div');
+  toast.className = 'toast-notification ' + (isSuccess ? 'toast-success' : 'toast-error');
   toast.textContent = message;
   toast.setAttribute('role', 'status');
   toast.setAttribute('aria-live', 'polite');
-  // toast.setAttribute('confirmed', 'true');
-
-    // const textSpan = document.createElement('span');
-    // textSpan.textContent = message;
-    // toast.style.display = 'flex';
-    // toast.style.alignItems = 'center';
-    // toast.style.gap = '12px';
-    // toast.appendChild(textSpan);
-    // const btn = document.createElement('button');
-    // btn.textContent = buttonLabel;
-    // btn.style.cssText = 'margin-left:auto; padding:2px 10px; background:white; color:#15803d; border:none; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer;';
-    // btn.onclick = () => {
-    //   toast.classList.remove('show');
-    //   setTimeout(() => toast.remove(), 300);
-    // };
-    // toast.appendChild(btn);
 
   document.body.appendChild(toast);
-  requestAnimationFrame(() => {
+  requestAnimationFrame(function() {
     toast.classList.add('show');
   });
 
-  // Auto-remove después de duration
-  setTimeout(() => {
+  setTimeout(function() {
     toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
+    setTimeout(function() { toast.remove(); }, 300);
   }, duration);
 }
 
-// ========== CONTADOR ==========
+/* ===== CONTADOR ===== */
 
 /**
- * Actualiza el badge contador de items
+ * Actualiza badge #items-count-badge e input #new_number.
  * @param {string} operation - 'add' o 'remove'
- * @param {number} value - Valor a sumar/restar (default 1)
+ * @param {number} value - Cantidad a sumar/restar (default 1)
  */
-function updateItemCount(operation = 'add', value = 1) {
-  const badge = document.getElementById('items-count-badge');
-  const new_num = document.getElementById('new_number');
+function updateItemCount(operation, value) {
+  if (value === undefined) value = 1;
+  var badge = document.getElementById('items-count-badge');
+  var newNum = document.getElementById('new_number');
   if (!badge) return;
 
-  let count = parseInt(badge.textContent) || 0;
+  var count = parseInt(badge.textContent) || 0;
   if (operation === 'add') {
     count += value;
   } else if (operation === 'remove') {
     count -= value;
   }
-  if (new_num) { new_num.value = count+1};
+  if (newNum) { newNum.value = count + 1; }
   badge.textContent = count;
 }
 
-
-
-
-// ========== BULK UPDATE ==========
+/* ===== BULK UPDATE ===== */
 
 /**
- * Obtiene todos los items editados de la tabla
- * @returns {Array} Lista de {id, campo1, campo2, ...}
+ * Recorre la tabla y devuelve array de objetos {id, campo, ...}.
+ * @returns {Array<{id: string}>}
  */
 function getEditedItems() {
-  const table = document.getElementById(config.tableId);
+  var table = document.getElementById(config.tableId);
   if (!table) return [];
 
-  const items = [];
-  const rows = table.querySelectorAll('tbody tr[data-item-id]');
+  var items = [];
+  var rows = table.querySelectorAll('tbody tr[data-item-id]');
 
-  rows.forEach(row => {
-    const itemId = row.dataset.itemId;
+  rows.forEach(function(row) {
+    var itemId = row.dataset.itemId;
     if (!itemId) return;
 
-    const item = { id: itemId };
-    const inputs = row.querySelectorAll('input[name]');
-
-    inputs.forEach(input => {
+    var item = { id: itemId };
+    var inputs = row.querySelectorAll('input[name]');
+    inputs.forEach(function(input) {
       item[input.name] = input.value;
     });
-
     items.push(item);
   });
 
@@ -128,27 +109,25 @@ function getEditedItems() {
 }
 
 /**
- * Maneja el guardado en lote de todos los items
+ * Envía POST con bulk-update al servidor y recarga página.
  */
 function handleBulkSave() {
-  const items = getEditedItems();
+  var items = getEditedItems();
   if (items.length === 0) {
     showToast('No hay cambios para guardar', false);
     return;
   }
 
-  // Validar que no haya inputs vacíos
-  const hasEmpty = items.some(item =>
-    Object.values(item).some(val => val === '' || val === null)
-  );
+  var hasEmpty = items.some(function(item) {
+    return Object.values(item).some(function(val) { return val === '' || val === null; });
+  });
 
   if (hasEmpty) {
     showToast('Por favor completa todos los campos', false);
     return;
   }
 
-  // Enviar bulk update
-  fetch(`?bulk-update`, {
+  fetch('?bulk-update', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -156,150 +135,115 @@ function handleBulkSave() {
     },
     body: JSON.stringify(items),
   })
-    .then(resp => resp.json())
-    .then(data => {
+    .then(function(resp) { return resp.json(); })
+    .then(function(data) {
       if (data.success) {
-        showToast(`${data.updated_count} ${config.modelName} actualizados`, true);
+        showToast(data.updated_count + ' ' + config.modelName + ' actualizados', true);
         location.reload();
       } else {
         showToast(data.error || 'Error en actualización en lote', false);
       }
     })
-    .catch(err => {
-      showToast(`Error: ${err.message}`, false);
+    .catch(function(err) {
+      showToast('Error: ' + err.message, false);
     });
 }
 
-// ========== HTMX EVENT HANDLERS ==========
+/* ===== HTMX EVENT HANDLERS ===== */
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Manejador antes del swap HTMX: evita duplicados en errores de validación
-
-
-document.addEventListener('htmx:beforeSwap', (event) => {
-    if (event.detail.xhr?.status === 400) {
-        const ct = event.detail.xhr.getResponseHeader('Content-Type') || '';
-        if (ct.includes('text/html')) {
-            event.detail.swapBehavior = 'outerHTML';
-            const msg = event.detail.xhr.getResponseHeader('X-Form-Error')
-                        || 'Corrige los errores en el formulario';
-            showToast(msg, false, 5000);
-        }
+/**
+ * beforeSwap: captura 400 y muestra toast de error de formulario.
+ */
+document.addEventListener('htmx:beforeSwap', function(event) {
+  if (event.detail.xhr && event.detail.xhr.status === 400) {
+    var ct = event.detail.xhr.getResponseHeader('Content-Type') || '';
+    if (ct.indexOf('text/html') !== -1) {
+      event.detail.swapBehavior = 'outerHTML';
+      var msg = event.detail.xhr.getResponseHeader('X-Form-Error') || 'Corrige los errores en el formulario';
+      showToast(msg, false, 5000);
     }
+  }
 });
 
-// document.addEventListener('htmx:beforeSwap', (event) => {
-//   if (event.detail.xhr?.status === 400) {
-//     const ct = event.detail.xhr.getResponseHeader('Content-Type') || '';
-//     if (ct.includes('text/html')) {
-//       event.detail.swapBehavior = 'outerHTML';
-//       showToast('Corrige los errores en el formulario', false);
-//     }
-//   }
-// });
+/**
+ * beforeRequest: agrega fade-out a filas que se eliminarán vía DELETE.
+ */
+document.addEventListener('htmx:beforeRequest', function(event) {
+  var method = event.detail.xhr && event.detail.xhr.method;
+  var trigger = event.detail.elt || event.detail.target;
 
-  // document.addEventListener('htmx:beforeSwap', (event) => {
-  //   if (event.detail.xhr?.status === 400) {
-  //     const ct = event.detail.xhr.getResponseHeader('Content-Type') || '';
-  //     if (ct.includes('text/html')) {
-  //       event.detail.swapBehavior = 'outerHTML';
-  //     }
-  //   }
-  // });
-
-  // Manejador antes de cualquier request HTMX
-  document.addEventListener('htmx:beforeRequest', (event) => {
-    const method = event.detail.xhr?.method;
-    const trigger = event.detail.elt || event.detail.target;
-
-    // Agregar clase de fade-out para deletes
-    if (method === 'DELETE') {
-      const row = trigger?.closest('tr');
-      if (row) {
-        row.classList.add('row-fade-out');
-      }
+  if (method === 'DELETE') {
+    var row = trigger && trigger.closest('tr');
+    if (row) {
+      row.classList.add('row-fade-out');
     }
-  });
-
-  // Manejador después de cualquier request HTMX
-  document.addEventListener('htmx:afterRequest', (event) => {
-    const status = event.detail.xhr?.status;
-    const successful = event.detail.successful;
-    const trigger = event.detail.elt || event.detail.target;
-    const action = trigger?.dataset?.action;
-    const row = trigger?.closest('tr') || event.detail.target?.closest('tr');
-
-    // Éxito (200, 201, 204)
-    if ([200, 201, 204].includes(status)) {
-      if (action === 'create') {
-        // Restaurar UI del form si estaba en estado de error
-        const formRow = document.querySelector('tr[id^="new-"][id$="-form-row"]');
-        if (formRow) {
-          const td = formRow.querySelector('td');
-          if (td) {
-            td.classList.remove('bg-red-50', 'bg-red-100');
-            td.classList.add('bg-green-100');
-          }
-          formRow.querySelectorAll('.error-message, .field-error').forEach(el => el.remove());
-        }
-        showToast(`${config.modelName}: Creado exitosamente`, true);
-        setTimeout(() => updateItemCount('add'), 400);
-
-      } else if (action === 'update') {
-        showToast(`${config.modelName}: Actualizado exitosamente`, true);
-      } else if (action === 'delete') {
-        updateItemCount('remove');
-        showToast(`${config.modelName}: Eliminado exitosamente`, true);
-        // Remover fila después de que la animación termine
-        setTimeout(() => {
-          if (row) row.remove();
-        }, 400);
-      }
-    }
-    // Error
-
-else if (status >= 400) {
-  const ct = event.detail.xhr?.getResponseHeader('Content-Type') || '';
-  let errorMsg = '';
-  if (ct.includes('application/json')) {
-    try {
-      const data = JSON.parse(event.detail.xhr.responseText);
-      errorMsg = data.error || data.message || '';
-    } catch (e) {}
   }
-  if (errorMsg) showToast(errorMsg, false);
-}
+});
 
-    // else if (status >= 400) {
-    //   const ct = event.detail.xhr?.getResponseHeader('Content-Type') || '';
-    //   let errorMsg = '';
-    //   if (ct.includes('application/json')) {
-    //     try {
-    //       const data = JSON.parse(event.detail.xhr.responseText);
-    //       errorMsg = data.error || data.message || '';
-    //     } catch (e) {}
-    //   } else if (ct.includes('text/html')) {
-    //     errorMsg = 'Corrige los errores en el formulario';
-    //   }
-    //   if (!errorMsg) {
-    //     const action_text = action ? action.charAt(0).toUpperCase() + action.slice(1) : 'Operación';
-    //     errorMsg = `${action_text} fallido (${status})`;
-    //   }
-    //   showToast(errorMsg, false);
-    // }
-  });
+/**
+ * afterRequest: maneja feedback visual por acción CRUD (create/update/delete).
+ * Muestra toast y actualiza contadores según corresponda.
+ */
+document.addEventListener('htmx:afterRequest', function(event) {
+  var status = event.detail.xhr && event.detail.xhr.status;
+  var successful = event.detail.successful;
+  var trigger = event.detail.elt || event.detail.target;
+  var action = trigger && trigger.dataset && trigger.dataset.action;
+  var row = (trigger && trigger.closest('tr')) || (event.detail.target && event.detail.target.closest('tr'));
 
-  // Vincular botones de submit/cancel (si existen)
-  const submitBtn = document.querySelector('[data-action="bulk-save"]');
-  const cancelBtn = document.querySelector('[data-action="bulk-cancel"]');
+  if ([200, 201, 204].indexOf(status) !== -1) {
+    if (action === 'create') {
+      /* Limpiar estado de error del form row */
+      var formRow = document.querySelector('tr[id^="new-"][id$="-form-row"]');
+      if (formRow) {
+        var td = formRow.querySelector('td');
+        if (td) {
+          td.classList.remove('bg-red-50', 'bg-red-100');
+          td.classList.add('bg-green-100');
+        }
+        formRow.querySelectorAll('.error-message, .field-error').forEach(function(el) { el.remove(); });
+      }
+      showToast(config.modelName + ': Creado exitosamente', true);
+      setTimeout(function() { updateItemCount('add'); }, 400);
+
+    } else if (action === 'update') {
+      showToast(config.modelName + ': Actualizado exitosamente', true);
+    } else if (action === 'delete') {
+      updateItemCount('remove');
+      showToast(config.modelName + ': Eliminado exitosamente', true);
+      setTimeout(function() {
+        if (row) row.remove();
+      }, 400);
+    }
+  } else if (status >= 400) {
+    /* Mostrar error desde JSON si aplica */
+    var ct = event.detail.xhr && event.detail.xhr.getResponseHeader('Content-Type') || '';
+    var errorMsg = '';
+    if (ct.indexOf('application/json') !== -1) {
+      try {
+        var data = JSON.parse(event.detail.xhr.responseText);
+        errorMsg = data.error || data.message || '';
+      } catch (e) {}
+    }
+    if (errorMsg) showToast(errorMsg, false);
+  }
+});
+
+/* ===== VINCULAR BOTONES BULK ===== */
+
+document.addEventListener('DOMContentLoaded', function() {
+  var submitBtn = document.querySelector('[data-action="bulk-save"]');
+  var cancelBtn = document.querySelector('[data-action="bulk-cancel"]');
 
   if (submitBtn) {
     submitBtn.addEventListener('click', handleBulkSave);
   }
 
   if (cancelBtn) {
-    cancelBtn.addEventListener('click', () => {
+    cancelBtn.addEventListener('click', function() {
       location.reload();
     });
   }
 });
+
+})();

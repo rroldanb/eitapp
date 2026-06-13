@@ -1,3 +1,4 @@
+{% load static %}
 <div class="space-y-4">
   <div class="flex items-center gap-2 text-lg font-semibold text-gray-800">
     <i class="fas fa-check-circle text-green-500"></i>
@@ -78,50 +79,5 @@
   {% endif %}
 </div>
 
-<script>
-function downloadReport() {
-  var lines = ['=== REPORTE DE IMPORTACION ===', '', 'Resumen:'];
-  var report = {{ report_json|safe }};
-  var totals = {{ report_totals_json|safe }};
-  lines.push('  Insertadas: ' + totals.inserted);
-  lines.push('  Actualizadas: ' + totals.updated);
-  lines.push('  Omitidas: ' + (totals.skipped || 0));
-  lines.push('  Rechazadas: ' + totals.rejected);
-  lines.push('');
-  for (var sheet in report) {
-    var sr = report[sheet];
-    lines.push('--- ' + sheet + ' ---');
-    lines.push('  Insertadas: ' + (sr.inserted || 0));
-    lines.push('  Actualizadas: ' + (sr.updated || 0));
-    lines.push('  Omitidas: ' + (sr.skipped_duplicates || 0));
-    if (sr.rejected && sr.rejected.length) {
-      lines.push('  Rechazadas:');
-      for (var i = 0; i < sr.rejected.length; i++) {
-        lines.push('    - Fila ' + (sr.rejected[i].row || '?') + ': ' + (sr.rejected[i].reason || ''));
-      }
-    }
-    lines.push('');
-  }
-  lines.push('=== FIN DEL REPORTE ===');
-
-  var blob = new Blob([lines.join('\n')], {type: 'text/plain;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'reporte_importacion.txt';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-document.querySelectorAll('.rej-toggle').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    var target = document.getElementById(this.dataset.target);
-    var icon = this.querySelector('i');
-    if (target) {
-      target.classList.toggle('hidden');
-      icon.classList.toggle('fa-chevron-right');
-      icon.classList.toggle('fa-chevron-down');
-    }
-  });
-});
-</script>
+<div id="import-report-data" data-report='{{ report_json|safe }}' data-totals='{{ report_totals_json|safe }}' hidden></div>
+<script src="{% static 'js/features/import-steps.js' %}" defer></script>

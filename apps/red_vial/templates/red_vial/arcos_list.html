@@ -22,5 +22,5 @@
 <div id="data-crud-config" data-table-id="arcos-table" data-model-name="Arco" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
 
 {% block extra_js %}
-<script src="{% static 'js/crud_events.js' %}"></script>
+<script src="{% static 'js/features/bulk-crud.js' %}" defer></script>
 {% endblock %}

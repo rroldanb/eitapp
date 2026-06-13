@@ -1,3 +1,4 @@
+{% load static %}
 {% if error %}
   <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700 mb-4">{{ error }}</div>
 {% endif %}
@@ -103,45 +104,4 @@
   </div>
 {% endif %}
 
-<script>
-(function() {
-  var inputs = document.querySelectorAll('[name^="dup_"]');
-  inputs.forEach(function(input) {
-    var name = input.name;
-    if (input.type === 'radio') {
-      input.addEventListener('change', function() {
-        var hidden = document.querySelector('input[type="hidden"][name="' + name + '"]');
-        if (hidden) {
-          hidden.value = this.value;
-        }
-      });
-    }
-  });
-  document.querySelectorAll('.dup-toggle').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var target = document.getElementById(this.dataset.target);
-      if (target) {
-        target.classList.toggle('hidden');
-        var icon = this.querySelector('i');
-        if (icon) {
-          icon.classList.toggle('fa-chevron-right');
-          icon.classList.toggle('fa-chevron-down');
-        }
-      }
-    });
-  });
-  document.querySelectorAll('.err-toggle').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var target = document.getElementById(this.dataset.target);
-      if (target) {
-        target.classList.toggle('hidden');
-        var icon = this.querySelector('i');
-        if (icon) {
-          icon.classList.toggle('fa-chevron-right');
-          icon.classList.toggle('fa-chevron-down');
-        }
-      }
-    });
-  });
-})();
-</script>
+<script src="{% static 'js/features/import-steps.js' %}" defer></script>

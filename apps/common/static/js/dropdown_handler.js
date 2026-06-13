@@ -1,31 +1,32 @@
 /**
- * Dropdown Handler - Maneja dropdowns del navbar con Tailwind
+ * Maneja dropdowns del navbar con Tailwind.
+ * Patrón: data-dropdown="{id}" en el toggle, [id$="-menu"] como target.
+ * Cierra cualquier otro menú abierto al abrir uno nuevo.
+ * Cierra todos al hacer clic fuera de .relative.
  */
-
 document.addEventListener('DOMContentLoaded', function() {
-    const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-    
-    dropdownToggles.forEach(toggle => {
-        const dropdownId = toggle.getAttribute('data-dropdown');
-        const menu = document.getElementById(dropdownId);
-        
+    var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+
+    dropdownToggles.forEach(function(toggle) {
+        var dropdownId = toggle.getAttribute('data-dropdown');
+        var menu = document.getElementById(dropdownId);
+
         if (!menu) return;
-        
-        // Toggle on click
-        toggle.addEventListener('click', (e) => {
+
+        toggle.addEventListener('click', function(e) {
             e.preventDefault();
-            const isHidden = menu.classList.contains('hidden');
-            
-            // Cerrar otros dropdowns
-            document.querySelectorAll('[id$="-menu"]').forEach(otherMenu => {
+            var isHidden = menu.classList.contains('hidden');
+
+            /* Cerrar otros dropdowns antes de abrir el actual */
+            document.querySelectorAll('[id$="-menu"]').forEach(function(otherMenu) {
                 if (otherMenu.id !== dropdownId) {
                     otherMenu.classList.add('hidden');
-                    const btn = document.querySelector(`[data-dropdown="${otherMenu.id}"]`);
+                    var btn = document.querySelector('[data-dropdown="' + otherMenu.id + '"]');
                     if (btn) btn.setAttribute('aria-expanded', 'false');
                 }
             });
-            
-            // Toggle actual
+
+            /* Toggle */
             if (isHidden) {
                 menu.classList.remove('hidden');
                 toggle.setAttribute('aria-expanded', 'true');
@@ -35,13 +36,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    // Cerrar dropdowns al clickear fuera
-    document.addEventListener('click', (e) => {
+
+    /* Cerrar dropdowns al clickear fuera del contenedor .relative */
+    document.addEventListener('click', function(e) {
         if (!e.target.closest('.relative')) {
-            document.querySelectorAll('[id$="-menu"]').forEach(menu => {
+            document.querySelectorAll('[id$="-menu"]').forEach(function(menu) {
                 menu.classList.add('hidden');
-                const btn = document.querySelector(`[data-dropdown="${menu.id}"]`);
+                var btn = document.querySelector('[data-dropdown="' + menu.id + '"]');
                 if (btn) btn.setAttribute('aria-expanded', 'false');
             });
         }

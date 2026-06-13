@@ -4,6 +4,7 @@
     Se generaron {{ generated_count }} filas
   </div>
   <script>
+    /* Auto-remover toast de generación después de 3s */
     setTimeout(function() {
       var el = document.getElementById('generation-toast');
       if (el) el.remove();

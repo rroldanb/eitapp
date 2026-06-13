@@ -174,20 +174,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function toggleDestino() {
-  var val = document.querySelector('input[name="destino_tipo"]:checked').value;
-  document.getElementById('destino_existente').classList.toggle('hidden', val !== 'existente');
-  document.getElementById('destino_nuevo').classList.toggle('hidden', val !== 'nuevo');
-}
-function toggleMandante() {
-  var val = document.querySelector('input[name="mandante_tipo"]:checked').value;
-  document.getElementById('mandante_existente').classList.toggle('hidden', val !== 'existente');
-  document.getElementById('mandante_nuevo').classList.toggle('hidden', val !== 'nuevo');
-}
-document.addEventListener('DOMContentLoaded', function() {
-  toggleDestino();
-  toggleMandante();
-});
-</script>
+<script src="{% static 'js/features/toggle-fields.js' %}" defer></script>
 {% endblock %}

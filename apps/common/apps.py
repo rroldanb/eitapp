@@ -12,7 +12,7 @@ class CommonConfig(AppConfig):
         from django.db import connections
         from django.db.utils import OperationalError
 
-        # dbs = ["default", "pg_local", "supa"]
+        # dbs = ["default", "pg_local", "supa"] # NO BORRAR, esto me permite probar conexiones a otras bases de datos si es necesario
         dbs = ["default"]
 
         for db_name in dbs:

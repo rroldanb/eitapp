@@ -1,3 +1,4 @@
+{% load static %}
 <form hx-post="{% url 'import_validate' proyecto.id %}" hx-target="#import-step-content" hx-swap="innerHTML" class="space-y-4">
   {% if error %}
     <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">{{ error }}</div>
@@ -45,32 +46,4 @@
   </div>
 </form>
 
-<script>
-(function() {
-  var checkboxes = document.querySelectorAll('.sheet-checkbox');
-
-  function setAll(checked) {
-    checkboxes.forEach(function(cb) { cb.checked = checked; });
-  }
-
-  document.querySelectorAll('.btn-preset').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var action = this.getAttribute('data-action');
-      if (action === 'check-all') { setAll(true); }
-      else if (action === 'uncheck-all') { setAll(false); }
-      else if (action === 'check-contactos') {
-        setAll(false);
-        document.querySelectorAll('.sheet-checkbox').forEach(function(cb) {
-          if (cb.value === 'Mandante' || cb.value === 'Contacto') cb.checked = true;
-        });
-      }
-      else if (action === 'check-proyecto') {
-        setAll(false);
-        document.querySelectorAll('.sheet-checkbox').forEach(function(cb) {
-          if (cb.value !== 'Mandante' && cb.value !== 'Contacto' && cb.value !== 'Proyecto') cb.checked = true;
-        });
-      }
-    });
-  });
-})();
-</script>
+<script src="{% static 'js/features/import-steps.js' %}" defer></script>

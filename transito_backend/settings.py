@@ -142,10 +142,15 @@ DBNAME = os.getenv("dbname")
 DATABASE_URL = f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
+
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
+    # },
+
+
+    ## NO BORRAR, esto me permite probar conexiones a otras bases de datos si es necesario
+    "default": dj_database_url.parse(DATABASE_URL),
     # "supa": dj_database_url.parse(DATABASE_URL),
     # 'pg_local': dj_database_url.config(
     #     default='postgresql://postgres:1234@localhost:5432/eitapp',
