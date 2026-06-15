@@ -128,31 +128,23 @@ WSGI_APPLICATION = 'transito_backend.wsgi.application'
 
 
 
-####### CLOUD PG DATABASE CONFIGURATION #######
+####### DATABASE CONFIGURATION #######
 
-USER = os.getenv("user")
-PASSWORD = os.getenv("password")
-HOST = os.getenv("host")
-PORT = os.getenv("port")
-DBNAME = os.getenv("dbname")
-
-DATABASE_URL = f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
+# Construir DATABASE_URL desde vars individuales si no está definida directamente
+if not os.getenv('DATABASE_URL'):
+    _user = os.getenv("user")
+    _password = os.getenv("password")
+    _host = os.getenv("host")
+    _port = os.getenv("port")
+    _dbname = os.getenv("dbname")
+    if all([_user, _password, _host, _port, _dbname]):
+        os.environ['DATABASE_URL'] = f"postgresql://{_user}:{_password}@{_host}:{_port}/{_dbname}"
 
 DATABASES = {
-
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # },
-
-
-    ## NO BORRAR, esto me permite probar conexiones a otras bases de datos si es necesario
-    "default": dj_database_url.parse(DATABASE_URL),
-    # "supa": dj_database_url.parse(DATABASE_URL),
-    # 'pg_local': dj_database_url.config(
-    #     default='postgresql://postgres:1234@localhost:5432/eitapp',
-    #     conn_max_age=600
-    # )
+    "default": dj_database_url.config(
+        default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
+        conn_max_age=600,
+    ),
 }
 
 

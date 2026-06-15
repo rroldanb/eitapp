@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.git/
+.gitignore
+.env
+.env.*
+*.sqlite3
+db.sqlite3
+staticfiles/
+README.md
+.DS_Store
+benchmark_js.py

@@ -2,12 +2,20 @@ import uuid
 import io
 import os
 from PIL import Image
-from apps.imagenes.utils.supabase_client import supabase
+from apps.imagenes.utils.supabase_client import get_supabase
 
 BUCKET = os.getenv("SUPABASE_BUCKET")
 
 
+def _get_client():
+    client = get_supabase()
+    if client is None:
+        raise Exception("Supabase no está configurado (faltan SUPABASE_URL o SUPABASE_KEY)")
+    return client
+
+
 def upload_project_image(file):
+    client = _get_client()
     try:
         img = Image.open(file)
     except Exception as e:
@@ -26,7 +34,7 @@ def upload_project_image(file):
     file_name = f"{uuid.uuid4()}.webp"
 
     try:
-        supabase.storage.from_(BUCKET).upload(
+        client.storage.from_(BUCKET).upload(
             file_name,
             webp_buffer.read(),
             {"content-type": "image/webp"}
@@ -34,14 +42,15 @@ def upload_project_image(file):
     except Exception as e:
         raise Exception(f"Error subiendo imagen a Supabase: {str(e)}")
 
-    public_url = supabase.storage.from_(BUCKET).get_public_url(file_name)
+    public_url = client.storage.from_(BUCKET).get_public_url(file_name)
     return public_url
 
 
 def delete_project_image(image_url):
+    client = _get_client()
     try:
         file_name = image_url.rstrip('/').rsplit('/', 1)[-1]
-        supabase.storage.from_(BUCKET).remove([file_name])
+        client.storage.from_(BUCKET).remove([file_name])
     except Exception as e:
         raise Exception(f"Error eliminando imagen de Supabase: {str(e)}")
 
