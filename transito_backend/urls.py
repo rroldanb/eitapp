@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.static import static
 from apps.usuarios import views as user_views
 from apps.admin_views import descargar_plantilla, backup_database, restore_database, migracion_gui, migracion_reporte, migracion_descarga_xlsx, migracion_descarga_csv
 from django.conf import settings
@@ -29,7 +30,6 @@ urlpatterns = [
 
 
 if settings.DEBUG:
-    # Include django_browser_reload URLs only in DEBUG mode
     urlpatterns += [
         path("__reload__/", include("django_browser_reload.urls")),
-    ]
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

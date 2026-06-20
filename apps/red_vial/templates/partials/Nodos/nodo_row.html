@@ -8,7 +8,7 @@
   <td class="px-2 py-1">
     <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_1" aria-label="Calle 1">
       <option value="">Seleccionar calle...</option>
-      {% for calle in proyecto.calles.all %}
+      {% for calle in calle_list %}
       <option value="{{ calle.id }}" {% if nodo.calle_1.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
       {% endfor %}
     </select>
@@ -17,7 +17,7 @@
   <td class="px-2 py-1">
     <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_2" aria-label="Calle 2">
       <option value="">Seleccionar calle...</option>
-      {% for calle in proyecto.calles.all %}
+      {% for calle in calle_list %}
       <option value="{{ calle.id }}" {% if nodo.calle_2.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
       {% endfor %}
     </select>

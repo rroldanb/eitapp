@@ -1,21 +1,16 @@
 import uuid
-import io
 import os
 from PIL import Image
-from apps.imagenes.utils.supabase_client import get_supabase
-
-BUCKET = os.getenv("SUPABASE_BUCKET")
+from django.conf import settings
 
 
-def _get_client():
-    client = get_supabase()
-    if client is None:
-        raise Exception("Supabase no está configurado (faltan SUPABASE_URL o SUPABASE_KEY)")
-    return client
+def _media_path(subdir, filename):
+    path = os.path.join(settings.MEDIA_ROOT, subdir)
+    os.makedirs(path, exist_ok=True)
+    return os.path.join(path, filename)
 
 
 def upload_project_image(file):
-    client = _get_client()
     try:
         img = Image.open(file)
     except Exception as e:
@@ -27,32 +22,25 @@ def upload_project_image(file):
         img = Image.alpha_composite(background, img)
     img = img.convert('RGB')
 
-    webp_buffer = io.BytesIO()
-    img.save(webp_buffer, format='WebP', quality=92, method=6)
-    webp_buffer.seek(0)
+    filename = f"{uuid.uuid4()}.webp"
+    file_path = _media_path('proyectos', filename)
+    img.save(file_path, format='WebP', quality=92, method=6)
 
-    file_name = f"{uuid.uuid4()}.webp"
-
-    try:
-        client.storage.from_(BUCKET).upload(
-            file_name,
-            webp_buffer.read(),
-            {"content-type": "image/webp"}
-        )
-    except Exception as e:
-        raise Exception(f"Error subiendo imagen a Supabase: {str(e)}")
-
-    public_url = client.storage.from_(BUCKET).get_public_url(file_name)
-    return public_url
+    return f"{settings.MEDIA_URL}proyectos/{filename}"
 
 
 def delete_project_image(image_url):
-    client = _get_client()
-    try:
-        file_name = image_url.rstrip('/').rsplit('/', 1)[-1]
-        client.storage.from_(BUCKET).remove([file_name])
-    except Exception as e:
-        raise Exception(f"Error eliminando imagen de Supabase: {str(e)}")
+    if not image_url:
+        return
+
+    # Ignorar URLs externas (ej. Supabase, imágenes viejas)
+    if not image_url.startswith(settings.MEDIA_URL):
+        return
+
+    rel_path = image_url[len(settings.MEDIA_URL):].lstrip('/')
+    abs_path = os.path.join(settings.MEDIA_ROOT, rel_path)
+    if os.path.exists(abs_path):
+        os.remove(abs_path)
 
 
 upload_image = upload_project_image

@@ -121,7 +121,7 @@ WSGI_APPLICATION = 'transito_backend.wsgi.application'
 
 # DATABASES = {
 #     'default': dj_database_url.config(
-#         default='postgresql://postgres:1234@localhost:5432/tasks',
+#         default='postgresql://postgres:1234@localhost:5432/eitapp',
 #         conn_max_age=600
 #     )
 # }
@@ -130,22 +130,49 @@ WSGI_APPLICATION = 'transito_backend.wsgi.application'
 
 ####### DATABASE CONFIGURATION #######
 
-# Construir DATABASE_URL desde vars individuales si no está definida directamente
-if not os.getenv('DATABASE_URL'):
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    },
+}
+
+# ── ORA: PostgreSQL en VPS (Coolify / Oracle Cloud) ──
+# Toma las vars individuales del .env: host, user, password, port, dbname
+_url_ora = os.getenv('DATABASE_URL_ORA')
+if not _url_ora:
     _user = os.getenv("user")
     _password = os.getenv("password")
     _host = os.getenv("host")
     _port = os.getenv("port")
     _dbname = os.getenv("dbname")
     if all([_user, _password, _host, _port, _dbname]):
-        os.environ['DATABASE_URL'] = f"postgresql://{_user}:{_password}@{_host}:{_port}/{_dbname}"
+        _url_ora = f"postgresql://{_user}:{_password}@{_host}:{_port}/{_dbname}"
+if _url_ora:
+    DATABASES["ORA"] = dj_database_url.parse(
+        _url_ora,
+        conn_max_age=int(os.getenv('CONN_MAX_AGE', '0')),
+    )
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
-        conn_max_age=600,
-    ),
-}
+# ── supa: PostgreSQL en Supabase (referencia, solo si se definen las vars) ──
+_supa_url = os.getenv('DATABASE_URL_SUPA')
+if not _supa_url:
+    _su = os.getenv("supa_user") or os.getenv("SUPA_USER")
+    _sp = os.getenv("supa_password") or os.getenv("SUPA_PASSWORD")
+    _sh = os.getenv("supa_host") or os.getenv("SUPA_HOST")
+    _spt = os.getenv("supa_port") or os.getenv("SUPA_PORT")
+    _sd = os.getenv("supa_dbname") or os.getenv("SUPA_DBNAME")
+    if all([_su, _sp, _sh, _spt, _sd]):
+        _supa_url = f"postgresql://{_su}:{_sp}@{_sh}:{_spt}/{_sd}"
+if _supa_url:
+    DATABASES["supa"] = dj_database_url.parse(_supa_url, conn_max_age=0)
+
+# ── pg_local: PostgreSQL local (tu máquina) ──
+DATABASES["pg_local"] = dj_database_url.config(
+    env='DATABASE_URL_LOCAL',
+    default='postgresql://postgres:1234@localhost:5432/eitapp',
+    conn_max_age=600,
+)
 
 
 # Password validation
@@ -170,14 +197,14 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
+# LANGUAGE_CODE = 'es-cl'
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
+# TIME_ZONE = 'America/Santiago'
 USE_TZ = True
 
+USE_I18N = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -190,6 +217,9 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_URL = '/signin'
 

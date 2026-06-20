@@ -1,12 +1,29 @@
 (function() {
   var zoomState = {};
 
+  function setLocked(imgId, locked) {
+    var s = zoomState[imgId];
+    if (!s) return;
+    s.locked = locked;
+    var vp = document.querySelector('[data-viewport="' + imgId + '"]');
+    if (!vp) return;
+    if (locked) {
+      vp.classList.remove('bg-gray-50');
+      vp.classList.add('bg-green-50');
+      vp.style.cursor = 'default';
+    } else {
+      vp.classList.remove('bg-green-50');
+      vp.classList.add('bg-gray-50');
+      vp.style.cursor = 'grab';
+    }
+  }
+
   function initZoom(imgId) {
     var img = document.getElementById(imgId);
     var vp = document.querySelector('[data-viewport="' + imgId + '"]');
     if (!img || !vp) return;
 
-    zoomState[imgId] = { scale: 1, tx: 0, ty: 0, dragging: false, dragStartX: 0, dragStartY: 0, startTx: 0, startTy: 0 };
+    zoomState[imgId] = { scale: 1, tx: 0, ty: 0, dragging: false, dragStartX: 0, dragStartY: 0, startTx: 0, startTy: 0, locked: false, clickStartX: 0, clickStartY: 0 };
 
     function apply() {
       var s = zoomState[imgId];
@@ -14,7 +31,8 @@
     }
 
     function resetZoom() {
-      zoomState[imgId] = { scale: 1, tx: 0, ty: 0, dragging: false, dragStartX: 0, dragStartY: 0, startTx: 0, startTy: 0 };
+      var s = zoomState[imgId];
+      s.scale = 1; s.tx = 0; s.ty = 0; s.dragging = false;
       apply();
     }
 
@@ -32,6 +50,7 @@
 
     vp.addEventListener('wheel', function(e) {
       if (img.classList.contains('hidden')) return;
+      if (zoomState[imgId].locked) return;
       e.preventDefault();
       var rect = vp.getBoundingClientRect();
       zoomAt(e.deltaY < 0 ? 1 : -1, rect.width / 2, rect.height / 2);
@@ -40,8 +59,11 @@
     vp.addEventListener('mousedown', function(e) {
       if (img.classList.contains('hidden')) return;
       if (e.button !== 0) return;
-      vp.focus();
       var s = zoomState[imgId];
+      s.clickStartX = e.clientX;
+      s.clickStartY = e.clientY;
+      if (s.locked) return;
+      vp.focus();
       s.dragging = true;
       s.dragStartX = e.clientX;
       s.dragStartY = e.clientY;
@@ -63,13 +85,22 @@
       var s = zoomState[imgId];
       if (s.dragging) {
         s.dragging = false;
-        vp.style.cursor = 'grab';
+        vp.style.cursor = s.locked ? 'default' : 'grab';
       }
     });
 
     vp.addEventListener('dblclick', function() {
       if (img.classList.contains('hidden')) return;
+      if (zoomState[imgId].locked) return;
       resetZoom();
+    });
+
+    vp.addEventListener('click', function(e) {
+      if (img.classList.contains('hidden')) return;
+      var s = zoomState[imgId];
+      var moved = Math.abs(e.clientX - s.clickStartX) > 5 || Math.abs(e.clientY - s.clickStartY) > 5;
+      if (moved) return;
+      setLocked(imgId, !s.locked);
     });
 
     return { reset: resetZoom, zoomAt: zoomAt };
@@ -82,6 +113,7 @@
       zoomState[imgId].ty = 0;
       var img = document.getElementById(imgId);
       if (img) img.style.transform = '';
+      setLocked(imgId, false);
     }
   }
 
@@ -123,6 +155,7 @@
     var action = btn.getAttribute('data-action');
     if (!targetId || !zoomState[targetId]) return;
     var s = zoomState[targetId];
+    if (action !== 'reset' && s.locked) return;
     var vp = document.querySelector('[data-viewport="' + targetId + '"]');
     if (!vp) return;
     if (action === 'zoom-in') {
