@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
+from django.http import HttpResponse
 from apps.usuarios import views as user_views
 from apps.admin_views import descargar_plantilla, backup_database, restore_database, migracion_gui, migracion_reporte, migracion_descarga_xlsx, migracion_descarga_csv
 from django.conf import settings
 
 urlpatterns = [
+    path('health/', lambda r: HttpResponse("OK"), name='health'),
     path('admin/generar-planilla/', descargar_plantilla, name='generar_planilla'),
     path('admin/migracion/', migracion_gui, name='migracion_gui'),
     path('admin/migracion/<str:token>/', migracion_reporte, name='migracion_reporte'),

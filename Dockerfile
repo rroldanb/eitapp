@@ -14,6 +14,6 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput
 
-EXPOSE 7860
+EXPOSE 8000
 
 ENTRYPOINT ["/app/entrypoint.sh"]
