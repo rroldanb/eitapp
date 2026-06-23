@@ -1,4 +1,4 @@
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -7,11 +7,29 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from apps.usuarios.models import Role
 
 
+def switch_db(request, alias):
+    if alias in settings.DATABASES:
+        request.session['active_db'] = alias if alias != 'default' else None
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+
 def home(request):
-    context = {'current_date': timezone.now()}
+    db_info = {
+        'alias': request.session.get('active_db') or 'default',
+        'engine': connection.vendor,
+        'host': connection.settings_dict.get('HOST', ''),
+        'port': connection.settings_dict.get('PORT', ''),
+        'name': connection.settings_dict.get('NAME', ''),
+    }
+    context = {
+        'current_date': timezone.now(),
+        'db_info': db_info,
+        'databases': {k: v for k, v in settings.DATABASES.items() if k != 'default'},
+    }
     if request.user.is_authenticated:
         from apps.proyectos.models.proyecto import Proyecto
         from apps.mandantes.models import Mandante

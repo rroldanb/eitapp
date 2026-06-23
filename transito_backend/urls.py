@@ -17,6 +17,7 @@ urlpatterns = [
     path('admin/restore-db/', restore_database, name='restore_database'),
     path('admin/', admin.site.urls),
     path('', user_views.home, name='home'),
+    path('switch-db/<str:alias>/', user_views.switch_db, name='switch_db'),
     path('logout/', user_views.signout, name='signout'),
     path('signin/', user_views.signin, name='signin'),
     path('usuarios/', include('apps.usuarios.urls')),

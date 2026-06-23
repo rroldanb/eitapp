@@ -67,6 +67,7 @@ TAILWIND_APP_NAME = "theme"
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'apps.common.db_router.DatabaseSelectorMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -131,10 +132,10 @@ WSGI_APPLICATION = 'transito_backend.wsgi.application'
 ####### DATABASE CONFIGURATION #######
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
+    "default": dj_database_url.config(
+        default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
+        conn_max_age=int(os.getenv('CONN_MAX_AGE', '0')),
+    ),
 }
 
 # ── ORA: PostgreSQL en VPS (Coolify / Oracle Cloud) ──
@@ -174,6 +175,7 @@ DATABASES["pg_local"] = dj_database_url.config(
     conn_max_age=600,
 )
 
+DATABASE_ROUTERS = ['apps.common.db_router.ActiveDatabaseRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
