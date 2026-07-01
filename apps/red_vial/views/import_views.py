@@ -1,10 +1,11 @@
 import json
 import copy
+from typing import Any
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse
 
@@ -17,13 +18,13 @@ from apps.red_vial.services.import_service import (
 SESSION_PREFIX = 'import_'
 
 
-def _clear_import_session(request):
+def _clear_import_session(request: HttpRequest) -> None:
     keys = [k for k in request.session.keys() if k.startswith(SESSION_PREFIX)]
     for k in keys:
         del request.session[k]
 
 
-def _step_data(request):
+def _step_data(request: HttpRequest) -> dict[str, Any]:
     return {
         'parsed': request.session.get(f'{SESSION_PREFIX}parsed'),
         'filename': request.session.get(f'{SESSION_PREFIX}filename'),
@@ -42,7 +43,7 @@ STEPS_DATA = [
 ]
 
 
-def _build_response(request, proyecto, step, content_template, extra=None):
+def _build_response(request: HttpRequest, proyecto: Proyecto | None, step: int, content_template: str, extra: dict[str, Any] | None = None) -> HttpResponse:
     data = _step_data(request)
     ctx = {
         'proyecto': proyecto,
@@ -78,7 +79,7 @@ def _build_response(request, proyecto, step, content_template, extra=None):
 # ── New entry point (replaces import_project_select) ──────────────────────────
 
 @login_required
-def import_landing(request):
+def import_landing(request: HttpRequest) -> HttpResponse:
     proyectos = Proyecto.objects.filter(user=request.user).order_by('-created_at')
     mandantes = Mandante.objects.all().order_by('name')
     _clear_import_session(request)
@@ -95,7 +96,7 @@ def import_landing(request):
 
 @login_required
 @require_POST
-def import_upload(request):
+def import_upload(request: HttpRequest) -> HttpResponse:
     _clear_import_session(request)
 
     excel_file = request.FILES.get('file')
@@ -132,7 +133,7 @@ def import_upload(request):
 
 @login_required
 @require_POST
-def import_configure(request):
+def import_configure(request: HttpRequest) -> HttpResponse:
     data = _step_data(request)
     parsed = data['parsed']
     if not parsed:
@@ -211,7 +212,7 @@ def import_configure(request):
 # ── Legacy entry point (sidebar / direct link) ────────────────────────────────
 
 @login_required
-def import_start(request, proyecto_id):
+def import_start(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     _clear_import_session(request)
     from_sidebar = request.GET.get('from_sidebar')
@@ -228,7 +229,7 @@ def import_start(request, proyecto_id):
 
 @login_required
 @require_POST
-def import_goto_selection(request, proyecto_id):
+def import_goto_selection(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     data = _step_data(request)
     if not data['parsed']:
@@ -242,7 +243,7 @@ def import_goto_selection(request, proyecto_id):
 
 @login_required
 @require_POST
-def import_back_config(request, proyecto_id):
+def import_back_config(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     keys = [k for k in request.session.keys()
             if k.startswith(f'{SESSION_PREFIX}selected')
@@ -260,7 +261,7 @@ def import_back_config(request, proyecto_id):
 
 @login_required
 @require_POST
-def import_back_upload(request, proyecto_id):
+def import_back_upload(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     keys = [k for k in request.session.keys() if k.startswith(f'{SESSION_PREFIX}parsed') or k.startswith(f'{SESSION_PREFIX}filename') or k.startswith(f'{SESSION_PREFIX}selected') or k.startswith(f'{SESSION_PREFIX}validation') or k.startswith(f'{SESSION_PREFIX}report') or k.startswith(f'{SESSION_PREFIX}report_totals') or k.startswith(f'{SESSION_PREFIX}analysis')]
     for k in keys:
@@ -273,7 +274,7 @@ def import_back_upload(request, proyecto_id):
 
 @login_required
 @require_POST
-def import_validate(request, proyecto_id):
+def import_validate(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     data = _step_data(request)
     parsed = data['parsed']
@@ -318,7 +319,7 @@ def import_validate(request, proyecto_id):
 
 @login_required
 @require_POST
-def import_execute(request, proyecto_id):
+def import_execute(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     data = _step_data(request)
     validation = data['validation']
@@ -356,7 +357,7 @@ def import_execute(request, proyecto_id):
 
 @login_required
 @require_POST
-def import_cancel(request, proyecto_id):
+def import_cancel(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     _clear_import_session(request)
     return _build_response(request, proyecto, 1, 'partials/Import/paso1_upload.html',
@@ -366,5 +367,5 @@ def import_cancel(request, proyecto_id):
 # ── Redirect old entry point to new landing ───────────────────────────────────
 
 @login_required
-def import_project_select(request):
+def import_project_select(request: HttpRequest) -> HttpResponse:
     return redirect('import_landing')

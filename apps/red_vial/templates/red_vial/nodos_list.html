@@ -142,6 +142,40 @@
 {% url 'nodo_delete_plano' item_id='00000000-0000-0000-0000-000000000000' as delete_plano_url %}
 <div id="nodo-file-config" hidden data-upload-imagen="{{ upload_imagen_url }}" data-delete-imagen="{{ delete_imagen_url }}" data-upload-plano="{{ upload_plano_url }}" data-delete-plano="{{ delete_plano_url }}"></div>
 {% block extra_js %}
-<script src="{% static 'js/features/bulk-crud.js' %}" defer></script>
 <script src="{% static 'js/features/nodo-file.js' %}" defer></script>
+<script>
+(function() {
+  function updateItemCount(delta) {
+    var badge = document.getElementById('items-count-badge');
+    var newNum = document.getElementById('new_number');
+    if (!badge) return;
+    var count = parseInt(badge.textContent) || 0;
+    count += delta;
+    badge.textContent = count;
+    if (newNum) newNum.value = count + 1;
+  }
+
+  document.addEventListener('nodo-created', function() {
+    var form = document.getElementById('new-nodo-form');
+    if (form) form.reset();
+    updateItemCount(1);
+  });
+
+  document.addEventListener('nodo-deleted', function() { updateItemCount(-1); });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && e.target.matches('.field-input')) {
+      var tr = e.target.closest('tr');
+      if (!tr) return;
+      tr.querySelectorAll('.field-input').forEach(function(inp) {
+        inp.value = inp.defaultValue;
+        inp.classList.add('hidden');
+        if (inp.previousElementSibling) inp.previousElementSibling.classList.remove('hidden');
+      });
+      var btn = tr.querySelector('.save-row-btn');
+      if (btn) btn.classList.add('hidden');
+    }
+  });
+})();
+</script>
 {% endblock %}

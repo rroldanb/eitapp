@@ -1,31 +1,43 @@
 {% load l10n %}
-<tr id="fase-semaforica-create-row" class="fase-semaforica-create-row {% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
-  <td class="px-2 py-1 whitespace-nowrap" colspan="2">
-    {{ form.punto_control }}
-    {% if form.punto_control.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.punto_control.errors.0 }}</div>{% endif %}
-  </td>
-  <td class="px-2 py-1 whitespace-nowrap">
-    {{ form.fase_numero }}
-    {% if form.fase_numero.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.fase_numero.errors.0 }}</div>{% endif %}
-  </td>
-  <td class="px-2 py-1 whitespace-nowrap">
-    {{ form.verde_inicio }}
-    {% if form.verde_inicio.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.verde_inicio.errors.0 }}</div>{% endif %}
-  </td>
-  <td class="px-2 py-1 whitespace-nowrap">
-    {{ form.verde_fin }}
-    {% if form.verde_fin.errors %}<div class="text-xs text-red-600 mt-0.5">{{ form.verde_fin.errors.0 }}</div>{% endif %}
-  </td>
-  <td class="px-2 py-1 flex gap-1 whitespace-nowrap">
-    <button type="button"
-      class="px-2 py-1 text-xs border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors action-btn"
+<tr id="fase-semaforica-create-row" class="fase-semaforica-create-row {% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}">
+  <td colspan="6" class="px-2 py-3">
+    <form id="new-fase-semaforica-form"
+      data-action="create"
       hx-post="{% url 'fase_semaforica_create' proyecto.id %}"
-      hx-include="closest tr"
       hx-target="closest tr"
-      hx-swap="outerHTML"
-      hx-indicator="#create-indicator">
-      <span id="create-indicator" class="inline-block w-3 h-3 border-2 border-t-transparent border-blue-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
-      Crear
-    </button>
+      hx-swap="afterend"
+      hx-indicator="#create-indicator"
+    >
+      {% csrf_token %}
+      {% if form.is_bound and form.errors %}
+      <div class="mb-2 space-y-1">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <p class="text-red-600 text-sm error-message">{{ field.label }}: {{ error }}</p>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <p class="text-red-600 text-sm error-message">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="flex flex-wrap items-center gap-4 justify-center">
+        <div class="min-w-[200px]">
+          {{ form.punto_control }}
+        </div>
+        {{ form.fase_numero }}
+        {{ form.verde_inicio }}
+        {{ form.verde_fin }}
+        <button type="submit"
+          class="px-2 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-800 transition-colors font-medium action-btn"
+          data-action="create">
+          Agregar
+          <i class="far fa-save ml-1" aria-hidden="true"></i>
+        </button>
+        <span id="create-indicator"
+          class="inline-block w-3 h-3 border-2 border-t-transparent border-blue-600 rounded-full animate-spin mr-1 htmx-indicator"
+          role="status" aria-hidden="true"></span>
+      </div>
+    </form>
   </td>
 </tr>

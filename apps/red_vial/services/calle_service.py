@@ -1,13 +1,16 @@
-from django.db.models import Count, F
+from typing import Any
+from django.core.exceptions import ValidationError
+from django.db.models import Count, F, QuerySet
 
 from apps.red_vial.models import Calle
+from apps.proyectos.models import Proyecto
 from apps.red_vial.forms.calle_form import CalleForm
-from .base_service import apply_sort_to_queryset, create_item, update_item, delete_item, bulk_update_items
+from .base_service import apply_sort_to_queryset, update_item, delete_item
 
 
 # ========== CALLE VIEWS ==========
 
-def get_calles_by_proyecto(proyecto_id, sort_by=None, order='asc'):
+def get_calles_by_proyecto(proyecto_id: str, sort_by: str | None = None, order: str = 'asc') -> QuerySet[Calle]:
     """
     Obtener calles de un proyecto con ordenamiento.
     
@@ -40,21 +43,22 @@ def get_calles_by_proyecto(proyecto_id, sort_by=None, order='asc'):
     )
 
 
-def create_calle(proyecto, data):
+def create_calle(proyecto: Proyecto, data: dict[str, Any]) -> Calle:
     """Crear una nueva calle."""
-    return create_item(Calle, data, form_class=CalleForm, proyecto=proyecto)
+    form = CalleForm(data, proyecto=proyecto)
+    if not form.is_valid():
+        raise ValidationError(form.errors)
+    calle = form.save(commit=False)
+    calle.proyecto = proyecto
+    calle.save()
+    return calle
 
 
-def update_calle(calle_id, data):
+def update_calle(calle_id: str, data: dict[str, Any]) -> Calle:
     """Actualizar una calle."""
     return update_item(Calle, calle_id, data, form_class=CalleForm)
 
 
-def delete_calle(calle_id):
+def delete_calle(calle_id: str) -> None:
     """Eliminar una calle."""
     delete_item(Calle, calle_id)
-
-
-def bulk_update_calles(items_data):
-    """Actualizar múltiples calles en lote."""
-    return bulk_update_items(Calle, items_data, ['numero', 'nombre'])

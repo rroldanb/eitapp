@@ -1,7 +1,9 @@
 import random
-from django.db.models import Sum, Avg, Count
+from typing import Any
+from django.db.models import QuerySet, Sum, Avg, Count
 from django.db import transaction
-from apps.red_vial.models import ResumenFlujo, Periodizacion, Periodo
+from apps.red_vial.models import ResumenFlujo, Periodizacion, Periodo, PuntoControl
+from apps.proyectos.models import Proyecto
 
 
 CHART_COLORS = [
@@ -16,7 +18,7 @@ CHART_COLORS = [
 ]
 
 
-def recalcular_resumenes(proyecto_id):
+def recalcular_resumenes(proyecto_id: str) -> dict[str, int]:
     """Recalcula ResumenFlujo para todos los PCs y Periodos del proyecto desde Periodización."""
     aggs = Periodizacion.objects.filter(
         pc__proyecto_id=proyecto_id
@@ -47,7 +49,12 @@ def recalcular_resumenes(proyecto_id):
     return created_count, updated_count
 
 
-def get_analisis_flujos(proyecto_id, pc_ids=None, periodo_ids=None, fecha=None):
+def get_analisis_flujos(
+    proyecto_id: str,
+    pc_ids: list[str] | None = None,
+    periodo_ids: list[str] | None = None,
+    fecha: str | None = None,
+) -> list[dict[str, Any]]:
     """Retorna datos agregados para el dashboard de Análisis de Flujos."""
     if fecha:
         qs = Periodizacion.objects.filter(
@@ -102,7 +109,7 @@ def get_analisis_flujos(proyecto_id, pc_ids=None, periodo_ids=None, fecha=None):
     return enriched
 
 
-def get_ranking(analisis_data):
+def get_ranking(analisis_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Agrupa por PC y ordena por flujo_total descendente."""
     from collections import OrderedDict
     ranking_map = {}
@@ -124,7 +131,7 @@ def get_ranking(analisis_data):
     return ranking
 
 
-def get_comparison(analisis_data, periodos_ordered):
+def get_comparison(analisis_data: list[dict[str, Any]], periodos_ordered: list[Periodo]) -> dict[str, Any]:
     """Estructura datos para comparación por periodo (pivot)."""
     from collections import OrderedDict
     comparison_map = OrderedDict()
@@ -153,7 +160,7 @@ def get_comparison(analisis_data, periodos_ordered):
     return result
 
 
-def get_chart_data(analisis_data, periodos_ordered):
+def get_chart_data(analisis_data: list[dict[str, Any]], periodos_ordered: list[Periodo]) -> dict[str, Any]:
     """Prepara datos JSON para Chart.js."""
     from collections import OrderedDict
     chart_map = OrderedDict()

@@ -5,7 +5,7 @@
       <th class="px-4 py-3 font-medium" aria-sort="{% if sort_by == 'username' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button" href="?sort_by=username&sort_order={% if sort_by == 'username' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
            hx-get="?sort_by=username&sort_order={% if sort_by == 'username' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#users-table" hx-swap="outerHTML" hx-push-url="true"
+           hx-target="#users-table" hx-swap="outerHTML"
            class="inline-flex items-center gap-1 hover:text-indigo-300 {% if sort_by == 'username' %}text-indigo-200{% endif %}">
           Usuario
           {% if sort_by == 'username' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
@@ -14,7 +14,7 @@
       <th class="px-4 py-3 font-medium" aria-sort="{% if sort_by == 'role' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button" href="?sort_by=role&sort_order={% if sort_by == 'role' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
            hx-get="?sort_by=role&sort_order={% if sort_by == 'role' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#users-table" hx-swap="outerHTML" hx-push-url="true"
+           hx-target="#users-table" hx-swap="outerHTML"
            class="inline-flex items-center gap-1 hover:text-indigo-300 {% if sort_by == 'role' %}text-indigo-200{% endif %}">
           Rol
           {% if sort_by == 'role' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
@@ -23,7 +23,7 @@
       <th class="px-4 py-3 font-medium" aria-sort="{% if sort_by == 'is_active' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
         <a role="button" href="?sort_by=is_active&sort_order={% if sort_by == 'is_active' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
            hx-get="?sort_by=is_active&sort_order={% if sort_by == 'is_active' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#users-table" hx-swap="outerHTML" hx-push-url="true"
+           hx-target="#users-table" hx-swap="outerHTML"
            class="inline-flex items-center gap-1 hover:text-indigo-300 {% if sort_by == 'is_active' %}text-indigo-200{% endif %}">
           Estado
           {% if sort_by == 'is_active' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}

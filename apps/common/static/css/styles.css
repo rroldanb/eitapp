@@ -259,42 +259,6 @@ tr.row-fade-out {
     display: inline-block !important; 
 }
 
-/* ==========================================================================
-   8. SORTABLE HEADERS - Visual indicator for active sort column
-   ========================================================================== */
-.sortable-active {
-    color: #4338ca; /* indigo-600-ish */
-    font-weight: 600;
-}
-.sortable-active.sorted-asc::after,
-.sortable-active.sorted-desc::after {
-    display: inline-block;
-    margin-left: 6px;
-    width: 0;
-    height: 0;
-    content: '';
-}
-.sortable-active.sorted-asc::after {
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-bottom: 8px solid #4338ca;
-    transform: translateY(-1px);
-}
-.sortable-active.sorted-desc::after {
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 8px solid #4338ca;
-    transform: translateY(1px);
-}
-
-/* Smooth transitions for sortable header indicators */
-.sortable-active {
-    transition: color 150ms ease;
-}
-.sortable-active::after {
-    transition: transform 150ms ease;
-    opacity: 0.999;
-}
 
 
 @keyframes fadeIn {
@@ -334,46 +298,7 @@ tr.htmx-swapping td {
   border-spacing: 0;
   min-width: 900px;
 }
-/* .pc-col-nombre {
-  width: 88px;
-  min-width: 88px;
-}
-.pc-col-nodo {
-  width: 80px;
-  min-width: 80px;
-}
-.pc-col-mov {
-  width: 60px;
-  min-width: 60px;
-}
-.pc-col-viraje {
-  width: 65px;
-  min-width: 65px;
-}
-.pc-col-prior {
-  width: 50px;
-  min-width: 50px;
-}
-.pc-col-entrada {
-  width: 80px;
-  min-width: 80px;
-}
-.pc-col-salida {
-  width: 80px;
-  min-width: 80px;
-} 
-.pc-col-regul {
-  width: 80px;
-  min-width: 80px;
-}
-.pc-col-pistas {
-  width: 60px;
-  min-width: 60px;
-}
-.pc-col-accion {
-  width: 70px;
-  min-width: 70px;
-} */
+
 
 .form-control{
     background-color: #ffffff;
@@ -569,7 +494,7 @@ tr.htmx-swapping td {
    ============================================================================ */
 .action-btn {
     min-width: 44px;
-    min-height: 44px;
+    min-height: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -609,47 +534,47 @@ textarea:focus-visible {
 /* ============================================================================
    12. SEADRAGON VIEWER - Estilos específicos para el visor de imágenes (seadragon)
    ============================================================================ */
-        .sd-details {
-            /* margin: 20px 0; */
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            color: #905bb5;
-        }
-        .sd-summary {
-            cursor: pointer;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1.1em;
-            user-select: none;
-          }
-          
-        .sd-summary:hover {
-            background-color: #905bb5;
-            color: white;
-            content: "Ver imagen ampliable RRRR";
-        }
-        
-        .sd-details[open] .sd-summary {
-            border-bottom: 1px solid #ddd;
-            border-radius: 8px 8px 0 0;
-        }
+.sd-details {
+    /* margin: 20px 0; */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    color: #905bb5;
+}
+.sd-summary {
+    cursor: pointer;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1em;
+    user-select: none;
+    }
+    
+.sd-summary:hover {
+    background-color: #905bb5;
+    color: white;
+    content: "Ver imagen ampliable RRRR";
+}
 
-        
-        #seadragon-viewer-proyecto {
-            width: 100%;
-            height: 400px;
-            background-color: #2c5d62;
-            border-radius: 0 0 8px 8px;
-        }
-        
-        /* Información adicional opcional */
-        .info-imagen {
-            padding: 2px 15px;
-            background-color: #d2e6e8;
-            font-size: 0.9em;
-            color: #171717;
-            border-top: 1px solid #7853a3;
-        }
+.sd-details[open] .sd-summary {
+    border-bottom: 1px solid #ddd;
+    border-radius: 8px 8px 0 0;
+}
+
+
+#seadragon-viewer-proyecto {
+    width: 100%;
+    height: 400px;
+    background-color: #2c5d62;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Información adicional opcional */
+.info-imagen {
+    padding: 2px 15px;
+    background-color: #d2e6e8;
+    font-size: 0.9em;
+    color: #171717;
+    border-top: 1px solid #7853a3;
+}

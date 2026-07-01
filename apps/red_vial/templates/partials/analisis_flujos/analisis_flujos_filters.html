@@ -2,7 +2,6 @@
   hx-get="{% url 'analisis_flujos' proyecto.id %}"
   hx-target="#analisis-flujos-container"
   hx-swap="outerHTML"
-  hx-push-url="true"
   hx-trigger="change from:.filter-checkbox delay:200ms, change from:select[name=fecha]"
   hx-sync="this:replace"
   class="bg-slate-200 rounded-lg mb-4">

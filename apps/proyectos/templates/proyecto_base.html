@@ -53,4 +53,18 @@
 <script src="{% static 'js/features/sidebar.js' %}" defer></script>
 {% endif %}
 
+<script>
+(function() {
+  document.body.addEventListener('htmx:beforeSwap', function(evt) {
+    if (evt.detail.xhr.status === 400 && evt.detail.isError) {
+      evt.detail.shouldSwap = true;
+      evt.detail.isError = false;
+    }
+    if (evt.detail.xhr.status === 204) {
+      evt.detail.shouldSwap = true;
+    }
+  });
+})();
+</script>
+
 {% endblock %}

@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta, date, time as time_type
+from typing import Any
 from django.db import transaction
+from django.db.models import QuerySet
 from apps.red_vial.models import Periodizacion, PuntoControl, Periodo
+from apps.proyectos.models import Proyecto
 from apps.red_vial.forms.periodizacion_forms import PeriodizacionForm
 from .base_service import apply_multi_sort_to_queryset, create_item, update_item, delete_item, get_item_by_id
 from django.core.exceptions import ValidationError
@@ -23,7 +26,7 @@ VALID_SORT_FIELDS = {
 }
 
 
-def parse_sort_specs(sort_param, order_param):
+def parse_sort_specs(sort_param: str | None, order_param: str | None) -> list[dict[str, str]] | None:
     """
     Parsea parámetros de sort multi-campo.
     
@@ -45,9 +48,15 @@ def parse_sort_specs(sort_param, order_param):
     return specs
 
 
-def get_periodizaciones(proyecto_id, nodo_ids=None, periodo_ids=None,
-                         movimiento_ids=None, fecha=None,
-                         sort_param=None, order_param='asc'):
+def get_periodizaciones(
+    proyecto_id: str,
+    nodo_ids: list[str] | None = None,
+    periodo_ids: list[str] | None = None,
+    movimiento_ids: list[str] | None = None,
+    fecha: date | None = None,
+    sort_param: str | None = None,
+    order_param: str = 'asc',
+) -> QuerySet[Periodizacion]:
     """Lista periodizaciones con filtros multi-select y orden anidado."""
     qs = Periodizacion.objects.filter(pc__proyecto_id=proyecto_id)
 
@@ -74,7 +83,7 @@ def get_periodizaciones(proyecto_id, nodo_ids=None, periodo_ids=None,
 
 
 @transaction.atomic
-def generar_filas(proyecto, nodo_ids, periodo_ids, fecha, movimiento_ids=None):
+def generar_filas(proyecto: Proyecto, nodo_ids: list[str], periodo_ids: list[str], fecha: date, movimiento_ids: list[str] | None = None) -> int:
     """
     Genera filas de 15 min para cada combinación PC (todos sus movimientos) × Periodo.
     No duplica filas existentes (get_or_create).
@@ -117,7 +126,7 @@ def generar_filas(proyecto, nodo_ids, periodo_ids, fecha, movimiento_ids=None):
 #     return update_item(Periodizacion, pc_id, data, form_class=PeriodizacionForm)
 
 COUNT_FIELDS = {'vl', 'txc', 'txb', 'c2e', 'c_mas2e', 'peat', 'cicl', 'moto'}
-def update_periodizacion(pc_id, data):
+def update_periodizacion(pc_id: str, data: dict[str, Any]) -> Periodizacion:
     item = get_item_by_id(Periodizacion, pc_id)
     for field in COUNT_FIELDS:
         if field in data:
@@ -129,6 +138,6 @@ def update_periodizacion(pc_id, data):
     return item
 
 
-def delete_periodizacion(pc_id):
+def delete_periodizacion(pc_id: str) -> None:
     """Elimina un registro de periodización."""
     delete_item(Periodizacion, pc_id)

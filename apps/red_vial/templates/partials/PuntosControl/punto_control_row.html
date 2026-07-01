@@ -1,15 +1,39 @@
 <tr id="punto-control-row-{{ item.id }}" class="punto-control-row hover:bg-gray-50" data-pc-id="{{ item.id }}">
 
-  <td class="px-1 py-1 sticky left-0 z-1 bg-white hover:bg-gray-50">
-    <select name="nodo" aria-label="Nodo" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+  <td class="px-1 py-1 sticky left-0 z-1 bg-white hover:bg-gray-50 editable-field" data-field="nodo">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.nodo }}
+    </span>
+    <select name="nodo" aria-label="Nodo"
+      class="field-input hidden px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
       {% for v, l in form.nodo.field.choices %}
         <option value="{{ v }}" {% if item.nodo.pk == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
 
-  <td class="px-1 py-1 sticky left-16 z-1 bg-white hover:bg-gray-50">
-    <select name="movimiento" aria-label="Movimiento" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+  <td class="px-1 py-1 sticky left-16 z-1 bg-white hover:bg-gray-50 editable-field" data-field="movimiento">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.get_movimiento_display }}
+    </span>
+    <select name="movimiento" aria-label="Movimiento"
+      class="field-input hidden px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
       <option value="" {% if not item.movimiento %}selected{% endif %}>---</option>
       {% for v, l in form.movimiento.field.choices %}
         <option value="{{ v }}" {% if item.movimiento == v %}selected{% endif %}>{{ l }}</option>
@@ -17,71 +41,151 @@
     </select>
   </td>
 
-  <td class="px-1 py-1">
-    <select name="viraje" aria-label="Viraje" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+  <td class="px-1 py-1 editable-field" data-field="viraje">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.get_viraje_display|default:'—' }}
+    </span>
+    <select name="viraje" aria-label="Viraje"
+      class="field-input hidden px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
       <option value="" {% if not item.viraje %}selected{% endif %}>---</option>
       {% for v, l in form.viraje.field.choices %}
         <option value="{{ v }}" {% if item.viraje == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
-  <td class="px-1 py-1 text-center">
-    <input type="checkbox" name="is_prioritario" id="pc-prioritario-{{ item.id }}" class="mr-1" aria-label="Es prioritario" {% if item.is_prioritario %}checked{% endif %}>
+
+  <td class="px-1 py-1 text-center editable-field" data-field="is_prioritario">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {% if item.is_prioritario %}<i class="fas fa-check text-green-600"></i>{% else %}<i class="fas fa-times text-red-400"></i>{% endif %}
+    </span>
+    <div class="field-input hidden">
+      <input type="checkbox" name="is_prioritario" id="pc-prioritario-{{ item.id }}" class="mr-1" aria-label="Es prioritario"
+        {% if item.is_prioritario %}checked{% endif %}
+        _="on change
+          add .hidden to me
+          remove .hidden from previous .field-display
+          trigger click on #save-row-btn-{{ item.id }}">
+    </div>
   </td>
-  <td class="px-1 py-1">
-    <select name="arco_entrada" aria-label="Arco de entrada" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+
+  <td class="px-1 py-1 editable-field" data-field="arco_entrada">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.arco_entrada.codigo_arco }}
+    </span>
+    <select name="arco_entrada" aria-label="Arco de entrada"
+      class="field-input hidden px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
       {% for v, l in form.arco_entrada.field.choices %}
         <option value="{{ v }}" {% if item.arco_entrada.pk == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
-  <td class="px-1 py-1">
-    <select name="arco_salida" aria-label="Arco de salida" class="px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+
+  <td class="px-1 py-1 editable-field" data-field="arco_salida">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.arco_salida.codigo_arco }}
+    </span>
+    <select name="arco_salida" aria-label="Arco de salida"
+      class="field-input hidden px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
       {% for v, l in form.arco_salida.field.choices %}
         <option value="{{ v }}" {% if item.arco_salida.pk == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
-  <td class="px-1 py-1 w-max-8">
-    <select name="regulacion" aria-label="Regulación" style="width: 5rem;" class="w-max-4 px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500">
+
+  <td class="px-1 py-1 w-max-8 editable-field" data-field="regulacion">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.regulacion|default:'—' }}
+    </span>
+    <select name="regulacion" aria-label="Regulación"
+      class="field-input hidden px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" style="width: 5rem;">
       <option value="" {% if not item.regulacion_id %}selected{% endif %}>---</option>
       {% for v, l in form.regulacion.field.choices %}
         <option value="{{ v }}" {% if item.regulacion.pk == v %}selected{% endif %}>{{ l }}</option>
       {% endfor %}
     </select>
   </td>
-  <td class="px-1 py-1">
-    <input type="number" name="numero_pistas" id="pc-pistas-{{ item.id }}" aria-label="Número de pistas" class="w-16 px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" step="0.5" value="{{ item.numero_pistas|default:'' }}">
+
+  <td class="px-1 py-1 editable-field" data-field="numero_pistas">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        call me.nextElementSibling.focus()
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.numero_pistas|default:'—' }}
+    </span>
+    <input type="number" name="numero_pistas" id="pc-pistas-{{ item.id }}" aria-label="Número de pistas"
+      class="field-input hidden w-16 px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      step="0.5" value="{{ item.numero_pistas|default:'' }}"
+      _="on keydown[key == 'Enter']
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
   </td>
+
   <td class="px-1 py-1">
-    <input type="text" name="interseccion" readonly aria-label="Intersección" class="w-16 px-1 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600" value="{{ item.interseccion|default:'' }}">
+    <span>{{ item.interseccion|default:'—' }}</span>
   </td>
+
   <td class="px-1 py-1">
-    <input type="number" name="vel_ini" readonly aria-label="Velocidad inicial" class="w-16 px-1 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600" step="0.1" value="{{ item.vel_ini|default:'' }}">
+    <span>{{ item.vel_ini|default:'—' }}</span>
   </td>
+
   <td class="px-1 py-1">
-    <input type="number" name="vel_mod" readonly aria-label="Velocidad modelo" class="w-16 px-1 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600" step="1" value="{{ item.vel_mod|default:'' }}">
+    <span>{{ item.vel_mod|default:'—' }}</span>
   </td>
+
   <td class="px-1 py-1 flex gap-1">
-    <button type="button" class="px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn"
+    <button type="button"
+      id="save-row-btn-{{ item.id }}"
+      class="save-row-btn hidden px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors"
       hx-put="{% url 'punto_control_update' item.id %}"
       hx-include="closest tr"
       hx-target="closest tr"
-      hx-swap="outerHTML transition:true swap:1s"
-      hx-indicator="#save-indicator-{{ item.id }}"
+      hx-swap="outerHTML"
       aria-label="Guardar punto de control"
     >
-      <span id="save-indicator-{{ item.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
-      OK
+      Guardar
     </button>
-    <button type="button" class="px-2 py-1 text-xs border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors action-btn"
+    <button type="button"
+      class="px-2 py-1 text-xs border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
       hx-delete="{% url 'punto_control_delete' item.id %}"
       hx-target="closest tr"
-      hx-swap="outerHTML transition:true swap:1s"
-      hx-indicator="#delete-indicator-{{ item.id }}"
+      hx-swap="outerHTML"
       aria-label="Eliminar punto de control"
     >
-      <span id="delete-indicator-{{ item.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
       <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </td>

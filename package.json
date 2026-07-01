@@ -1,0 +1,14 @@
+{
+  "name": "eit-app",
+  "private": true,
+  "scripts": {
+    "lint": "eslint apps/common/static/js/",
+    "lint:fix": "eslint apps/common/static/js/ --fix",
+    "format": "prettier --check apps/common/static/js/",
+    "format:fix": "prettier --write apps/common/static/js/"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.0"
+  }
+}

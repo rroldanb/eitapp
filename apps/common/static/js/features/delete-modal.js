@@ -1,13 +1,15 @@
-(function() {
-  var modal = document.getElementById('delete-modal');
+(function () {
+  const modal = document.getElementById('delete-modal');
   if (!modal) return;
-  var projectName = modal.dataset.projectName || '';
+  const projectName = modal.dataset.projectName || '';
 
-  window.openDeleteModal = function() {
+  window.openDeleteModal = function () {
     modal.classList.remove('hidden');
-    var input = document.getElementById('confirm-name-input');
-    if (input) { input.value = ''; }
-    var btn = document.getElementById('confirm-delete-btn');
+    const input = document.getElementById('confirm-name-input');
+    if (input) {
+      input.value = '';
+    }
+    const btn = document.getElementById('confirm-delete-btn');
     if (btn) {
       btn.disabled = true;
       btn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -16,13 +18,13 @@
     document.body.style.overflow = 'hidden';
   };
 
-  window.closeDeleteModal = function() {
+  window.closeDeleteModal = function () {
     modal.classList.add('hidden');
     document.body.style.overflow = '';
   };
 
-  window.onConfirmNameChange = function(input) {
-    var btn = document.getElementById('confirm-delete-btn');
+  window.onConfirmNameChange = function (input) {
+    const btn = document.getElementById('confirm-delete-btn');
     if (!btn) return;
     if (input.value === projectName) {
       btn.disabled = false;
@@ -35,11 +37,11 @@
     }
   };
 
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeDeleteModal();
   });
 
-  modal.addEventListener('click', function(e) {
+  modal.addEventListener('click', function (e) {
     if (e.target === this) closeDeleteModal();
   });
 })();

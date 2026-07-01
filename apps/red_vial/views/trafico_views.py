@@ -1,6 +1,8 @@
+from typing import Any
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from apps.proyectos.models import Proyecto
 
 from apps.red_vial.forms.periodo_form import PeriodoForm
@@ -14,7 +16,7 @@ from apps.red_vial.services.trafico_service import (
 # ========== PERIODO VIEWS ==========
 
 @login_required
-def periodos_list_view(request):
+def periodos_list_view(request: HttpRequest) -> HttpResponse:
     """Vista de lista de períodos"""
     periodos = get_all_periodos()
     return render(request, 'red_vial/periodos_list.html', {
@@ -23,26 +25,22 @@ def periodos_list_view(request):
 
 
 @login_required
-def periodo_create_view(request):
+def periodo_create_view(request: HttpRequest) -> HttpResponse:
     """Vista para crear un nuevo período"""
     if request.method == 'POST':
         form = PeriodoForm(request.POST)
         if form.is_valid():
-            form.save()
+            periodo = form.save()
             return redirect('periodos_list')
     else:
         form = PeriodoForm()
-
-    return render(request, 'red_vial/periodo_form.html', {
-        'form': form
-    })
+    return render(request, 'red_vial/periodo_form.html', {'form': form})
 
 
 @login_required
-def periodo_update_view(request, periodo_id):
-    """Vista para actualizar un período"""
+def periodo_update_view(request: HttpRequest, periodo_id: str) -> HttpResponse:
+    """Vista para editar un período"""
     periodo = get_periodo_by_id(periodo_id)
-
     if request.method == 'POST':
         form = PeriodoForm(request.POST, instance=periodo)
         if form.is_valid():
@@ -50,15 +48,11 @@ def periodo_update_view(request, periodo_id):
             return redirect('periodos_list')
     else:
         form = PeriodoForm(instance=periodo)
-
-    return render(request, 'red_vial/periodo_form.html', {
-        'form': form,
-        'periodo': periodo
-    })
+    return render(request, 'red_vial/periodo_form.html', {'form': form, 'periodo': periodo})
 
 
 @login_required
-def periodo_delete_view(request, periodo_id):
+def periodo_delete_view(request: HttpRequest, periodo_id: str) -> HttpResponse:
     """Vista para eliminar un período"""
     periodo_delete(periodo_id)
     return redirect('periodos_list')

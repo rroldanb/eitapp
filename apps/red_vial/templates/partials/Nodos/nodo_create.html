@@ -1,43 +1,43 @@
+{# Partial template for creating a new nodo #}
 
-
-
-<tr id="new-nodo-form-row"> 
-  <td colspan="6" class="px-2 py-3 {% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
+<tr id="new-nodo-form-row">
+  <td colspan="6" class="px-2 py-3 {% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}">
     <form id="new-nodo-form"
       data-action="create"
       hx-post="{% url 'nodo_create' proyecto.id %}"
       hx-target="closest tr"
       hx-swap="afterend"
-      hx-on::after-request="if(event.detail.successful) this.reset()"
       hx-indicator="#create-indicator"
     >
       {% csrf_token %}
-      {% if form.errors %}
+      {% if form.is_bound and form.errors %}
       <div class="mb-2 space-y-1">
         {% for field in form %}
           {% for error in field.errors %}
-            <p class="text-red-600 text-xs error-message">{{ field.label }}: {{ error }}</p>
+            <p class="text-red-600 text-sm error-message">{{ field.label }}: {{ error }}</p>
           {% endfor %}
         {% endfor %}
         {% for error in form.non_field_errors %}
-          <p class="text-red-600 text-xs error-message">{{ error }}</p>
+          <p class="text-red-600 text-sm error-message">{{ error }}</p>
         {% endfor %}
       </div>
       {% endif %}
-      <div class="flex flex-wrap items-center gap-4 justify-center">
-        
-        <input type="number" id="new_number" name="numero" aria-label="Número de nodo"
-          class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50"
-          value="{{ proyecto.nodos.count|add:1 }}" min="1" max="999"/>
+      <div class="flex flex-wrap items-center gap-4 justify-between">
+        <input type="number" name="numero" id="new_number"
+          value="{{ proyecto.nodos.count|add:1 }}"
+          class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50 {% if form.errors %}border-red-500{% endif %}"
+          min="1" max="999" required />
 
-        <select class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50" name="calle_1" aria-label="Calle 1">
+        <select name="calle_1" aria-label="Calle 1"
+          class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50">
           <option value="">Calle 1...</option>
           {% for calle in proyecto.calles.all %}
           <option value="{{ calle.id }}">{{ calle.nombre }}</option>
           {% endfor %}
         </select>
 
-        <select class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50" name="calle_2" aria-label="Calle 2">
+        <select name="calle_2" aria-label="Calle 2"
+          class="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50">
           <option value="">Calle 2...</option>
           {% for calle in proyecto.calles.all %}
           <option value="{{ calle.id }}">{{ calle.nombre }}</option>
@@ -45,15 +45,28 @@
         </select>
 
         <div class="flex items-center gap-1">
-          <label class="text-xs text-gray-600  whitespace-nowrap">PC N°</label>
-          <input type="number" name="numero_pc" aria-label="Número de punto de control" class="w-14 bg-gray-100 px-1 py-1 border border-gray-300 rounded text-xs" placeholder="N°" min="1" max="99" />
+          <label class="text-xs text-gray-600 whitespace-nowrap">PC N°</label>
+          <input type="number" name="numero_pc" aria-label="Número de punto de control"
+            class="w-14 bg-gray-100 px-1 py-1 border border-gray-300 rounded text-xs" placeholder="N°" min="1" max="999" />
         </div>
 
-        <button type="submit" class="px-2 py-1 text-xs border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors action-btn" data-action="create">
-          Crear
+
+        {% comment %} class="px-2 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-800 transition-colors text-sm action-btn" {% endcomment %}
+        <button type="submit"
+          {% comment %} class="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors" {% endcomment %}
+          class="px-2 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-800 transition-colors text-sm"
+          data-action="create">
+          Agregar
+          <i class="far fa-save ml-1 text-sm" aria-hidden="true"></i>
         </button>
 
-        <span id="create-indicator" class="inline-block w-3 h-3 border-2 border-t-transparent border-blue-600 rounded-full animate-spin mr-1 htmx-indicator" style="display:none;" role="status" aria-hidden="true"></span>
+<div>
+</div>
+<div>
+</div>
+        <span id="create-indicator"
+          class="inline-block w-3 h-3 border-2 border-t-transparent border-blue-600 rounded-full animate-spin mr-1 htmx-indicator"
+          role="status" aria-hidden="true"></span>
       </div>
     </form>
   </td>

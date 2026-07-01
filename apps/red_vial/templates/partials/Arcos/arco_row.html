@@ -1,45 +1,86 @@
 <tr id="arco-row-{{ arco.id }}" class="arco-row hover:bg-gray-50" data-arco-id="{{ arco.id }}">
 
   <td class="px-2 py-1">{{ arco.codigo_arco }}</td>
-  <td class="px-2 py-1">
-    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="nodo_origen" aria-label="Nodo origen">
-      <option value="">Seleccionar nodo...</option>
-      {% for nodo in proyecto.nodos.all %}
-      <option value="{{ nodo.id }}" {% if arco.nodo_origen.id  == nodo.id  %}selected{% endif %}>{{ nodo }}</option>
+
+  <td class="px-2 py-1 editable-field" data-field="nodo_origen">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ arco.id }}">
+      {{ arco.nodo_origen }}
+    </span>
+    <select name="nodo_origen" aria-label="Nodo origen"
+      class="field-input hidden w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ arco.id }}">
+      <option value="">—</option>
+      {% for nodo in nodos %}
+      <option value="{{ nodo.id }}" {% if arco.nodo_origen_id == nodo.id %}selected{% endif %}>{{ nodo }}</option>
       {% endfor %}
     </select>
   </td>
-  <td class="px-2 py-1">
-    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="nodo_destino" aria-label="Nodo destino">
-      <option value="">Seleccionar nodo...</option>
-      {% for nodo in proyecto.nodos.all %}
-      <option value="{{ nodo.id }}" {% if arco.nodo_destino.id  == nodo.id  %}selected{% endif %}>{{ nodo }}</option>
+
+  <td class="px-2 py-1 editable-field" data-field="nodo_destino">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ arco.id }}">
+      {{ arco.nodo_destino }}
+    </span>
+    <select name="nodo_destino" aria-label="Nodo destino"
+      class="field-input hidden w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ arco.id }}">
+      <option value="">—</option>
+      {% for nodo in nodos %}
+      <option value="{{ nodo.id }}" {% if arco.nodo_destino_id == nodo.id %}selected{% endif %}>{{ nodo }}</option>
       {% endfor %}
     </select>
   </td>
-  <td class="px-2 py-1">
-    <input type="number" name="longitud" id="arco-longitud-{{ arco.id }}" aria-label="Longitud" class="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ arco.longitud }}" min="1" step="1" />
+
+  <td class="px-2 py-1 editable-field" data-field="longitud">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        call me.nextElementSibling.focus()
+        remove .hidden from #save-row-btn-{{ arco.id }}">
+      {{ arco.longitud }}
+    </span>
+    <input type="number" name="longitud" value="{{ arco.longitud }}"
+      class="field-input hidden w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" min="1" step="1"
+      _="on keydown[key == 'Enter']
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ arco.id }}">
   </td>
 
   <td class="px-2 py-1 flex gap-1">
-    <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn" data-action="update"
+    <button type="button"
+      id="save-row-btn-{{ arco.id }}"
+      aria-label="Guardar arco"
+      class="save-row-btn hidden px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors"
       hx-put="{% url 'arco_update' arco.id %}"
       hx-include="closest tr"
       hx-target="closest tr"
-      hx-swap="outerHTML transition:true swap:1s"
-      hx-indicator="#save-indicator-{{ arco.id }}"
-    >
-      <span id="save-indicator-{{ arco.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
-      Actualizar
+      hx-swap="outerHTML">
+      Guardar
     </button>
-    <button type="button" class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors action-btn" data-action="delete"
+    <button type="button"
+      aria-label="Eliminar arco"
+      class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
       hx-delete="{% url 'arco_delete' arco.id %}"
       hx-target="closest tr"
-      hx-swap="outerHTML transition:true swap:1s"
-      hx-indicator="#delete-indicator-{{ arco.id }}"
-    >
-      <span id="delete-indicator-{{ arco.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+      hx-swap="outerHTML"
+      >
       Eliminar
     </button>
   </td>
+
 </tr>

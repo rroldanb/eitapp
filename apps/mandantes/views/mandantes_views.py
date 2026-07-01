@@ -117,7 +117,7 @@ def contacto_delete_view(request, contacto_id):
 
 def contacto_create_view(request, mandante_id):
 
-    mandante = Mandante.objects.get(id=mandante_id)
+    mandante = get_object_or_404(Mandante, id=mandante_id)
 
     if request.method == "POST":
         form = ContactoForm(request.POST)

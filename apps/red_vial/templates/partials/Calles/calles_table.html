@@ -1,51 +1,74 @@
-<table class="w-full divide-y divide-gray-200 table-results" id="calles-table">
-  <thead class="bg-slate-200">
-    <tr>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
-      aria-sort="{% if sort_by == 'numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button" 
-        href="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-get="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#calles-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'numero' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          N°
-          {% if sort_by == 'numero' %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'nombre' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button" href="?sort_by=nombre&sort_order={% if sort_by == 'nombre' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-get="?sort_by=nombre&sort_order={% if sort_by == 'nombre' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#calles-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'nombre' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Nombre
-          {% if sort_by == 'nombre' %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'nodos' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button" href="?sort_by=nodos&sort_order={% if sort_by == 'nodos' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-get="?sort_by=nodos&sort_order={% if sort_by == 'nodos' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#calles-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'nodos' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Nodos Asociados
-          {% if sort_by == 'nodos' %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase">Acc</th>
-    </tr>
-  </thead>
-  <tbody id="calles-table-body" class="divide-y divide-gray-200">
-    {% include 'partials/Calles/calles_table_body.html' with proyecto=proyecto calles=calles %}
-  </tbody>
-</table>
+<div id="calles-table-container">
+  <table class="w-full divide-y divide-gray-200 table-results" id="calles-table" aria-label="Tabla de calles">
+    <thead class="bg-slate-200">
+      <tr>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+        aria-sort="{% if sort_by == 'numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+          href="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#calles-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+            N°
+            {% if sort_by == 'numero' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'nombre' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button" href="?sort_by=nombre&sort_order={% if sort_by == 'nombre' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=nombre&sort_order={% if sort_by == 'nombre' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#calles-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Nombre
+            {% if sort_by == 'nombre' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'nodos' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button" href="?sort_by=nodos&sort_order={% if sort_by == 'nodos' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=nodos&sort_order={% if sort_by == 'nodos' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#calles-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Nodos Asociados
+            {% if sort_by == 'nodos' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase">Acc</th>
+      </tr>
+    </thead>
+    <tbody id="calles-table-body" class="divide-y divide-gray-200">
+      {% include 'partials/Calles/calles_table_body.html' with proyecto=proyecto calles=page_obj.object_list %}
+    </tbody>
+  </table>
+
+  {% if page_obj and paginator.num_pages > 1 %}
+  <div class="flex justify-between items-center px-4 py-3 bg-gray-50 border-t border-gray-200">
+    <span class="text-sm text-gray-600">
+      Página {{ page_obj.number }} de {{ paginator.num_pages }} ({{ paginator.count }} calles)
+    </span>
+    <div class="flex gap-1">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#calles-table-container"
+           hx-swap="outerHTML"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">← Anterior</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#calles-table-container"
+           hx-swap="outerHTML"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">Siguiente →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>

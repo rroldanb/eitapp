@@ -1,8 +1,12 @@
+from typing import Any
+
 from io import BytesIO
 import zipfile
 
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, QuerySet
+from django.shortcuts import get_object_or_404
+from apps.proyectos.models import Proyecto
 from apps.red_vial.models import (
     ConfiguracionTransyt, ParametroArco, FaseSemaforica,
     PuntoControl, ResumenFlujo, Periodo, Arco, Nodo,
@@ -10,26 +14,26 @@ from apps.red_vial.models import (
 
 
 class DatGenerator:
-    CARD_WIDTH = 80
+    CARD_WIDTH: int = 80
 
-    def __init__(self, proyecto, periodo_id=None):
+    def __init__(self, proyecto: Proyecto, periodo_id: str | None = None) -> None:
         self.proyecto = proyecto
         self.periodo_id = periodo_id
-        self.errors = []
+        self.errors: list[str] = []
 
-    def i5(self, value, field_index=0):
+    def i5(self, value: int, field_index: int = 0) -> str:
         return f'{value:>5d}'
 
-    def pad_line(self, fields):
+    def pad_line(self, fields: list[str]) -> str:
         line = ''.join(fields)
         return line.ljust(self.CARD_WIDTH)
 
-    def header_line(self):
+    def header_line(self) -> str:
         title = (self.proyecto.title or 'SIN TITULO')[:60]
         nodos_pc = Nodo.objects.filter(proyecto=self.proyecto, numero_pc__isnull=False).count()
         return f'  {title:<56}{nodos_pc:>4d}'.ljust(self.CARD_WIDTH)
 
-    def card_1(self, config):
+    def card_1(self, config: ConfiguracionTransyt) -> str:
         nint = config.ciclo * 2
         fields = [
             self.i5(1),
@@ -48,7 +52,7 @@ class DatGenerator:
         fields.append(self.i5(int(config.K * 100)))
         return self.pad_line(fields)
 
-    def card_2(self):
+    def card_2(self) -> str:
         nodos_pc = Nodo.objects.filter(proyecto=self.proyecto, numero_pc__isnull=False).count()
         return self.pad_line([self.i5(2), self.i5(nodos_pc)])
 
@@ -164,12 +168,12 @@ class DatGenerator:
             errors.append('Resumen de Flujos: debe calcular los flujos para al menos un período')
         return errors
 
-    def generate(self):
+    def generate(self) -> tuple[str | None, list[str]]:
         errors = self.validate()
         if errors:
             return None, errors
 
-        config = ConfiguracionTransyt.objects.get(proyecto=self.proyecto)
+        config = get_object_or_404(ConfiguracionTransyt, proyecto=self.proyecto)
 
         periodo = None
         if self.periodo_id:
@@ -188,9 +192,9 @@ class DatGenerator:
         content = '\r\n'.join(lines) + '\r\n'
         return content, []
 
-    def generate_all_periods(self):
+    def generate_all_periods(self) -> dict[str, str]:
         """Genera un .dat por período y devuelve dict {periodo_nombre: contenido}."""
-        config = ConfiguracionTransyt.objects.get(proyecto=self.proyecto)
+        config = get_object_or_404(ConfiguracionTransyt, proyecto=self.proyecto)
         periodos = Periodo.objects.filter(proyecto=self.proyecto)
 
         files = {}

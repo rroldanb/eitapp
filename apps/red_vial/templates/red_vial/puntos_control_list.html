@@ -61,20 +61,38 @@
 </div>
 
 <div id="puntos-control-list-config" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" data-images-url-tpl="{% url 'nodo_images_json' item_id='00000000-0000-0000-0000-000000000000' %}" hidden></div>
-<style>
-{% comment %} #puntos-control-table select,
-#new-punto-control-form select {
-  max-width: 100px;
-}
-#puntos-control-table select:focus,
-#new-punto-control-form select:focus {
-  max-width: 300px;
-  position: relative;
-  z-index: 10;
-} {% endcomment %}
-</style>
 {% endblock %}
 {% block extra_js %}
-<script src="{% static 'js/features/bulk-crud.js' %}" defer></script>
+<script>
+(function() {
+  function updateItemCount(delta) {
+    var badge = document.getElementById('items-count-badge');
+    if (!badge) return;
+    var count = parseInt(badge.textContent) || 0;
+    count += delta;
+    badge.textContent = count;
+  }
+  document.addEventListener('punto-control-created', function() {
+    var form = document.getElementById('new-punto-control-form');
+    if (form) form.reset();
+    updateItemCount(1);
+  });
+  document.addEventListener('punto-control-deleted', function() { updateItemCount(-1); });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && e.target.matches('.field-input')) {
+      var tr = e.target.closest('tr');
+      if (!tr) return;
+      tr.querySelectorAll('.field-input').forEach(function(inp) {
+        inp.value = inp.defaultValue;
+        inp.classList.add('hidden');
+        if (inp.previousElementSibling) inp.previousElementSibling.classList.remove('hidden');
+      });
+      var btn = tr.querySelector('.save-row-btn');
+      if (btn) btn.classList.add('hidden');
+    }
+  });
+})();
+</script>
 <script src="{% static 'js/features/zoom-pan.js' %}" defer></script>
 {% endblock extra_js %}

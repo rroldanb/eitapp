@@ -1,14 +1,19 @@
 import json
-from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import render, get_object_or_404
+from typing import Any
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.http import require_http_methods
+from django.views.generic import ListView
 
-from apps.red_vial.models import CoeficienteCruce
 from apps.proyectos.models import Proyecto
+from apps.red_vial.models import CoeficienteCruce
 from apps.red_vial.forms.coeficiente_cruce_form import CoeficienteCruceModelForm
 from apps.red_vial.services.coeficiente_cruce_service import (
     get_all_coeficientes_cruce, create_coeficiente_cruce,
@@ -16,81 +21,100 @@ from apps.red_vial.services.coeficiente_cruce_service import (
 )
 
 
-@method_decorator(login_required, name='dispatch')
-class CoeficientesCruceListView(View):
-    sort_fields = ['nomenclatura', 'tipo_transporte', 'coeficiente', 'proyecto']
-    default_sort = 'nomenclatura'
+class CoeficientesCruceListView(ListView):
+    model: type = CoeficienteCruce
+    context_object_name: str = 'coeficientes'
+    template_name: str = 'red_vial/coeficientes_cruce_list.html'
+    paginate_by: int = 20
+    sort_fields: list[str] = ['nomenclatura', 'tipo_transporte', 'coeficiente', 'proyecto']
+    default_sort: str = 'nomenclatura'
 
-    def get(self, request, proyecto_id):
-        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-        sort_by = request.GET.get('sort_by', self.default_sort)
-        sort_order = request.GET.get('sort_order', 'asc')
+    @method_decorator(login_required)
+    def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponse:
+        return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self) -> QuerySet[CoeficienteCruce]:
+        sort_by = self.request.GET.get('sort_by', self.default_sort)
+        sort_order = self.request.GET.get('sort_order', 'asc')
         if sort_by not in self.sort_fields:
             sort_by = self.default_sort
-        if sort_order not in ['asc', 'desc']:
-            sort_order = 'asc'
-        items = get_all_coeficientes_cruce(sort_by=sort_by, order=sort_order)
-        form = CoeficienteCruceModelForm()
-        available_projects = Proyecto.objects.only('id', 'title').order_by('title')
-        standard_coeficientes = CoeficienteCruce.objects.filter(
-            proyecto__isnull=True
-        ).values('nomenclatura', 'tipo_transporte').order_by('nomenclatura')
-        context = {
-            'proyecto': proyecto,
-            'coeficientes': items,
-            'coeficientes_count': items.count(),
-            'form': form,
-            'sort_by': sort_by,
-            'sort_order': sort_order,
-            'available_projects': available_projects,
-            'standard_coeficientes': list(standard_coeficientes),
-        }
-        if request.headers.get('HX-Request'):
-            return render(request, 'partials/CoeficientesCruce/coeficientes_cruce_table.html', context)
-        return render(request, 'red_vial/coeficientes_cruce_list.html', context)
+        return get_all_coeficientes_cruce(sort_by=sort_by, order=sort_order)
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        proyecto_id = self.kwargs.get('proyecto_id')
+        if proyecto_id:
+            ctx['proyecto'] = get_object_or_404(Proyecto, id=proyecto_id)
+        ctx['sort_by'] = self.request.GET.get('sort_by', self.default_sort)
+        ctx['sort_order'] = self.request.GET.get('sort_order', 'asc')
+        ctx['sort_fields'] = self.sort_fields
+        return ctx
+
+    def render_to_response(self, context: dict[str, Any], **response_kwargs: Any) -> HttpResponse:
+        if self.request.headers.get('HX-Request'):
+            return render(self.request, 'partials/CoeficientesCruce/coeficientes_cruce_table.html', context)
+        return super().render_to_response(context, **response_kwargs)
 
 
-@method_decorator(login_required, name='dispatch')
 class CoeficienteCruceCreateView(View):
+    @method_decorator(login_required)
     @method_decorator(require_http_methods(['POST']))
-    def post(self, request):
+    def post(self, request: HttpRequest, proyecto_id: str | None = None) -> HttpResponse:
         form = CoeficienteCruceModelForm(request.POST)
         if form.is_valid():
             try:
-                item = create_coeficiente_cruce(form.cleaned_data)
-                proys = Proyecto.objects.only('id', 'title').order_by('title')
-                ctx = {'item': item, 'coeficiente': item, 'available_projects': proys}
-                return render(request, 'partials/CoeficientesCruce/coeficiente_cruce_row.html', ctx)
+                with transaction.atomic():
+                    item = create_coeficiente_cruce(form.cleaned_data)
+                response = render(request, 'partials/CoeficientesCruce/coeficiente_cruce_row.html', {
+                    'item': item,
+                })
+                response['HX-Trigger'] = 'coeficiente-cruce-created'
+                return response
             except ValidationError as e:
-                return HttpResponseBadRequest(json.dumps({'error': str(e)}), content_type='application/json')
-        proys = Proyecto.objects.only('id', 'title').order_by('title')
-        standards = list(CoeficienteCruce.objects.filter(proyecto__isnull=True).values('nomenclatura', 'tipo_transporte').order_by('nomenclatura'))
-        ctx = {'form': form, 'available_projects': proys, 'standard_coeficientes': standards}
-        return render(request, 'partials/CoeficientesCruce/coeficiente_cruce_create.html', ctx, status=400)
+                form.add_error(None, str(e))
+                response = render(request, 'partials/CoeficientesCruce/coeficiente_cruce_create.html', {
+                    'form': form,
+                }, status=400)
+                response['HX-Reswap'] = 'outerHTML'
+                return response
+        response = render(request, 'partials/CoeficientesCruce/coeficiente_cruce_create.html', {
+            'form': form,
+        }, status=400)
+        response['HX-Reswap'] = 'outerHTML'
+        return response
 
 
-@method_decorator(login_required, name='dispatch')
 class CoeficienteCruceUpdateView(View):
+    @method_decorator(login_required)
     @method_decorator(require_http_methods(['PUT']))
-    def put(self, request, item_id):
+    def put(self, request: HttpRequest, item_id: str) -> HttpResponse:
         from django.http import QueryDict
         try:
             data = QueryDict(request.body)
-            item = update_coeficiente_cruce(item_id, data)
-            ctx = {'item': item, 'coeficiente': item, 'available_projects': Proyecto.objects.only('id', 'title').order_by('title')}
-            response = render(request, 'partials/CoeficientesCruce/coeficiente_cruce_row.html', ctx)
-            response['HX-Trigger'] = f'item-updated:{item.id}'
+            with transaction.atomic():
+                item = update_coeficiente_cruce(item_id, data)
+            response = render(request, 'partials/CoeficientesCruce/coeficiente_cruce_row.html', {
+                'item': item,
+            })
+            response['HX-Trigger'] = 'item-updated'
             return response
         except ValidationError as e:
-            return HttpResponseBadRequest(json.dumps({'error': str(e)}), content_type='application/json')
+            return HttpResponseBadRequest(
+                json.dumps({'error': str(e)}), content_type='application/json'
+            )
 
 
-@method_decorator(login_required, name='dispatch')
 class CoeficienteCruceDeleteView(View):
+    @method_decorator(login_required)
     @method_decorator(require_http_methods(['DELETE']))
-    def delete(self, request, item_id):
+    def delete(self, request: HttpRequest, item_id: str) -> HttpResponse:
         try:
-            delete_coeficiente_cruce(item_id)
-            return HttpResponse('', status=200)
+            with transaction.atomic():
+                delete_coeficiente_cruce(item_id)
+            response = HttpResponse(status=204)
+            response['HX-Trigger'] = 'coeficiente-cruce-deleted'
+            return response
         except ValidationError as e:
-            return HttpResponseBadRequest(json.dumps({'error': str(e)}), content_type='application/json')
+            return HttpResponseBadRequest(
+                json.dumps({'error': str(e)}), content_type='application/json'
+            )

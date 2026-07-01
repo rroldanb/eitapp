@@ -1,51 +1,85 @@
-<table class="w-full divide-y divide-gray-200 table-results" id="coeficientes-cruce-table">
-  <thead class="bg-slate-200">
-    <tr>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-          aria-sort="{% if sort_by == 'nomenclatura' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=nomenclatura&sort_order={% if sort_by == 'nomenclatura' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#coeficientes-cruce-table" hx-swap="outerHTML" hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'nomenclatura' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Nomenclatura
-          {% if sort_by == 'nomenclatura' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-        </a>
-      </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-          aria-sort="{% if sort_by == 'tipo_transporte' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=tipo_transporte&sort_order={% if sort_by == 'tipo_transporte' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#coeficientes-cruce-table" hx-swap="outerHTML" hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'tipo_transporte' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Tipo Transporte
-          {% if sort_by == 'tipo_transporte' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-        </a>
-      </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-          aria-sort="{% if sort_by == 'coeficiente' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=coeficiente&sort_order={% if sort_by == 'coeficiente' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#coeficientes-cruce-table" hx-swap="outerHTML" hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'coeficiente' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Coeficiente
-          {% if sort_by == 'coeficiente' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-        </a>
-      </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">¿Estándar?</th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-          aria-sort="{% if sort_by == 'proyecto' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=proyecto&sort_order={% if sort_by == 'proyecto' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#coeficientes-cruce-table" hx-swap="outerHTML" hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'proyecto' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Proyecto
-          {% if sort_by == 'proyecto' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-        </a>
-      </th>
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-    </tr>
-  </thead>
-  <tbody id="coeficientes-cruce-table-body" class="divide-y divide-gray-200">
-    {% include 'partials/CoeficientesCruce/coeficientes_cruce_table_body.html' %}
-  </tbody>
-</table>
+<div id="coeficientes-cruce-table-container">
+  <table class="w-full divide-y divide-gray-200 table-results" id="coeficientes-cruce-table" aria-label="Tabla de coeficientes de cruce">
+    <thead class="bg-slate-200">
+      <tr>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            aria-sort="{% if sort_by == 'nomenclatura' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+             href="?sort_by=nomenclatura&sort_order={% if sort_by == 'nomenclatura' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+             hx-get="?sort_by=nomenclatura&sort_order={% if sort_by == 'nomenclatura' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+             hx-target="#coeficientes-cruce-table-container"
+             hx-swap="outerHTML"
+             class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Nomenclatura
+            {% if sort_by == 'nomenclatura' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+          </a>
+        </th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            aria-sort="{% if sort_by == 'tipo_transporte' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+             href="?sort_by=tipo_transporte&sort_order={% if sort_by == 'tipo_transporte' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+             hx-get="?sort_by=tipo_transporte&sort_order={% if sort_by == 'tipo_transporte' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+             hx-target="#coeficientes-cruce-table-container"
+             hx-swap="outerHTML"
+             class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Tipo Transporte
+            {% if sort_by == 'tipo_transporte' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+          </a>
+        </th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            aria-sort="{% if sort_by == 'coeficiente' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+             href="?sort_by=coeficiente&sort_order={% if sort_by == 'coeficiente' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+             hx-get="?sort_by=coeficiente&sort_order={% if sort_by == 'coeficiente' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+             hx-target="#coeficientes-cruce-table-container"
+             hx-swap="outerHTML"
+             class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Coeficiente
+            {% if sort_by == 'coeficiente' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+          </a>
+        </th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">¿Estándar?</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            aria-sort="{% if sort_by == 'proyecto' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+             href="?sort_by=proyecto&sort_order={% if sort_by == 'proyecto' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+             hx-get="?sort_by=proyecto&sort_order={% if sort_by == 'proyecto' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+             hx-target="#coeficientes-cruce-table-container"
+             hx-swap="outerHTML"
+             class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Proyecto
+            {% if sort_by == 'proyecto' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+          </a>
+        </th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="coeficientes-cruce-table-body" class="divide-y divide-gray-200">
+      {% include 'partials/CoeficientesCruce/coeficientes_cruce_table_body.html' %}
+    </tbody>
+  </table>
+
+  {% if page_obj and paginator.num_pages > 1 %}
+  <div class="flex justify-between items-center px-4 py-3 bg-gray-50 border-t border-gray-200">
+    <span class="text-sm text-gray-600">
+      Página {{ page_obj.number }} de {{ paginator.num_pages }} ({{ paginator.count }} coeficientes)
+    </span>
+    <div class="flex gap-1">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#coeficientes-cruce-table-container"
+           hx-swap="outerHTML"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">← Anterior</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#coeficientes-cruce-table-container"
+           hx-swap="outerHTML"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">Siguiente →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>

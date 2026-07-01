@@ -1,72 +1,98 @@
-<div class="periodo-table-wrap overflow-x-auto">
-  <table class="w-full divide-y divide-gray-200 table-results" id="periodo-table">
-    <thead class="bg-slate-200">
-      <tr>
-        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'codigo' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=codigo&sort_order={% if sort_by == 'codigo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#periodo-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'codigo' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            Código
-            {% if sort_by == 'codigo' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'hora_inicio' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=hora_inicio&sort_order={% if sort_by == 'hora_inicio' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#periodo-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'hora_inicio' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            Hora Inicio
-            {% if sort_by == 'hora_inicio' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'hora_fin' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=hora_fin&sort_order={% if sort_by == 'hora_fin' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#periodo-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'hora_fin' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            Hora Fin
-            {% if sort_by == 'hora_fin' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-center font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'es_laboral' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=es_laboral&sort_order={% if sort_by == 'es_laboral' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#periodo-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'es_laboral' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            Laboral
-            {% if sort_by == 'es_laboral' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-center font-bold text-gray-800 uppercase">Acc</th>
-      </tr>
-    </thead>
-    <tbody id="periodo-table-body" class="divide-y divide-gray-200">
-      {% include 'partials/Periodo/periodo_create.html' with proyecto=proyecto %}
-  
-      {% if periodos %}
-        {% for p in periodos %}
-          {% include 'partials/Periodo/periodo_row.html' with item=p %}
-        {% endfor %}
-      {% else %}
+<div id="periodo-table-container">
+  <div class="overflow-x-auto">
+    <table class="w-full divide-y divide-gray-200 table-results" id="periodo-table" aria-label="Tabla de periodos">
+      <thead class="bg-slate-200">
         <tr>
-          <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-            No hay períodos registrados para este proyecto. Crea uno nuevo en la fila superior.
-          </td>
+          <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'codigo' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=codigo&sort_order={% if sort_by == 'codigo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=codigo&sort_order={% if sort_by == 'codigo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#periodo-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              Código
+              {% if sort_by == 'codigo' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'hora_inicio' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=hora_inicio&sort_order={% if sort_by == 'hora_inicio' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=hora_inicio&sort_order={% if sort_by == 'hora_inicio' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#periodo-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              Hora Inicio
+              {% if sort_by == 'hora_inicio' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'hora_fin' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=hora_fin&sort_order={% if sort_by == 'hora_fin' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=hora_fin&sort_order={% if sort_by == 'hora_fin' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#periodo-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              Hora Fin
+              {% if sort_by == 'hora_fin' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-center font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'es_laboral' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=es_laboral&sort_order={% if sort_by == 'es_laboral' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=es_laboral&sort_order={% if sort_by == 'es_laboral' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#periodo-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              Laboral
+              {% if sort_by == 'es_laboral' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-center font-bold text-gray-800 uppercase">Acc</th>
         </tr>
+      </thead>
+      <tbody id="periodo-table-body" class="divide-y divide-gray-200">
+        {% include 'partials/Periodo/periodo_create.html' with proyecto=proyecto %}
+
+        {% if periodos %}
+          {% for p in periodos %}
+            {% include 'partials/Periodo/periodo_row.html' with periodo=p %}
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+              No hay períodos registrados para este proyecto. Crea uno nuevo en la fila superior.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj and paginator.num_pages > 1 %}
+  <div class="flex justify-between items-center px-4 py-3 bg-gray-50 border-t border-gray-200">
+    <span class="text-sm text-gray-600">
+      Página {{ page_obj.number }} de {{ paginator.num_pages }} ({{ paginator.count }} períodos)
+    </span>
+    <div class="flex gap-1">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#periodo-table-container"
+           hx-swap="outerHTML"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">← Anterior</a>
       {% endif %}
-    </tbody>
-  </table>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#periodo-table-container"
+           hx-swap="outerHTML"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">Siguiente →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 </div>

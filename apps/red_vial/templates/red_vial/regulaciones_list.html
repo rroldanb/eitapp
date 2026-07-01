@@ -4,7 +4,7 @@
 {% block hero_image %}
 <div class="flex justify-between items-center mt-2 mb-0">
   <h2 class="text-3xl font-bold text-white mt-4">Regulaciones Viales</h2>
-  <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full" id="regulaciones-count">{{ regulaciones.count }}</span>
+  <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full" id="items-count-badge">{{ regulaciones|length }}</span>
 </div>
 {% endblock %}
 
@@ -16,4 +16,38 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  function updateItemCount(delta) {
+    var badge = document.getElementById('items-count-badge');
+    if (!badge) return;
+    var count = parseInt(badge.textContent) || 0;
+    count += delta;
+    badge.textContent = count;
+  }
+  document.addEventListener('regulacion-created', function() {
+    var form = document.getElementById('new-regulacion-form');
+    if (form) form.reset();
+    updateItemCount(1);
+  });
+  document.addEventListener('regulacion-deleted', function() { updateItemCount(-1); });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && e.target.matches('.field-input')) {
+      var tr = e.target.closest('tr');
+      if (!tr) return;
+      tr.querySelectorAll('.field-input').forEach(function(inp) {
+        inp.value = inp.defaultValue;
+        inp.classList.add('hidden');
+        if (inp.previousElementSibling) inp.previousElementSibling.classList.remove('hidden');
+      });
+      var btn = tr.querySelector('.save-row-btn');
+      if (btn) btn.classList.add('hidden');
+    }
+  });
+})();
+</script>
 {% endblock %}

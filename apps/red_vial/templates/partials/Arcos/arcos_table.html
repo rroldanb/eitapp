@@ -1,59 +1,88 @@
-<table class="w-full divide-y divide-gray-200 table-results" id="arcos-table">
-  <thead class="bg-slate-200">
-    <tr>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
-        aria-sort="{% if sort_by == 'codigo_arco' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=codigo_arco&sort_order={% if sort_by == 'codigo_arco' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#arcos-table"
-           hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'codigo_arco' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Código
-          {% if sort_by == 'codigo_arco' %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
-      aria-sort="{% if sort_by == 'origen' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=origen&sort_order={% if sort_by == 'origen' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#arcos-table"
-           hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'origen' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Origen
+<div id="arcos-table-container">
+  <table class="w-full divide-y divide-gray-200 table-results" id="arcos-table" aria-label="Tabla de arcos">
+    <thead class="bg-slate-200">
+      <tr>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+          aria-sort="{% if sort_by == 'codigo_arco' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+            hx-get="?sort_by=codigo_arco&sort_order={% if sort_by == 'codigo_arco' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+            hx-target="#arcos-table-container"
+            hx-swap="outerHTML"
+            class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Código
+            {% if sort_by == 'codigo_arco' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+          aria-sort="{% if sort_by == 'origen' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+            hx-get="?sort_by=origen&sort_order={% if sort_by == 'origen' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+            hx-target="#arcos-table-container"
+            hx-swap="outerHTML"
+            class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Origen
+            {% if sort_by == 'origen' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+          aria-sort="{% if sort_by == 'destino' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+            hx-get="?sort_by=destino&sort_order={% if sort_by == 'destino' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+            hx-target="#arcos-table-container"
+            hx-swap="outerHTML"
+            class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Destino
+            {% if sort_by == 'destino' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+          aria-sort="{% if sort_by == 'longitud' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+            hx-get="?sort_by=longitud&sort_order={% if sort_by == 'longitud' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+            hx-target="#arcos-table-container"
+            hx-swap="outerHTML"
+            class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Longitud
+            {% if sort_by == 'longitud' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase">Acc</th>
+      </tr>
+    </thead>
+    <tbody id="arcos-table-body" class="divide-y divide-gray-200">
+      {% include 'partials/Arcos/arcos_table_body.html' with proyecto=proyecto arcos=page_obj.object_list %}
+    </tbody>
+  </table>
 
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
-      aria-sort="{% if sort_by == 'destino' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=destino&sort_order={% if sort_by == 'destino' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#arcos-table"
+  {% if page_obj and paginator.num_pages > 1 %}
+  <div class="flex justify-between items-center px-4 py-3 bg-gray-50 border-t border-gray-200">
+    <span class="text-sm text-gray-600">
+      Página {{ page_obj.number }} de {{ paginator.num_pages }} ({{ paginator.count }} arcos)
+    </span>
+    <div class="flex gap-1">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#arcos-table-container"
            hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'destino' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Destino
-
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'longitud' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=longitud&sort_order={% if sort_by == 'longitud' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#arcos-table"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">← Anterior</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#arcos-table-container"
            hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'longitud' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Longitud
-
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase">Acc</th>
-    </tr>
-  </thead>
-  <tbody id="arcos-table-body" class="divide-y divide-gray-200">
-    {% include 'partials/Arcos/arcos_table_body.html' with proyecto=proyecto arcos=arcos %}
-  </tbody>
-</table>
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">Siguiente →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>

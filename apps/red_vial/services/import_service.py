@@ -1,3 +1,4 @@
+from typing import Any
 from openpyxl import load_workbook
 from datetime import date, time, datetime
 from decimal import Decimal
@@ -159,7 +160,7 @@ def _header_index(headers, name):
     return None
 
 
-def parse_excel(file):
+def parse_excel(file: Any) -> dict[str, list[dict[str, Any]]]:
     wb = load_workbook(file, read_only=True, data_only=True)
     result = {}
     for ws in wb.worksheets:
@@ -201,7 +202,12 @@ class _VirtualObj:
         self._value = value
 
 
-def validate_sheet(sheet_name, rows, proyecto=None, shared_cache=None):
+def validate_sheet(
+    sheet_name: str,
+    rows: list[dict[str, Any]],
+    proyecto: Proyecto | None = None,
+    shared_cache: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     required = REQUIRED_FIELDS.get(sheet_name, [])
     fk_map = FK_FIELDS.get(sheet_name, {})
     valid = []
@@ -676,7 +682,11 @@ def _get_model(name):
     return models.get(name)
 
 
-def validate_selection(parsed_data, selected_sheets, proyecto=None):
+def validate_selection(
+    parsed_data: dict[str, list[dict[str, Any]]],
+    selected_sheets: list[str],
+    proyecto: Proyecto | None = None,
+) -> dict[str, Any]:
     sheets_in_order = [s for s in SHEET_ORDER if s in selected_sheets]
     results = {}
     total_valid = 0

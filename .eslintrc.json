@@ -1,0 +1,29 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "globals": {
+    "htmx": "readonly",
+    "_hyperscript": "readonly",
+    "Chart": "readonly",
+    "OpenSeadragon": "readonly",
+    "showToast": "writable",
+    "openModal": "writable",
+    "closeModal": "writable",
+    "ModalUtils": "writable",
+    "toggleSidebar": "writable"
+  },
+  "rules": {
+    "no-var": "warn",
+    "prefer-const": "warn",
+    "no-undef": "warn",
+    "no-unused-vars": ["warn", { "args": "none" }],
+    "no-console": "warn",
+    "no-empty": "warn"
+  }
+}

@@ -10,14 +10,9 @@
            hx-get="?sort_by={{ field_name }}&sort_order={% if sort_by == field_name and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
            hx-target="#{{ table_id }}"
            hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == field_name %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}"
            aria-label="Ordenar por {{ field_label }}"
         >
           {{ field_label }}
-          {% if sort_by == field_name %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
         </a>
       </th>
     {% endfor %}

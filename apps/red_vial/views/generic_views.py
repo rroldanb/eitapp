@@ -2,16 +2,18 @@
 Generic views para operaciones CRUD con soporte HTMX y ordenamiento.
 Proporciona clases base reutilizables para todas las entidades de red_vial.
 """
+import json
+import inspect
+from typing import Any
+
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-import json
-import inspect
 
 
 # ========== LIST VIEW GENÉRICA ==========
@@ -39,7 +41,7 @@ class GenericListView(View):
     form_class = None   
 
     @method_decorator(login_required)
-    def get(self, request, proyecto_id=None):
+    def get(self, request: HttpRequest, proyecto_id: str | None = None) -> HttpResponse:
         """GET: Retorna lista de items, partial si HTMX, página completa si no."""
         # Obtener proyecto_id desde resolver_match para evitar valores mal enlazados
         resolver_kwargs = getattr(request, 'resolver_match', None)
@@ -121,7 +123,7 @@ class GenericCreateView(View):
     
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['POST']))
-    def post(self, request, proyecto_id):
+    def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         """POST: Crea un item y retorna su fila HTML."""
         from apps.proyectos.models import Proyecto
         
@@ -141,7 +143,6 @@ class GenericCreateView(View):
                 # para compatibilidad con templates que esperan el nombre del modelo (ej. 'calle')
                 singular = self.model._meta.model_name if self.model is not None else 'item'
                 context = {'item': item, 'proyecto': proyecto, singular: item}
-                print(f"Context for create response 1 : {context}")  # Debug log
 
                 if self.form_class:
                     kwargs = {}
@@ -149,7 +150,6 @@ class GenericCreateView(View):
                     if 'proyecto' in sig.parameters:
                         kwargs['proyecto'] = proyecto
                     context['form'] = self.form_class(**kwargs)
-                    print(f"Context for create response: {context}")  # Debug log
                 return render(request, self.row_template, context)
             except ValidationError as e:
                 for err in e.messages:
@@ -203,7 +203,7 @@ class GenericUpdateView(View):
     
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['PUT']))
-    def put(self, request, item_id, **kwargs):
+    def put(self, request: HttpRequest, item_id: str, **kwargs: Any) -> HttpResponse:
         """PUT: Actualiza un item y retorna su fila HTML."""
         from django.http import QueryDict
         
@@ -248,7 +248,7 @@ class GenericDeleteView(View):
     
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['DELETE']))
-    def delete(self, request, item_id, **kwargs):
+    def delete(self, request: HttpRequest, item_id: str, **kwargs: Any) -> HttpResponse:
         """DELETE: Elimina un item."""
         try:
             service_func = self.__class__.service_delete_function
@@ -275,7 +275,7 @@ class GenericBulkUpdateView(View):
     
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['POST']))
-    def post(self, request, proyecto_id):
+    def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         """POST: Actualiza múltiples items."""
         try:
             data_list = json.loads(request.body)

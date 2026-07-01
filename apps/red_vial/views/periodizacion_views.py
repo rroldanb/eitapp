@@ -1,5 +1,9 @@
+import json
+from typing import Any
+from datetime import date
+
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseBadRequest, JsonResponse, QueryDict, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse, QueryDict
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -7,7 +11,6 @@ from django.views.decorators.http import require_http_methods
 from django.views import View
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-import json
 from apps.red_vial.models import Periodizacion, PuntoControl, Periodo, Nodo
 from apps.red_vial.forms.periodizacion_forms import PeriodizacionForm
 from apps.red_vial.services.periodizacion_service import (
@@ -25,13 +28,13 @@ class PeriodizacionListView(View):
     template_full = 'red_vial/periodizacion_list.html'
     template_container = 'partials/Periodizacion/periodizacion_container.html'
 
-    def get(self, request, proyecto_id):
+    def get(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
 
         nodo_ids = request.GET.getlist('nodo')
         periodo_ids = request.GET.getlist('periodo')
         movimiento_ids = request.GET.getlist('movimiento')
-        fecha = request.GET.get('fecha') or None
+        fecha: str | None = request.GET.get('fecha') or None
         sort_param = request.GET.get('sort')
         order_param = request.GET.get('order', 'asc')
 
@@ -88,7 +91,7 @@ class PeriodizacionListView(View):
             return render(request, self.template_container, context)
         return render(request, self.template_full, context)
 
-    def post(self, request, proyecto_id):
+    def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         """Genera filas de periodización."""
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
 
@@ -162,7 +165,7 @@ class PeriodizacionListView(View):
 @method_decorator(login_required, name='dispatch')
 class PeriodizacionUpdateView(View):
     """Actualiza un campo vehicular de una fila de periodización (PUT parcial)."""
-    def put(self, request, item_id):
+    def put(self, request: HttpRequest, item_id: str) -> HttpResponse:
         try:
             try:
                 data = json.loads(request.body) if request.body else {}
@@ -185,7 +188,7 @@ class PeriodizacionUpdateView(View):
 class PeriodizacionDeleteView(View):
     """Elimina una fila de periodización."""
 
-    def delete(self, request, item_id):
+    def delete(self, request: HttpRequest, item_id: str) -> HttpResponse:
         try:
             delete_periodizacion(item_id)
             return HttpResponse(status=204)

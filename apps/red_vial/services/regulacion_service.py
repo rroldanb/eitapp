@@ -1,9 +1,12 @@
+from typing import Any
+from django.db.models import QuerySet
+
 from apps.red_vial.models import Regulacion
 from apps.red_vial.forms.regulacion_form import RegulacionForm
 from .base_service import apply_sort_to_queryset, create_item, update_item, delete_item
 
 
-def get_all_regulaciones(sort_by=None, order='asc'):
+def get_all_regulaciones(sort_by: str | None = None, order: str = 'asc') -> QuerySet[Regulacion]:
     qs = Regulacion.objects.all()
 
     valid_fields = {
@@ -14,13 +17,13 @@ def get_all_regulaciones(sort_by=None, order='asc'):
     return apply_sort_to_queryset(qs, sort_by=sort_by, order=order, valid_fields=valid_fields)
 
 
-def create_regulacion(data):
+def create_regulacion(data: dict[str, Any]) -> Regulacion:
     return create_item(Regulacion, data, form_class=RegulacionForm)
 
 
-def update_regulacion(regulacion_id, data):
+def update_regulacion(regulacion_id: str, data: dict[str, Any]) -> Regulacion:
     return update_item(Regulacion, regulacion_id, data, form_class=RegulacionForm)
 
 
-def delete_regulacion(regulacion_id):
+def delete_regulacion(regulacion_id: str) -> None:
     delete_item(Regulacion, regulacion_id)

@@ -1,10 +1,10 @@
-(function() {
-  var backupForm = document.getElementById('backup-form');
+(function () {
+  const backupForm = document.getElementById('backup-form');
   if (!backupForm) return;
 
-  var backupNameInput = document.getElementById('backup_name');
-  var spinner = document.getElementById('submit-spinner');
-  var feedback = document.getElementById('backup-feedback');
+  const backupNameInput = document.getElementById('backup_name');
+  const spinner = document.getElementById('submit-spinner');
+  const feedback = document.getElementById('backup-feedback');
 
   function clearFeedback() {
     if (!feedback) return;
@@ -23,38 +23,49 @@
     }
   }
 
-  backupForm.addEventListener('submit', async function(event) {
+  backupForm.addEventListener('submit', async function (event) {
     event.preventDefault();
     clearFeedback();
-    var backupName = backupNameInput.value.trim();
+    const backupName = backupNameInput.value.trim();
     if (!backupName) {
       showToast('Debes indicar el nombre del archivo de respaldo.', false);
       backupNameInput.focus();
       return;
     }
     spinner.style.display = 'inline-flex';
-    var submitButton = backupForm.querySelector('button[type="submit"]');
+    const submitButton = backupForm.querySelector('button[type="submit"]');
     submitButton.setAttribute('disabled', 'disabled');
     try {
-      var formData = new FormData(backupForm);
-      var response = await fetch(backupForm.action || window.location.href, {
-        method: 'POST', body: formData, credentials: 'same-origin',
+      const formData = new FormData(backupForm);
+      const response = await fetch(backupForm.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
       });
-      var contentType = response.headers.get('Content-Type') || '';
+      const contentType = response.headers.get('Content-Type') || '';
       if (!response.ok || contentType.indexOf('application/zip') === -1) {
-        var message = 'Error al generar el respaldo.';
+        let message = 'Error al generar el respaldo.';
         try {
-          var text = await response.text();
-          if (text) { message = text.replace(/<[^>]*>/g, '').trim().slice(0, 200) || message; }
+          const text = await response.text();
+          if (text) {
+            message =
+              text
+                .replace(/<[^>]*>/g, '')
+                .trim()
+                .slice(0, 200) || message;
+          }
         } catch (ignored) {}
         throw new Error(message);
       }
-      var blob = await response.blob();
-      var filename = backupName.replace(/[^A-Za-z0-9_.-]/g, '_') + '.zip';
-      var url = URL.createObjectURL(blob);
-      var anchor = document.createElement('a');
-      anchor.href = url; anchor.download = filename;
-      document.body.appendChild(anchor); anchor.click(); document.body.removeChild(anchor);
+      const blob = await response.blob();
+      const filename = backupName.replace(/[^A-Za-z0-9_.-]/g, '_') + '.zip';
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
       URL.revokeObjectURL(url);
       showFeedback('Respaldo completado. El archivo está descargándose.', 'success');
     } catch (err) {

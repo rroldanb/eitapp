@@ -1,65 +1,87 @@
-<table class="w-full divide-y divide-gray-200 table-results" id="nodos-table">
-  <thead class="bg-slate-200">
-    <tr>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
-      aria-sort="{% if sort_by == 'numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#nodos-table"
+<div id="nodos-table-container">
+  <table class="w-full divide-y divide-gray-200 table-results" id="nodos-table" aria-label="Tabla de nodos">
+    <thead class="bg-slate-200">
+      <tr>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+        aria-sort="{% if sort_by == 'numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button"
+          href="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=numero&sort_order={% if sort_by == 'numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#nodos-table-container"
+          hx-swap="outerHTML"
+          class="inline-flex items-center gap-1 hover:text-indigo-700">
+            N°
+            {% if sort_by == 'numero' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up"></i>{% else %}<i class="fas fa-sort-numeric-down-alt"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'calle_1' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button" href="?sort_by=calle_1&sort_order={% if sort_by == 'calle_1' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=calle_1&sort_order={% if sort_by == 'calle_1' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#nodos-table-container"
+          hx-swap="outerHTML"
+          class="inline-flex items-center gap-1 hover:text-indigo-700 ">
+            Calle 1
+            {% if sort_by == 'calle_1' %}
+              {% if sort_order == 'asc' %} <i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'calle_2' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button" href="?sort_by=calle_2&sort_order={% if sort_by == 'calle_2' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=calle_2&sort_order={% if sort_by == 'calle_2' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#nodos-table-container"
+          hx-swap="outerHTML"
+          class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Calle 2
+            {% if sort_by == 'calle_2' %}
+              {% if sort_order == 'asc' %} <i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'numero_pc' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+          <a role="button" href="?sort_by=numero_pc&sort_order={% if sort_by == 'numero_pc' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-get="?sort_by=numero_pc&sort_order={% if sort_by == 'numero_pc' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+          hx-target="#nodos-table-container"
+          hx-swap="outerHTML"
+          class="inline-flex items-center gap-1 hover:text-indigo-700">
+            Número PC
+            {% if sort_by == 'numero_pc' %}
+              {% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        <th class="px-2 py-2 text-center font-bold text-gray-900 uppercase w-12">Img</th>
+        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase">Acc</th>
+      </tr>
+    </thead>
+    <tbody id="nodos-table-body" class="divide-y divide-gray-200">
+      {% include 'partials/Nodos/nodos_table_body.html' with proyecto=proyecto nodos=page_obj.object_list calles=proyecto.calles.all %}
+    </tbody>
+  </table>
+
+  {% if page_obj and paginator.num_pages > 1 %}
+  <div class="flex justify-between items-center px-4 py-3 bg-gray-50 border-t border-gray-200">
+    <span class="text-sm text-gray-600">
+      Página {{ page_obj.number }} de {{ paginator.num_pages }} ({{ paginator.count }} nodos)
+    </span>
+    <div class="flex gap-1">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#nodos-table-container"
            hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'numero' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          N°
-          {% if sort_by == 'numero' %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" 
-      aria-sort="{% if sort_by == 'calle_1' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=calle_1&sort_order={% if sort_by == 'calle_1' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#nodos-table"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">← Anterior</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#nodos-table-container"
            hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'calle_1' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Calle 1
-          {% if sort_by == 'calle_1' %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'calle_2' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=calle_2&sort_order={% if sort_by == 'calle_2' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#nodos-table"
-           hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'calle_2' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Calle 2
-          {% if sort_by == 'calle_2' %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
-        </a>
-      </th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase" aria-sort="{% if sort_by == 'is_pc' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-        <a role="button"
-           hx-get="?sort_by=is_pc&sort_order={% if sort_by == 'is_pc' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-           hx-target="#nodos-table"
-           hx-swap="outerHTML"
-           hx-push-url="true"
-           class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'is_pc' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-          Es PC
-          {% if sort_by == 'is_pc' %}
-            {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-          {% endif %}
-        </a>
-      </th>
-      <th class="px-2 py-2 text-center font-bold text-gray-900 uppercase w-12">Img</th>
-      <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase">Acc</th>
-    </tr>
-  </thead>
-  <tbody id="nodos-table-body" class="divide-y divide-gray-200">
-    {% include 'partials/Nodos/nodos_table_body.html' with proyecto=proyecto nodos=nodos %}
-  </tbody>
-</table>
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">Siguiente →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>

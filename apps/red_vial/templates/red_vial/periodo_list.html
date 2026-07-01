@@ -4,22 +4,14 @@
 {% block hero_image %}
 <div class="flex justify-between items-center mt-2 mb-0">
   <h2 class="text-3xl font-bold text-white mt-4">Períodos de Medición</h2>
-  <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full" id="periodos-count">{{ periodos|length }}</span>
+  <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full" id="periodos-count">{{ page_obj.paginator.count }}</span>
 </div>
 {% endblock %}
 
 {% block section_content %}
 <div class="bg-white rounded-lg shadow overflow-hidden">
   <div class="p-4">
-    <div class="overflow-x-auto">
-      {% include 'partials/Periodo/periodo_table.html' with proyecto=proyecto periodos=periodos form=form %}
-    </div>
+    {% include 'partials/Periodo/periodo_table.html' with proyecto=proyecto periodos=page_obj.object_list %}
   </div>
 </div>
-
-<div id="periodo-list-config" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
 {% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'js/features/bulk-crud.js' %}" defer></script>
-{% endblock extra_js %}

@@ -1,46 +1,108 @@
 {% load l10n %}
 <tr id="parametro-arco-row-{{ item.id }}" class="parametro-arco-row hover:bg-gray-50" data-parametro-id="{{ item.id }}">
-  <td class="px-2 py-1 whitespace-nowrap font-medium text-gray-700 max-w-48 truncate" title="{{ item.punto_control.nombre }}">{{ item.punto_control.nombre }}</td>
+  <td class="px-2 py-1 whitespace-nowrap font-medium text-gray-700 max-w-48 truncate" title="{{ item.punto_control.nombre }}">{{ item.punto_control.nombre }}<input type="hidden" name="punto_control" value="{{ item.punto_control_id }}"></td>
   <td class="px-2 py-1 whitespace-nowrap text-gray-600">{{ item.punto_control.get_movimiento_display|default:item.punto_control.movimiento }}</td>
-  <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="flujo_saturacion" id="param-flujo-{{ item.id }}" value="{{ item.flujo_saturacion }}" step="10" aria-label="Flujo de saturación"
-      class="w-24 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+  <td class="px-2 py-1 whitespace-nowrap editable-field" data-field="flujo_saturacion">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        call me.nextElementSibling.focus()
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.flujo_saturacion }}
+    </span>
+    <input type="number" name="flujo_saturacion" value="{{ item.flujo_saturacion }}"
+      class="field-input hidden w-24 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500" step="10"
+      _="on keydown[key == 'Enter']
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
   </td>
-  <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="ponderador_demora" id="param-demora-{{ item.id }}" value="{{ item.ponderador_demora }}" step="0.01" aria-label="Ponderador de demora"
-      class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+  <td class="px-2 py-1 whitespace-nowrap editable-field" data-field="ponderador_demora">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        call me.nextElementSibling.focus()
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.ponderador_demora }}
+    </span>
+    <input type="number" name="ponderador_demora" value="{{ item.ponderador_demora }}"
+      class="field-input hidden w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500" step="0.01"
+      _="on keydown[key == 'Enter']
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
   </td>
-  <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="ponderador_detencion" id="param-detencion-{{ item.id }}" value="{{ item.ponderador_detencion }}" step="0.01" aria-label="Ponderador de detención"
-      class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+  <td class="px-2 py-1 whitespace-nowrap editable-field" data-field="ponderador_detencion">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        call me.nextElementSibling.focus()
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.ponderador_detencion }}
+    </span>
+    <input type="number" name="ponderador_detencion" value="{{ item.ponderador_detencion }}"
+      class="field-input hidden w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500" step="0.01"
+      _="on keydown[key == 'Enter']
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
   </td>
-  <td class="px-2 py-1 whitespace-nowrap">
-    <input type="number" name="capacidad_cola" id="param-cola-{{ item.id }}" value="{{ item.capacidad_cola|default:'' }}" step="0.1" aria-label="Capacidad de cola"
-      class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+  <td class="px-2 py-1 whitespace-nowrap editable-field" data-field="capacidad_cola">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        call me.nextElementSibling.focus()
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {{ item.capacidad_cola|default:'—' }}
+    </span>
+    <input type="number" name="capacidad_cola" value="{{ item.capacidad_cola|default:'' }}"
+      class="field-input hidden w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-2 focus:ring-indigo-500" step="0.1"
+      _="on keydown[key == 'Enter']
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ item.id }}">
   </td>
-  <td class="px-2 py-1 text-center whitespace-nowrap">
-    <input type="checkbox" name="tiene_tarjeta_38" id="param-tarjeta-{{ item.id }}" class="form-check-input" aria-label="Tiene tarjeta 38" {% if item.tiene_tarjeta_38 %}checked{% endif %} value="true">
+  <td class="px-2 py-1 text-center whitespace-nowrap editable-field" data-field="tiene_tarjeta_38">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input-container
+        remove .hidden from #save-row-btn-{{ item.id }}">
+      {% if item.tiene_tarjeta_38 %}Sí{% else %}No{% endif %}
+    </span>
+    <span class="field-input-container hidden">
+      <input type="checkbox" name="tiene_tarjeta_38" class="form-check-input"
+        {% if item.tiene_tarjeta_38 %}checked{% endif %} value="true"
+        _="on change
+          set container to me.closest('.field-input-container')
+          add .hidden to container
+          remove .hidden from container.previousElementSibling
+          trigger click on #save-row-btn-{{ item.id }}">
+    </span>
   </td>
   <td class="px-2 py-1 flex gap-1 whitespace-nowrap">
     <button type="button"
-      class="px-2 py-1 text-xs border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn"
+      id="save-row-btn-{{ item.id }}"
+      aria-label="Guardar parámetro de arco"
+      class="save-row-btn hidden px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors"
       hx-put="{% url 'parametro_arco_update' item.id %}"
       hx-include="closest tr"
       hx-target="closest tr"
-      hx-swap="outerHTML"
-      hx-indicator="#save-indicator-{{ item.id }}"
-      aria-label="Guardar parámetro">
-      <span id="save-indicator-{{ item.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
-      OK
+      hx-swap="outerHTML">
+      Guardar
     </button>
-    <button type="button" data-action="delete"
-      class="px-2 py-1 text-xs border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
+    <button type="button"
+      aria-label="Eliminar parámetro de arco"
+      class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
       hx-delete="{% url 'parametro_arco_delete' item.id %}"
       hx-target="closest tr"
       hx-swap="outerHTML"
-      hx-confirm="Eliminar parametro {{ item.punto_control.nombre }}?"
-      aria-label="Eliminar parametro">
-      <i class="fas fa-times" aria-hidden="true"></i>
+      hx-confirm="Eliminar parámetro {{ item.punto_control.nombre }}?">
+      Eliminar
     </button>
   </td>
 </tr>

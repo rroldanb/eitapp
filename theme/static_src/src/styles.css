@@ -8,3 +8,9 @@
   * the scope of this path.
   */
 @source "../../../**/*.{html,py,js}";
+
+.container {
+  @media (width >= 110rem) {
+    max-width: 110rem;
+  }
+}

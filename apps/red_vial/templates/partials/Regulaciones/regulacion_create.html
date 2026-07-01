@@ -1,25 +1,43 @@
-<tr id="new-regulacion-form-row" class="{% if form.errors %}bg-red-50{% else %}bg-green-100{% endif %}">
+{# Partial template for creating a new regulacion #}
+
+<tr id="new-regulacion-form-row" class="{% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}">
   <td colspan="3" class="px-4 py-3">
     <form id="new-regulacion-form"
       data-action="create"
       hx-post="{% url 'regulacion_create' %}"
       hx-target="closest tr"
       hx-swap="afterend"
-      hx-on::after-request="if(event.detail.successful) this.reset()"
       hx-indicator="#create-indicator"
     >
       {% csrf_token %}
-      <div class="flex flex-wrap items-center gap-3">
+      {% if form.is_bound and form.errors %}
+      <div class="mb-2 space-y-1">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <p class="text-red-600 text-sm error-message">{{ field.label }}: {{ error }}</p>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <p class="text-red-600 text-sm error-message">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="flex flex-wrap items-center gap-4 justify-center">
         <input type="text" name="codigo" aria-label="Código"
-          class="form-control w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 uppercase bg-slate-50"
+          class="bg-slate-50 w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 uppercase"
           placeholder="Código" maxlength="20" required />
         <input type="text" name="descripcion" aria-label="Descripción"
-          class="form-control flex-1 min-w-[220px] max-w-2/3 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 bg-slate-50"
+          class="bg-slate-50 flex-1 min-w-[220px] max-w-2/3 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
           placeholder="Descripción" required />
-        <button type="submit" class="px-2 py-1 text-base border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors action-btn" data-action="create" aria-label="Guardar regulación">
-          Guardar
+        <button type="submit"
+          class="px-2 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-800 transition-colors font-medium action-btn"
+          data-action="create" aria-label="Agregar regulación">
+          Agregar
+          <i class="far fa-save ml-1" aria-hidden="true"></i>
         </button>
-        <span id="create-indicator" class="inline-block w-3 h-3 border-2 border-t-transparent border-blue-600 rounded-full animate-spin mr-1 htmx-indicator" style="display:none;" role="status" aria-hidden="true"></span>
+        <span id="create-indicator"
+          class="inline-block w-3 h-3 border-2 border-t-transparent border-blue-600 rounded-full animate-spin mr-1 htmx-indicator"
+          role="status" aria-hidden="true"></span>
       </div>
     </form>
   </td>

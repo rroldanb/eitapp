@@ -1,3 +1,7 @@
+from typing import Any
+
+from django.db.models import QuerySet
+from django.shortcuts import get_object_or_404
 from apps.red_vial.models import (
     Calle,
     Nodo,
@@ -12,86 +16,86 @@ from apps.proyectos.models import Proyecto
 
 # ========== REGULACION SERVICES ==========
 
-def get_all_regulaciones():
+def get_all_regulaciones() -> QuerySet[Regulacion]:
     """Obtener todos los tipos de regulación"""
     return Regulacion.objects.all()
 
 
-def get_regulacion_by_id(regulacion_id):
+def get_regulacion_by_id(regulacion_id: str) -> Regulacion:
     """Obtener regulación por ID"""
-    return Regulacion.objects.get(id=regulacion_id)
+    return get_object_or_404(Regulacion, id=regulacion_id)
 
 
-def get_regulacion_by_codigo(codigo):
+def get_regulacion_by_codigo(codigo: str) -> Regulacion:
     """Obtener regulación por código (DIR, DER, IZQ)"""
-    return Regulacion.objects.get(codigo=codigo)
+    return get_object_or_404(Regulacion, codigo=codigo)
 
 
-def regulacion_create(data):
+def regulacion_create(data: dict[str, Any]) -> Regulacion:
     """Crear un nuevo tipo de regulación"""
     return Regulacion.objects.create(**data)
 
 
-def regulacion_update(regulacion_id, data):
+def regulacion_update(regulacion_id: str, data: dict[str, Any]) -> Regulacion:
     """Actualizar una regulación"""
-    regulacion = Regulacion.objects.get(id=regulacion_id)
+    regulacion = get_object_or_404(Regulacion, id=regulacion_id)
     for key, value in data.items():
         setattr(regulacion, key, value)
     regulacion.save()
     return regulacion
 
 
-def regulacion_delete(regulacion_id):
+def regulacion_delete(regulacion_id: str) -> None:
     """Eliminar una regulación"""
-    regulacion = Regulacion.objects.get(id=regulacion_id)
+    regulacion = get_object_or_404(Regulacion, id=regulacion_id)
     regulacion.delete()
 
 
 # ========== COEFICIENTE CRUCE SERVICES ==========
 
-def get_all_coeficientes():
+def get_all_coeficientes() -> QuerySet[Coeficiente_Cruce]:
     """Obtener todos los coeficientes de cruce"""
     return Coeficiente_Cruce.objects.all()
 
 
-def get_coeficiente_by_id(coeficiente_id):
+def get_coeficiente_by_id(coeficiente_id: str) -> Coeficiente_Cruce:
     """Obtener coeficiente por ID"""
-    return Coeficiente_Cruce.objects.get(id=coeficiente_id)
+    return get_object_or_404(Coeficiente_Cruce, id=coeficiente_id)
 
 
-def get_coeficiente_by_nomenclatura(nomenclatura):
+def get_coeficiente_by_nomenclatura(nomenclatura: str) -> Coeficiente_Cruce:
     """Obtener coeficiente por nomenclatura (VL, TXC, etc.)"""
-    return Coeficiente_Cruce.objects.get(nomenclatura=nomenclatura)
+    return get_object_or_404(Coeficiente_Cruce, nomenclatura=nomenclatura)
 
 
-def get_coeficientes_standard():
+def get_coeficientes_standard() -> QuerySet[Coeficiente_Cruce]:
     """Obtener coeficientes estándar"""
     return Coeficiente_Cruce.objects.filter(is_standard=True)
 
 
-def coeficiente_create(data):
+def coeficiente_create(data: dict[str, Any]) -> Coeficiente_Cruce:
     """Crear un nuevo coeficiente"""
     return Coeficiente_Cruce.objects.create(**data)
 
 
-def coeficiente_update(coeficiente_id, data):
+def coeficiente_update(coeficiente_id: str, data: dict[str, Any]) -> Coeficiente_Cruce:
     """Actualizar un coeficiente"""
-    coeficiente = Coeficiente_Cruce.objects.get(id=coeficiente_id)
+    coeficiente = get_object_or_404(Coeficiente_Cruce, id=coeficiente_id)
     for key, value in data.items():
         setattr(coeficiente, key, value)
     coeficiente.save()
     return coeficiente
 
 
-def coeficiente_delete(coeficiente_id):
+def coeficiente_delete(coeficiente_id: str) -> None:
     """Eliminar un coeficiente"""
-    coeficiente = Coeficiente_Cruce.objects.get(id=coeficiente_id)
+    coeficiente = get_object_or_404(Coeficiente_Cruce, id=coeficiente_id)
     coeficiente.delete()
 
 
 # ========== IMPORT/EXPORT SERVICES ==========
 
-def import_calles_from_excel(proyecto_id, calles_data):
+def import_calles_from_excel(proyecto_id: str, calles_data: list[dict[str, Any]]) -> list[Calle]:
     """Importar calles desde datos de Excel"""
     calles_creadas = []
     for data in calles_data:
@@ -101,7 +105,7 @@ def import_calles_from_excel(proyecto_id, calles_data):
     return calles_creadas
 
 
-def import_nodos_from_excel(proyecto_id, nodos_data, calles_mapping):
+def import_nodos_from_excel(proyecto_id: str, nodos_data: list[dict[str, Any]], calles_mapping: dict[str | int, str]) -> list[Nodo]:
     """Importar nodos desde datos de Excel"""
     nodos_creados = []
     for data in nodos_data:
@@ -116,7 +120,7 @@ def import_nodos_from_excel(proyecto_id, nodos_data, calles_mapping):
     return nodos_creados
 
 
-def import_arcos_from_excel(proyecto_id, arcos_data, nodos_mapping):
+def import_arcos_from_excel(proyecto_id: str, arcos_data: list[dict[str, Any]], nodos_mapping: dict[str | int, str]) -> list[Arco]:
     """Importar arcos desde datos de Excel"""
     arcos_creados = []
     for data in arcos_data:

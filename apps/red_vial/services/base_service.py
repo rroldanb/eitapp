@@ -2,14 +2,21 @@
 Base service module para operaciones CRUD genéricas con soporte para ordenamiento.
 Proporciona funciones reutilizables para listar, crear, actualizar y eliminar items.
 """
+from typing import Any
 from django.db import transaction
-from django.db.models import QuerySet, F
+from django.db.models import Model, QuerySet, F
 from django.core.exceptions import ValidationError
 
 
 # ========== FUNCIONES GENÉRICAS DE SORT ==========
 
-def apply_sort_to_queryset(queryset, sort_by=None, order='asc', valid_fields=None, count_annotations=None):
+def apply_sort_to_queryset(
+    queryset: QuerySet,
+    sort_by: str | None = None,
+    order: str = 'asc',
+    valid_fields: dict[str, str | list[str]] | None = None,
+    count_annotations: dict[str, Any] | None = None,
+) -> QuerySet:
     """
     Aplica ordenamiento a un queryset con validaciones y anotaciones opcionales.
     
@@ -50,7 +57,12 @@ def apply_sort_to_queryset(queryset, sort_by=None, order='asc', valid_fields=Non
     return queryset.order_by(*sort_field)
 
 
-def apply_multi_sort_to_queryset(queryset, sort_specs=None, valid_fields=None, count_annotations=None):
+def apply_multi_sort_to_queryset(
+    queryset: QuerySet,
+    sort_specs: list[dict[str, str]] | None = None,
+    valid_fields: dict[str, str] | None = None,
+    count_annotations: dict[str, Any] | None = None,
+) -> QuerySet:
     """
     Aplica ordenamiento multi-campo con direcciones independientes.
 
@@ -88,17 +100,18 @@ def apply_multi_sort_to_queryset(queryset, sort_specs=None, valid_fields=None, c
 
 # ========== FUNCIONES GENÉRICAS CRUD ==========
 
-def list_items(queryset):
+def list_items(queryset: QuerySet) -> QuerySet:
     """Retorna todos los items del queryset."""
     return queryset.all()
 
 
-def get_item_by_id(model, item_id):
+def get_item_by_id(model: type[Model], item_id: str) -> Model:
     """Obtiene un item por ID."""
-    return model.objects.get(id=item_id)
+    from django.shortcuts import get_object_or_404
+    return get_object_or_404(model, id=item_id)
 
 
-def create_item(model, data, form_class=None, **extra_fields):
+def create_item(model: type[Model], data: dict, form_class: type | None = None, **extra_fields: Any) -> Model:
     """
     Crea un nuevo item.
     
@@ -127,7 +140,7 @@ def create_item(model, data, form_class=None, **extra_fields):
     return item
 
 
-def update_item(model, item_id, data, form_class=None):
+def update_item(model: type[Model], item_id: str, data: dict, form_class: type | None = None) -> Model:
     """
     Actualiza un item existente.
     
@@ -155,14 +168,13 @@ def update_item(model, item_id, data, form_class=None):
         return item
 
 
-def delete_item(model, item_id):
+def delete_item(model: type[Model], item_id: str) -> None:
     """Elimina un item."""
     item = get_item_by_id(model, item_id)
-#    print(f"Eliminando item: {item} (ID: {item.id})")  # Debug log
     item.delete()
 
 
-def bulk_update_items(model, items_data, fields_to_update):
+def bulk_update_items(model: type[Model], items_data: list[dict], fields_to_update: list[str]) -> list[str]:
     """
     Actualiza múltiples items en lote.
     
@@ -207,7 +219,7 @@ def bulk_update_items(model, items_data, fields_to_update):
 
 # ========== UTILIDADES ==========
 
-def get_or_raise(model, item_id, error_msg="Item not found"):
+def get_or_raise(model: type[Model], item_id: str, error_msg: str = "Item not found") -> Model:
     """Obtiene un item o lanza una excepción."""
     try:
         return get_item_by_id(model, item_id)

@@ -1,16 +1,27 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseBadRequest, HttpResponse
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_http_methods
-from django.views import View
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.http import QueryDict
 import json
+from typing import Any
+
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, render
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.http import require_http_methods
+from django.views.generic import ListView
 
 from apps.red_vial.models.transyt import ConfiguracionTransyt, ParametroArco, FaseSemaforica
 from apps.red_vial.forms.transyt_forms import ConfiguracionTransytForm, ParametroArcoForm, FaseSemaforicaForm
+from apps.red_vial.services.parametro_arco_service import (
+    get_parametros_by_proyecto, create_parametro_arco,
+    update_parametro_arco, delete_parametro_arco,
+)
+from apps.red_vial.services.fase_semaforica_service import (
+    get_fases_by_proyecto, create_fase_semaforica,
+    update_fase_semaforica, delete_fase_semaforica,
+)
 from apps.proyectos.models import Proyecto
 
 
@@ -18,9 +29,9 @@ from apps.proyectos.models import Proyecto
 
 @method_decorator(login_required, name='dispatch')
 class ConfiguracionTransytView(View):
-    template = 'red_vial/configuracion_transyt.html'
+    template: str = 'red_vial/configuracion_transyt.html'
 
-    def get(self, request, proyecto_id):
+    def get(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
         config, _ = ConfiguracionTransyt.objects.get_or_create(
             proyecto=proyecto,
@@ -30,7 +41,7 @@ class ConfiguracionTransytView(View):
         context = {'proyecto': proyecto, 'form': form, 'config': config}
         return render(request, self.template, context)
 
-    def post(self, request, proyecto_id):
+    def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
         config, _ = ConfiguracionTransyt.objects.get_or_create(proyecto=proyecto)
         form = ConfiguracionTransytForm(request.POST, instance=config, proyecto=proyecto)
@@ -44,153 +55,211 @@ class ConfiguracionTransytView(View):
 
 # ============ PARÁMETROS DE ARCO ============
 
-@method_decorator(login_required, name='dispatch')
-class ParametroArcoListView(View):
-    template_full = 'red_vial/parametros_arco_list.html'
-    template_table = 'partials/Transyt/parametro_arco_table.html'
-    sort_fields = ['punto_control__nodo__numero', 'punto_control__movimiento', 'flujo_saturacion', 'ponderador_demora', 'ponderador_detencion', 'capacidad_cola', 'tiene_tarjeta_38']
-    default_sort = 'punto_control__nodo__numero'
+class ParametroArcoListView(ListView):
+    model: type = ParametroArco
+    context_object_name: str = 'items'
+    template_name: str = 'red_vial/parametros_arco_list.html'
+    paginate_by: int = 20
+    sort_fields: list[str] = ['punto_control__nodo__numero', 'punto_control__movimiento', 'flujo_saturacion', 'ponderador_demora', 'ponderador_detencion', 'capacidad_cola', 'tiene_tarjeta_38']
+    default_sort: str = 'punto_control__nodo__numero'
 
-    def get(self, request, proyecto_id):
-        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    @method_decorator(login_required)
+    def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponse:
+        return super().dispatch(*args, **kwargs)
 
-        sort_by = request.GET.get('sort_by', self.default_sort)
-        sort_order = request.GET.get('sort_order', 'asc')
+    def get_queryset(self) -> QuerySet[ParametroArco]:
+        sort_by = self.request.GET.get('sort_by', self.default_sort)
+        sort_order = self.request.GET.get('sort_order', 'asc')
         if sort_by not in self.sort_fields:
             sort_by = self.default_sort
-        if sort_order not in ['asc', 'desc']:
-            sort_order = 'asc'
+        return get_parametros_by_proyecto(
+            self.kwargs['proyecto_id'], sort_by=sort_by, order=sort_order
+        )
 
-        order_prefix = '-' if sort_order == 'desc' else ''
-        items = ParametroArco.objects.filter(proyecto=proyecto).select_related('punto_control__nodo').order_by(f'{order_prefix}{sort_by}')
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        proyecto = get_object_or_404(
+            Proyecto, id=self.kwargs['proyecto_id']
+        )
+        ctx['proyecto'] = proyecto
+        ctx['sort_by'] = self.request.GET.get('sort_by', self.default_sort)
+        ctx['sort_order'] = self.request.GET.get('sort_order', 'asc')
+        ctx['sort_fields'] = self.sort_fields
+        ctx['form'] = ParametroArcoForm(proyecto=proyecto)
+        return ctx
 
-        form = ParametroArcoForm(proyecto=proyecto)
-        context = {'proyecto': proyecto, 'items': items, 'form': form, 'sort_by': sort_by, 'sort_order': sort_order, 'sort_fields': self.sort_fields}
-        if request.headers.get('HX-Request'):
-            return render(request, self.template_table, context)
-        return render(request, self.template_full, context)
+    def render_to_response(self, context: dict[str, Any], **response_kwargs: Any) -> HttpResponse:
+        if self.request.headers.get('HX-Request'):
+            return render(self.request, 'partials/Transyt/parametro_arco_table.html', context)
+        return super().render_to_response(context, **response_kwargs)
 
 
-@method_decorator(login_required, name='dispatch')
-@method_decorator(require_http_methods(['POST']), name='dispatch')
 class ParametroArcoCreateView(View):
-    def post(self, request, proyecto_id):
+    @method_decorator(login_required)
+    @method_decorator(require_http_methods(['POST']))
+    def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
         form = ParametroArcoForm(request.POST, proyecto=proyecto)
         if form.is_valid():
             try:
-                item = form.save()
-                form = ParametroArcoForm(proyecto=proyecto)
-                context = {'item': item, 'proyecto': proyecto, 'form': form}
-                return render(request, 'partials/Transyt/parametro_arco_row.html', context)
-            except IntegrityError:
-                form.add_error('punto_control', 'Ya existe un parámetro para este Punto de Control.')
-        context = {'proyecto': proyecto, 'form': form}
-        return render(request, 'partials/Transyt/parametro_arco_create.html', context, status=400)
+                with transaction.atomic():
+                    item = create_parametro_arco(proyecto, form.cleaned_data)
+                response = render(request, 'partials/Transyt/parametro_arco_row.html', {
+                    'item': item, 'proyecto': proyecto,
+                })
+                response['HX-Trigger'] = 'parametro-arco-created'
+                return response
+            except (ValidationError, IntegrityError) as e:
+                form.add_error(None, str(e))
+                response = render(request, 'partials/Transyt/parametro_arco_create.html', {
+                    'proyecto': proyecto, 'form': form,
+                }, status=400)
+                response['HX-Reswap'] = 'outerHTML'
+                return response
+        response = render(request, 'partials/Transyt/parametro_arco_create.html', {
+            'proyecto': proyecto, 'form': form,
+        }, status=400)
+        response['HX-Reswap'] = 'outerHTML'
+        return response
 
 
-@method_decorator(login_required, name='dispatch')
-@method_decorator(require_http_methods(['PUT']), name='dispatch')
 class ParametroArcoUpdateView(View):
-    def put(self, request, item_id):
-        item = get_object_or_404(ParametroArco, id=item_id)
-        proyecto = item.proyecto
-        data = QueryDict(request.body).dict()
-        form = ParametroArcoForm(data, instance=item, proyecto=proyecto)
-        if form.is_valid():
-            try:
-                item = form.save()
-                context = {'item': item, 'proyecto': proyecto, 'form': ParametroArcoForm(proyecto=proyecto)}
-                return render(request, 'partials/Transyt/parametro_arco_row.html', context)
-            except IntegrityError:
-                form.add_error('punto_control', 'Ya existe un parámetro para este Punto de Control.')
-        return HttpResponseBadRequest(json.dumps({'error': str(form.errors)}), content_type='application/json')
-
-
-@method_decorator(login_required, name='dispatch')
-@method_decorator(require_http_methods(['DELETE']), name='dispatch')
-class ParametroArcoDeleteView(View):
-    def delete(self, request, item_id):
+    @method_decorator(login_required)
+    @method_decorator(require_http_methods(['PUT']))
+    def put(self, request: HttpRequest, item_id: str) -> HttpResponse:
+        from django.http import QueryDict
         try:
-            item = get_object_or_404(ParametroArco, id=item_id)
-            item.delete()
-            return HttpResponse(status=204)
+            data = QueryDict(request.body)
+            with transaction.atomic():
+                item = update_parametro_arco(item_id, data)
+            response = render(request, 'partials/Transyt/parametro_arco_row.html', {
+                'item': item, 'proyecto': item.proyecto,
+            })
+            response['HX-Trigger'] = 'item-updated'
+            return response
         except ValidationError as e:
-            return HttpResponseBadRequest(json.dumps({'error': str(e)}), content_type='application/json')
+            return HttpResponseBadRequest(
+                json.dumps({'error': str(e)}), content_type='application/json'
+            )
+
+
+class ParametroArcoDeleteView(View):
+    @method_decorator(login_required)
+    @method_decorator(require_http_methods(['DELETE']))
+    def delete(self, request: HttpRequest, item_id: str) -> HttpResponse:
+        try:
+            with transaction.atomic():
+                delete_parametro_arco(item_id)
+            response = HttpResponse(status=204)
+            response['HX-Trigger'] = 'parametro-arco-deleted'
+            return response
+        except ValidationError as e:
+            return HttpResponseBadRequest(
+                json.dumps({'error': str(e)}), content_type='application/json'
+            )
 
 
 # ============ FASES SEMAFÓRICAS ============
 
-@method_decorator(login_required, name='dispatch')
-class FaseSemaforicaListView(View):
-    template_full = 'red_vial/fases_semaforicas_list.html'
-    template_table = 'partials/Transyt/fase_semaforica_table.html'
-    sort_fields = ['punto_control__nodo__numero', 'punto_control__movimiento', 'fase_numero', 'verde_inicio', 'verde_fin']
-    default_sort = 'punto_control__nodo__numero'
+class FaseSemaforicaListView(ListView):
+    model: type = FaseSemaforica
+    context_object_name: str = 'items'
+    template_name: str = 'red_vial/fases_semaforicas_list.html'
+    paginate_by: int = 20
+    sort_fields: list[str] = ['punto_control__nodo__numero', 'punto_control__movimiento', 'fase_numero', 'verde_inicio', 'verde_fin']
+    default_sort: str = 'punto_control__nodo__numero'
 
-    def get(self, request, proyecto_id):
-        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    @method_decorator(login_required)
+    def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponse:
+        return super().dispatch(*args, **kwargs)
 
-        sort_by = request.GET.get('sort_by', self.default_sort)
-        sort_order = request.GET.get('sort_order', 'asc')
+    def get_queryset(self) -> QuerySet[FaseSemaforica]:
+        sort_by = self.request.GET.get('sort_by', self.default_sort)
+        sort_order = self.request.GET.get('sort_order', 'asc')
         if sort_by not in self.sort_fields:
             sort_by = self.default_sort
-        if sort_order not in ['asc', 'desc']:
-            sort_order = 'asc'
+        return get_fases_by_proyecto(
+            self.kwargs['proyecto_id'], sort_by=sort_by, order=sort_order
+        )
 
-        order_prefix = '-' if sort_order == 'desc' else ''
-        items = FaseSemaforica.objects.filter(proyecto=proyecto).select_related('punto_control__nodo').order_by(f'{order_prefix}{sort_by}')
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        proyecto = get_object_or_404(
+            Proyecto, id=self.kwargs['proyecto_id']
+        )
+        ctx['proyecto'] = proyecto
+        ctx['sort_by'] = self.request.GET.get('sort_by', self.default_sort)
+        ctx['sort_order'] = self.request.GET.get('sort_order', 'asc')
+        ctx['sort_fields'] = self.sort_fields
+        ctx['form'] = FaseSemaforicaForm(proyecto=proyecto)
+        return ctx
 
-        form = FaseSemaforicaForm(proyecto=proyecto)
-        context = {'proyecto': proyecto, 'items': items, 'form': form, 'sort_by': sort_by, 'sort_order': sort_order, 'sort_fields': self.sort_fields}
-        if request.headers.get('HX-Request'):
-            return render(request, self.template_table, context)
-        return render(request, self.template_full, context)
+    def render_to_response(self, context: dict[str, Any], **response_kwargs: Any) -> HttpResponse:
+        if self.request.headers.get('HX-Request'):
+            return render(self.request, 'partials/Transyt/fase_semaforica_table.html', context)
+        return super().render_to_response(context, **response_kwargs)
 
 
-@method_decorator(login_required, name='dispatch')
-@method_decorator(require_http_methods(['POST']), name='dispatch')
 class FaseSemaforicaCreateView(View):
-    def post(self, request, proyecto_id):
+    @method_decorator(login_required)
+    @method_decorator(require_http_methods(['POST']))
+    def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
         form = FaseSemaforicaForm(request.POST, proyecto=proyecto)
         if form.is_valid():
             try:
-                item = form.save()
-                form = FaseSemaforicaForm(proyecto=proyecto)
-                context = {'item': item, 'proyecto': proyecto, 'form': form}
-                return render(request, 'partials/Transyt/fase_semaforica_row.html', context)
-            except IntegrityError:
-                form.add_error('fase_numero', 'Ya existe una fase con ese número para este Punto de Control.')
-        context = {'proyecto': proyecto, 'form': form}
-        return render(request, 'partials/Transyt/fase_semaforica_create.html', context, status=400)
+                with transaction.atomic():
+                    item = create_fase_semaforica(proyecto, form.cleaned_data)
+                response = render(request, 'partials/Transyt/fase_semaforica_row.html', {
+                    'item': item, 'proyecto': proyecto,
+                })
+                response['HX-Trigger'] = 'fase-semaforica-created'
+                return response
+            except (ValidationError, IntegrityError) as e:
+                form.add_error(None, str(e))
+                response = render(request, 'partials/Transyt/fase_semaforica_create.html', {
+                    'proyecto': proyecto, 'form': form,
+                }, status=400)
+                response['HX-Reswap'] = 'outerHTML'
+                return response
+        response = render(request, 'partials/Transyt/fase_semaforica_create.html', {
+            'proyecto': proyecto, 'form': form,
+        }, status=400)
+        response['HX-Reswap'] = 'outerHTML'
+        return response
 
 
-@method_decorator(login_required, name='dispatch')
-@method_decorator(require_http_methods(['PUT']), name='dispatch')
 class FaseSemaforicaUpdateView(View):
-    def put(self, request, item_id):
-        item = get_object_or_404(FaseSemaforica, id=item_id)
-        proyecto = item.proyecto
-        data = QueryDict(request.body).dict()
-        form = FaseSemaforicaForm(data, instance=item, proyecto=proyecto)
-        if form.is_valid():
-            try:
-                item = form.save()
-                context = {'item': item, 'proyecto': proyecto, 'form': FaseSemaforicaForm(proyecto=proyecto)}
-                return render(request, 'partials/Transyt/fase_semaforica_row.html', context)
-            except IntegrityError:
-                form.add_error('fase_numero', 'Ya existe una fase con ese número para este Punto de Control.')
-        return HttpResponseBadRequest(json.dumps({'error': str(form.errors)}), content_type='application/json')
-
-
-@method_decorator(login_required, name='dispatch')
-@method_decorator(require_http_methods(['DELETE']), name='dispatch')
-class FaseSemaforicaDeleteView(View):
-    def delete(self, request, item_id):
+    @method_decorator(login_required)
+    @method_decorator(require_http_methods(['PUT']))
+    def put(self, request: HttpRequest, item_id: str) -> HttpResponse:
+        from django.http import QueryDict
         try:
-            item = get_object_or_404(FaseSemaforica, id=item_id)
-            item.delete()
-            return HttpResponse(status=204)
+            data = QueryDict(request.body)
+            with transaction.atomic():
+                item = update_fase_semaforica(item_id, data)
+            response = render(request, 'partials/Transyt/fase_semaforica_row.html', {
+                'item': item, 'proyecto': item.proyecto,
+            })
+            response['HX-Trigger'] = 'item-updated'
+            return response
         except ValidationError as e:
-            return HttpResponseBadRequest(json.dumps({'error': str(e)}), content_type='application/json')
+            return HttpResponseBadRequest(
+                json.dumps({'error': str(e)}), content_type='application/json'
+            )
+
+
+class FaseSemaforicaDeleteView(View):
+    @method_decorator(login_required)
+    @method_decorator(require_http_methods(['DELETE']))
+    def delete(self, request: HttpRequest, item_id: str) -> HttpResponse:
+        try:
+            with transaction.atomic():
+                delete_fase_semaforica(item_id)
+            response = HttpResponse(status=204)
+            response['HX-Trigger'] = 'fase-semaforica-deleted'
+            return response
+        except ValidationError as e:
+            return HttpResponseBadRequest(
+                json.dumps({'error': str(e)}), content_type='application/json'
+            )

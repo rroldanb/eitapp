@@ -1,84 +1,110 @@
-<div class="fase-semaforica-table-wrap overflow-x-auto">
-  <table class="w-full divide-y divide-gray-200 table-results" id="fase-semaforica-table">
-    <thead class="bg-slate-200">
-      <tr>
-        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'punto_control__nodo__numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=punto_control__nodo__numero&sort_order={% if sort_by == 'punto_control__nodo__numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#fase-semaforica-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'punto_control__nodo__numero' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            PC
-            {% if sort_by == 'punto_control__nodo__numero' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'punto_control__movimiento' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=punto_control__movimiento&sort_order={% if sort_by == 'punto_control__movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#fase-semaforica-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'punto_control__movimiento' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            Movimiento
-            {% if sort_by == 'punto_control__movimiento' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-center font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'fase_numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=fase_numero&sort_order={% if sort_by == 'fase_numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#fase-semaforica-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'fase_numero' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            N° Fase
-            {% if sort_by == 'fase_numero' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-right font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'verde_inicio' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=verde_inicio&sort_order={% if sort_by == 'verde_inicio' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#fase-semaforica-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'verde_inicio' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            Verde Inicio (seg)
-            {% if sort_by == 'verde_inicio' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-right font-bold text-gray-900 uppercase"
-          aria-sort="{% if sort_by == 'verde_fin' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
-          <a role="button"
-            hx-get="?sort_by=verde_fin&sort_order={% if sort_by == 'verde_fin' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-            hx-target="#fase-semaforica-table"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="inline-flex items-center gap-1 hover:text-indigo-700 {% if sort_by == 'verde_fin' %}sortable-active {% if sort_order == 'asc' %}sorted-asc{% else %}sorted-desc{% endif %}{% endif %}">
-            Verde Fin (seg)
-            {% if sort_by == 'verde_fin' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
-          </a>
-        </th>
-        <th class="px-2 py-2 text-center font-bold text-gray-800 uppercase">Acc</th>
-      </tr>
-    </thead>
-    <tbody id="fase-semaforica-table-body" class="divide-y divide-gray-200">
-      {% include 'partials/Transyt/fase_semaforica_create.html' with proyecto=proyecto %}
-
-      {% if items %}
-        {% for item in items %}
-          {% include 'partials/Transyt/fase_semaforica_row.html' with item=item %}
-        {% endfor %}
-      {% else %}
+<div id="fase-semaforica-table-container">
+  <div class="overflow-x-auto">
+    <table class="w-full divide-y divide-gray-200 table-results" id="fase-semaforica-table" aria-label="Tabla de fases semafóricas">
+      <thead class="bg-slate-200">
         <tr>
-          <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-            No hay fases semafóricas registradas. Crea una nueva en la fila superior.
-          </td>
+          <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'punto_control__nodo__numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=punto_control__nodo__numero&sort_order={% if sort_by == 'punto_control__nodo__numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=punto_control__nodo__numero&sort_order={% if sort_by == 'punto_control__nodo__numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#fase-semaforica-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              PC
+              {% if sort_by == 'punto_control__nodo__numero' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'punto_control__movimiento' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=punto_control__movimiento&sort_order={% if sort_by == 'punto_control__movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=punto_control__movimiento&sort_order={% if sort_by == 'punto_control__movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#fase-semaforica-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              Movimiento
+              {% if sort_by == 'punto_control__movimiento' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-center font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'fase_numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=fase_numero&sort_order={% if sort_by == 'fase_numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=fase_numero&sort_order={% if sort_by == 'fase_numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#fase-semaforica-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              N° Fase
+              {% if sort_by == 'fase_numero' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-right font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'verde_inicio' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=verde_inicio&sort_order={% if sort_by == 'verde_inicio' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=verde_inicio&sort_order={% if sort_by == 'verde_inicio' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#fase-semaforica-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              Verde Inicio (seg)
+              {% if sort_by == 'verde_inicio' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-right font-bold text-gray-900 uppercase"
+            aria-sort="{% if sort_by == 'verde_fin' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            <a role="button"
+              href="?sort_by=verde_fin&sort_order={% if sort_by == 'verde_fin' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=verde_fin&sort_order={% if sort_by == 'verde_fin' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-target="#fase-semaforica-table-container"
+              hx-swap="outerHTML"
+              class="inline-flex items-center gap-1 hover:text-indigo-700">
+              Verde Fin (seg)
+              {% if sort_by == 'verde_fin' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+            </a>
+          </th>
+          <th class="px-2 py-2 text-center font-bold text-gray-800 uppercase">Acc</th>
         </tr>
+      </thead>
+      <tbody id="fase-semaforica-table-body" class="divide-y divide-gray-200">
+        {% include 'partials/Transyt/fase_semaforica_create.html' with proyecto=proyecto %}
+
+        {% if items %}
+          {% for item in items %}
+            {% include 'partials/Transyt/fase_semaforica_row.html' with item=item %}
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+              No hay fases semafóricas registradas. Crea una nueva en la fila superior.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj and paginator.num_pages > 1 %}
+  <div class="flex justify-between items-center px-4 py-3 bg-gray-50 border-t border-gray-200">
+    <span class="text-sm text-gray-600">
+      Página {{ page_obj.number }} de {{ paginator.num_pages }} ({{ paginator.count }} fases)
+    </span>
+    <div class="flex gap-1">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#fase-semaforica-table-container"
+           hx-swap="outerHTML"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">← Anterior</a>
       {% endif %}
-    </tbody>
-  </table>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-get="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+           hx-target="#fase-semaforica-table-container"
+           hx-swap="outerHTML"
+           class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">Siguiente →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 </div>

@@ -1,6 +1,8 @@
 import json
+from typing import Any
+
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -22,7 +24,7 @@ class AnalisisFlujosView(View):
     template_full = 'red_vial/analisis_flujos.html'
     template_container = 'partials/analisis_flujos/analisis_flujos_container.html'
 
-    def get(self, request, proyecto_id):
+    def get(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
 
         nodo_ids = request.GET.getlist('nodo')
@@ -96,7 +98,7 @@ class AnalisisFlujosView(View):
         return render(request, self.template_full, context)
 
     @method_decorator(require_http_methods(['POST']))
-    def post(self, request, proyecto_id):
+    def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
         action = request.POST.get('action') or request.headers.get('X-Action', '')
 

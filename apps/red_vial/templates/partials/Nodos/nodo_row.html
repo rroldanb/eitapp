@@ -1,50 +1,102 @@
-{# Partial template for a single nodo row - used by HTMX #}
 <tr id="nodo-row-{{ nodo.id }}" class="nodo-row hover:bg-gray-50" data-nodo-id="{{ nodo.id }}">
 
-  <td class="px-2 py-1">
-    <input type="number" name="numero" id="nodo-numero-{{ nodo.id }}" aria-label="Número de nodo" class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ nodo.numero }}" min="1" max="99">
+  <td class="px-2 py-1 editable-field" data-field="numero">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        call me.nextElementSibling.focus()
+        remove .hidden from #save-row-btn-{{ nodo.id }}">
+      {{ nodo.numero }}
+    </span>
+    <input type="number" name="numero" value="{{ nodo.numero }}"
+      class="field-input hidden w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" min="1" max="99"
+      _="on keydown[key == 'Enter']
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ nodo.id }}">
   </td>
 
-  <td class="px-2 py-1">
-    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_1" aria-label="Calle 1">
-      <option value="">Seleccionar calle...</option>
-      {% for calle in calle_list %}
-      <option value="{{ calle.id }}" {% if nodo.calle_1.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
+  <td class="px-2 py-1 editable-field" data-field="calle_1">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ nodo.id }}">
+      {{ nodo.calle_1.nombre|default:'—' }}
+    </span>
+    <select name="calle_1" aria-label="Calle 1"
+      class="field-input hidden w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ nodo.id }}">
+      <option value="">—</option>
+      {% for calle in calles %}
+      <option value="{{ calle.id }}" {% if nodo.calle_1_id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
       {% endfor %}
     </select>
   </td>
 
-  <td class="px-2 py-1">
-    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" name="calle_2" aria-label="Calle 2">
-      <option value="">Seleccionar calle...</option>
-      {% for calle in calle_list %}
-      <option value="{{ calle.id }}" {% if nodo.calle_2.id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
+  <td class="px-2 py-1 editable-field" data-field="calle_2">
+    <span class="field-display"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        remove .hidden from #save-row-btn-{{ nodo.id }}">
+      {{ nodo.calle_2.nombre|default:'—' }}
+    </span>
+    <select name="calle_2" aria-label="Calle 2"
+      class="field-input hidden w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ nodo.id }}">
+      <option value="">—</option>
+      {% for calle in calles %}
+      <option value="{{ calle.id }}" {% if nodo.calle_2_id == calle.id %}selected{% endif %}>{{ calle.nombre }}</option>
       {% endfor %}
     </select>
   </td>
 
-  <td class="px-2 py-1">
+  <td class="px-2 py-1 editable-field" data-field="numero_pc">
     <div class="flex items-center gap-1">
-      <label class="text-xs text-gray-600">PC N°</label>
-      <input type="number" name="numero_pc" id="nodo-numero-pc-{{ nodo.id }}" aria-label="Número de punto de control" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm" value="{{ nodo.numero_pc|default:'' }}" min="1" max="99">
       {% if nodo.is_pc %}
-      <span class="text-xs font-semibold text-indigo-600 ml-1">{{ nodo.nombre_pc }}</span>
+      <span class="field-display"
+        _="on click
+          add .hidden to me
+          remove .hidden from next .field-input
+          call me.nextElementSibling.focus()
+          remove .hidden from #save-row-btn-{{ nodo.id }}">
+        PC-{{ nodo.numero_pc|stringformat:'02d' }}
+      </span>
+      {% else %}
+      <span class="field-display text-gray-400"
+        _="on click
+          add .hidden to me
+          remove .hidden from next .field-input
+          call me.nextElementSibling.focus()
+          remove .hidden from #save-row-btn-{{ nodo.id }}">
+        —
+      </span>
       {% endif %}
+      <input type="number" name="numero_pc" value="{{ nodo.numero_pc|default:'' }}"
+        class="field-input hidden w-16 px-2 py-1 border border-gray-300 rounded text-sm" min="1" max="99"
+        _="on keydown[key == 'Enter']
+          add .hidden to me
+          remove .hidden from previous .field-display
+          trigger click on #save-row-btn-{{ nodo.id }}">
     </div>
   </td>
 
-
-
   <td class="px-2 py-1 text-center">
     <div class="flex items-center justify-center gap-1">
-      {# Imagen (mapa) #}
       <button type="button" onclick="openNodoFileModal('{{ nodo.id }}', 'imagen', '{% if nodo.imagen %}{{ nodo.imagen|escapejs }}{% endif %}', '{% if nodo.plano %}{{ nodo.plano|escapejs }}{% endif %}')"
         class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors
         {% if nodo.imagen %}bg-green-100 text-green-600 hover:bg-green-200{% else %}bg-gray-100 text-gray-400 hover:bg-gray-200{% endif %}"
         title="{% if nodo.imagen %}Gestionar imagen (mapa){% else %}Agregar imagen (mapa){% endif %}">
         <i class="{% if nodo.imagen %}fas{% else %}far{% endif %} fa-map text-sm"></i>
       </button>
-      {# Plano (esquema) #}
       <button type="button" onclick="openNodoFileModal('{{ nodo.id }}', 'plano', '{% if nodo.imagen %}{{ nodo.imagen|escapejs }}{% endif %}', '{% if nodo.plano %}{{ nodo.plano|escapejs }}{% endif %}')"
         class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors
         {% if nodo.plano %}bg-green-100 text-green-600 hover:bg-green-200{% else %}bg-gray-100 text-gray-400 hover:bg-gray-200{% endif %}"
@@ -55,30 +107,25 @@
   </td>
 
   <td class="px-2 py-1 flex gap-1">
-    <button type="button" class="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors action-btn" data-action="update"
+    <button type="button"
+      id="save-row-btn-{{ nodo.id }}"
+      aria-label="Guardar nodo"
+      class="save-row-btn hidden px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors"
       hx-put="{% url 'nodo_update' nodo.id %}"
       hx-include="closest tr"
       hx-target="closest tr"
-      hx-swap="outerHTML transition:true swap:1s"
-      hx-indicator="#save-indicator-{{ nodo.id }}"
-    >
-      <span id="save-indicator-{{ nodo.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-green-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
-      Actualizar
+      hx-swap="outerHTML">
+      Guardar
     </button>
-    <button type="button" class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors action-btn" data-action="delete"
+    <button type="button"
+      aria-label="Eliminar nodo"
+      class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
       hx-delete="{% url 'nodo_delete' nodo.id %}"
       hx-target="closest tr"
-      hx-swap="outerHTML transition:true swap:1s"
-      hx-indicator="#delete-indicator-{{ nodo.id }}"
-    >
-      <span id="delete-indicator-{{ nodo.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator" style="display: none;"></span>
+      hx-swap="outerHTML"
+      >
       Eliminar
     </button>
   </td>
 
-
 </tr>
-
-<style>
-  .htmx-request { opacity: 0.7; pointer-events: none; }
-</style>

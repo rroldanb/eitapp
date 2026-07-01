@@ -1,53 +1,57 @@
+from typing import Any
+from django.core.exceptions import ValidationError
+from django.db.models import Count, F, QuerySet
+
 from apps.red_vial.models import Nodo
+from apps.proyectos.models import Proyecto
 from apps.red_vial.forms.nodo_form import NodoForm
 from apps.red_vial.services.base_service import (
     apply_sort_to_queryset,
-    create_item,
     update_item,
     delete_item,
     bulk_update_items,
 )
 
 
-def get_nodos_by_proyecto(proyecto_id, sort_by=None, order='asc'):
-    """Retorna nodos de un proyecto con soporte de ordenamiento simple."""
+def get_nodos_by_proyecto(proyecto_id: str, sort_by: str | None = None, order: str = 'asc') -> QuerySet[Nodo]:
     qs = Nodo.objects.filter(proyecto__id=proyecto_id).select_related('calle_1', 'calle_2')
-
     valid_fields = {
         'numero': 'numero',
         'calle_1': 'calle_1__nombre',
         'calle_2': 'calle_2__nombre',
         'is_pc': 'is_pc',
+        'numero_pc': 'numero_pc',
     }
-
     return apply_sort_to_queryset(qs, sort_by=sort_by, order=order, valid_fields=valid_fields)
 
 
-def create_nodo(proyecto, data):
-    """Crea un Nodo validando con `NodoForm` y asignando `proyecto`."""
-    # El formulario ya maneja validaciones específicas
-    return create_item(Nodo, data, form_class=NodoForm, proyecto=proyecto)
+def create_nodo(proyecto: Proyecto, data: dict[str, Any]) -> Nodo:
+    form = NodoForm(data, proyecto=proyecto)
+    if not form.is_valid():
+        raise ValidationError(form.errors)
+    nodo = form.save(commit=False)
+    nodo.proyecto = proyecto
+    nodo.save()
+    return nodo
 
 
-def update_nodo(nodo_id, data):
-    """Actualiza un nodo usando `NodoForm` si está disponible."""
+def update_nodo(nodo_id: str, data: dict[str, Any]) -> Nodo:
     return update_item(Nodo, nodo_id, data, form_class=NodoForm)
 
 
-def delete_nodo(nodo_id):
+def delete_nodo(nodo_id: str) -> None:
     return delete_item(Nodo, nodo_id)
 
 
-def bulk_update_nodos(items_data):
-    # Definir campos que permitimos actualizar en lote
+def bulk_update_nodos(items_data: list[dict]) -> list[str]:
     fields = ['numero', 'is_pc', 'numero_pc', 'interseccion']
     return bulk_update_items(Nodo, items_data, fields)
 
 
-def _update_nodo_file_field(nodo_id, file, field):
-    """Sube un archivo a Supabase y actualiza un campo URL del nodo."""
+def _update_nodo_file_field(nodo_id: str, file: Any, field: str) -> Nodo:
+    from django.shortcuts import get_object_or_404
     from apps.imagenes.services.storage_service import upload_image, delete_image
-    nodo = Nodo.objects.get(id=nodo_id)
+    nodo = get_object_or_404(Nodo, id=nodo_id)
     old_url = getattr(nodo, field, None)
     if old_url:
         delete_image(old_url)
@@ -56,10 +60,10 @@ def _update_nodo_file_field(nodo_id, file, field):
     return nodo
 
 
-def _delete_nodo_file_field(nodo_id, field):
-    """Elimina un archivo de Supabase y limpia un campo URL del nodo."""
+def _delete_nodo_file_field(nodo_id: str, field: str) -> Nodo:
+    from django.shortcuts import get_object_or_404
     from apps.imagenes.services.storage_service import delete_image
-    nodo = Nodo.objects.get(id=nodo_id)
+    nodo = get_object_or_404(Nodo, id=nodo_id)
     old_url = getattr(nodo, field, None)
     if old_url:
         delete_image(old_url)
@@ -68,17 +72,17 @@ def _delete_nodo_file_field(nodo_id, field):
     return nodo
 
 
-def update_nodo_image(nodo_id, file):
+def update_nodo_image(nodo_id: str, file: Any) -> Nodo:
     return _update_nodo_file_field(nodo_id, file, 'imagen')
 
 
-def delete_nodo_image(nodo_id):
+def delete_nodo_image(nodo_id: str) -> Nodo:
     return _delete_nodo_file_field(nodo_id, 'imagen')
 
 
-def update_nodo_plano(nodo_id, file):
+def update_nodo_plano(nodo_id: str, file: Any) -> Nodo:
     return _update_nodo_file_field(nodo_id, file, 'plano')
 
 
-def delete_nodo_plano(nodo_id):
+def delete_nodo_plano(nodo_id: str) -> Nodo:
     return _delete_nodo_file_field(nodo_id, 'plano')

@@ -1,63 +1,63 @@
-{% load static %}<div class="pc-table-wrap">
-<table class="w-full divide-y divide-gray-200 table-results " id="puntos-control-table">
+{% load static %}<div class="pc-table-wrap" id="puntos-control-table-container">
+<table class="w-full divide-y divide-gray-200 table-results " id="puntos-control-table" aria-label="Tabla de puntos de control">
   <thead class="bg-slate-200">
     <tr>
 
       <th class="pc-col-nodo px-1 py-2 text-center font-bold text-gray-900 uppercase sticky left-0 z-10 bg-slate-200">
-        <a role="button" href="?sort_by=nodo&amp;sort_order={% if sort_by == 'nodo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+        <a role="button"
           hx-get="?sort_by=nodo&amp;sort_order={% if sort_by == 'nodo' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
-          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'nodo' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          hx-target="#puntos-control-table-container" hx-swap="outerHTML"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700">
           Nodo
-          {% if sort_by == 'nodo' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+          {% if sort_by == 'nodo' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
         </a>
       </th>
       <th class="pc-col-mov px-1 py-2 text-center font-bold text-gray-900 uppercase sticky left-16 z-10 bg-slate-200">
-        <a role="button" href="?sort_by=movimiento&amp;sort_order={% if sort_by == 'movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+        <a role="button"
           hx-get="?sort_by=movimiento&amp;sort_order={% if sort_by == 'movimiento' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
-          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'movimiento' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          hx-target="#puntos-control-table-container" hx-swap="outerHTML"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700">
           Mov
-          {% if sort_by == 'movimiento' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+          {% if sort_by == 'movimiento' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
         </a>
       </th>
       <th class="pc-col-viraje px-1 py-2 text-center font-bold text-gray-900 uppercase">
-        <a role="button" href="?sort_by=viraje&amp;sort_order={% if sort_by == 'viraje' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+        <a role="button"
           hx-get="?sort_by=viraje&amp;sort_order={% if sort_by == 'viraje' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
-          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'viraje' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          hx-target="#puntos-control-table-container" hx-swap="outerHTML"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700">
           Viraje
-          {% if sort_by == 'viraje' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+          {% if sort_by == 'viraje' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
         </a>
       </th>
       <th class="pc-col-prior px-1 py-2 text-center font-bold text-gray-900 uppercase">Prior</th>
       <th class="pc-col-entrada px-1 py-2 text-center font-bold text-gray-900 uppercase">
-        <a role="button" href="?sort_by=arco_entrada&amp;sort_order={% if sort_by == 'arco_entrada' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+        <a role="button"
           hx-get="?sort_by=arco_entrada&amp;sort_order={% if sort_by == 'arco_entrada' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
-          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'arco_entrada' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          hx-target="#puntos-control-table-container" hx-swap="outerHTML"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700">
           Entrada
-          {% if sort_by == 'arco_entrada' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+          {% if sort_by == 'arco_entrada' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
         </a>
       </th>
       <th class="pc-col-salida px-1 py-2 text-center font-bold text-gray-900 uppercase">
-        <a role="button" href="?sort_by=arco_salida&amp;sort_order={% if sort_by == 'arco_salida' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+        <a role="button"
           hx-get="?sort_by=arco_salida&amp;sort_order={% if sort_by == 'arco_salida' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
-          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'arco_salida' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          hx-target="#puntos-control-table-container" hx-swap="outerHTML"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700">
           Salida
-          {% if sort_by == 'arco_salida' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+          {% if sort_by == 'arco_salida' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-alpha-down text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-alpha-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
         </a>
       </th>
       <th class="pc-col-regul px-1 py-2 text-center font-bold text-gray-900 uppercase">Regul</th>
 
       <th class="pc-col-pistas px-1 py-2 text-center font-bold text-gray-900 uppercase">
-        <a role="button" href="?sort_by=numero_pistas&amp;sort_order={% if sort_by == 'numero_pistas' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+        <a role="button"
           hx-get="?sort_by=numero_pistas&amp;sort_order={% if sort_by == 'numero_pistas' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-          hx-target="#puntos-control-table" hx-swap="outerHTML" hx-push-url="true"
-          class="inline-flex items-center gap-0.5 hover:text-indigo-700 {% if sort_by == 'numero_pistas' %}sortable-active{% if sort_order == 'asc' %} sorted-asc{% else %} sorted-desc{% endif %}{% endif %}">
+          hx-target="#puntos-control-table-container" hx-swap="outerHTML"
+          class="inline-flex items-center gap-0.5 hover:text-indigo-700">
           Pistas
-          {% if sort_by == 'numero_pistas' %}{% if sort_order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+          {% if sort_by == 'numero_pistas' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
         </a>
       </th>
       <th class="pc-col-interseccion px-1 py-2 text-center font-bold text-gray-900 uppercase">Flujo satur</th>
@@ -67,8 +67,32 @@
     </tr>
   </thead>
   <tbody id="puntos-control-table-body" class="divide-y divide-gray-200">
-    {% include 'partials/PuntosControl/puntos_control_table_body.html' with proyecto=proyecto puntos_control=puntos_control %}
+    {% include 'partials/PuntosControl/puntos_control_table_body.html' with proyecto=proyecto puntos_control=page_obj.object_list %}
   </tbody>
 </table>
+
+{% if page_obj and paginator.num_pages > 1 %}
+<div class="flex justify-between items-center px-4 py-3 bg-gray-50 border-t border-gray-200">
+  <span class="text-sm text-gray-600">
+    Página {{ page_obj.number }} de {{ paginator.num_pages }} ({{ paginator.count }} puntos de control)
+  </span>
+  <div class="flex gap-1">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+         hx-get="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+         hx-target="#puntos-control-table-container"
+         hx-swap="outerHTML"
+         class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">← Anterior</a>
+    {% endif %}
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+         hx-get="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}"
+         hx-target="#puntos-control-table-container"
+         hx-swap="outerHTML"
+         class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100">Siguiente →</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
 </div>
 <script src="{% static 'js/features/recalcular-punto-control.js' %}" defer></script>

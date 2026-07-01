@@ -14,9 +14,4 @@ urlpatterns = [
     path("periodos/create/", periodo_create_view, name="periodo_create"),
     path("periodo/<uuid:periodo_id>/update/", periodo_update_view, name="periodo_update"),
     path("periodo/<uuid:periodo_id>/delete/", periodo_delete_view, name="periodo_delete"),
-
-    # ========== API URLs ==========
-    path("api/proyecto/<uuid:proyecto_id>/calles/", api_calles_by_proyecto, name="api_calles"),
-    path("api/proyecto/<uuid:proyecto_id>/nodos/", api_nodos_by_proyecto, name="api_nodos"),
-    path("api/proyecto/<uuid:proyecto_id>/arcos/", api_arcos_by_proyecto, name="api_arcos"),
 ]

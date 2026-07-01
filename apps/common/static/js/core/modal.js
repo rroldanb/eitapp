@@ -9,16 +9,16 @@
  *
  * Expone: openModal(id), closeModal(id), ModalUtils.setupAutoClose(modalId)
  */
-(function() {
-  window.openModal = function(id) {
-    var el = document.getElementById(id);
+(function () {
+  window.openModal = function (id) {
+    const el = document.getElementById(id);
     if (!el) return;
     el.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   };
 
-  window.closeModal = function(id) {
-    var el = document.getElementById(id);
+  window.closeModal = function (id) {
+    const el = document.getElementById(id);
     if (!el) return;
     el.classList.add('hidden');
     document.body.style.overflow = '';
@@ -29,21 +29,21 @@
      * Vincula cierre con Escape y clic en backdrop.
      * Llamar una vez al cargar el DOM por cada modal.
      */
-    setupAutoClose: function(modalId) {
-      var modal = document.getElementById(modalId);
+    setupAutoClose: function (modalId) {
+      const modal = document.getElementById(modalId);
       if (!modal) return;
 
-      document.addEventListener('keydown', function(e) {
+      document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-          var ev = new CustomEvent('modal-escape', { detail: { modalId: modalId } });
+          const ev = new CustomEvent('modal-escape', { detail: { modalId: modalId } });
           document.dispatchEvent(ev);
           window.closeModal(modalId);
         }
       });
 
-      modal.addEventListener('click', function(e) {
+      modal.addEventListener('click', function (e) {
         if (e.target === this) window.closeModal(modalId);
       });
-    }
+    },
   };
 })();

@@ -1,13 +1,9 @@
-{% comment %} Cuerpo de tabla para Nodos. Usa el partial de fila existente {% endcomment %}
-
 {% include 'partials/Nodos/nodo_create.html' with proyecto=proyecto %}
 
 {% if nodos %}
-  {% with calles=proyecto.calles.all %}
   {% for nodo in nodos %}
     {% include 'partials/Nodos/nodo_row.html' with nodo=nodo calles=calles %}
   {% endfor %}
-  {% endwith %}
 {% else %}
   <tr>
     <td colspan="6" class="px-4 py-8 text-center text-gray-500">

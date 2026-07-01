@@ -1,9 +1,13 @@
+from typing import Any
+from django.db.models import QuerySet
+
 from apps.red_vial.models import PuntoControl
+from apps.proyectos.models import Proyecto
 from apps.red_vial.forms.punto_control_form import PuntoControlForm
 from .base_service import apply_sort_to_queryset, create_item, update_item, delete_item
 
 
-def get_puntos_control_by_proyecto(proyecto_id, sort_by=None, order='asc'):
+def get_puntos_control_by_proyecto(proyecto_id: str, sort_by: str | None = None, order: str = 'asc') -> QuerySet[PuntoControl]:
     queryset = PuntoControl.objects.filter(proyecto_id=proyecto_id).select_related(
         'nodo', 'arco_entrada', 'arco_salida', 'regulacion'
     )
@@ -30,13 +34,13 @@ def get_puntos_control_by_proyecto(proyecto_id, sort_by=None, order='asc'):
 
 
 
-def create_punto_control(proyecto, data):
+def create_punto_control(proyecto: Proyecto, data: dict[str, Any]) -> PuntoControl:
     return create_item(PuntoControl, data, form_class=PuntoControlForm, proyecto=proyecto)
 
 
-def update_punto_control(pc_id, data):
+def update_punto_control(pc_id: str, data: dict[str, Any]) -> PuntoControl:
     return update_item(PuntoControl, pc_id, data, form_class=PuntoControlForm)
 
 
-def delete_punto_control(pc_id):
+def delete_punto_control(pc_id: str) -> None:
     delete_item(PuntoControl, pc_id)

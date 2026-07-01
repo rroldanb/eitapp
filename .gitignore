@@ -7,7 +7,6 @@ migrations
 data.json
 *.log
 *basurero*
-.opencode
 *copy.*
 *RR_Temp*
 DESIGN.md
@@ -17,3 +16,9 @@ skills*
 .impeccable
 audit_report.md 
 plantilla_importacion_eitapp.xlsx 
+AGENTS*
+.gitignore
+TODO*
+*pencod*
+node_modules/
+tui.json

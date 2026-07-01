@@ -6,7 +6,6 @@
 <div class="section-header flex justify-between items-center mb-6">
   <h2 class="text-xl font-semibold text-gray-800">Calles del Proyecto</h2>
   <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full" id="items-count-badge" >{{ proyecto.calles.count }}</span>
-  {% comment %} <span class="ml-auto px-3 py-1 bg-indigo-100 text-indigo-900 text-lg rounded-full" id="calles-count" data-count="{{ proyecto.calles.count }}">{{ proyecto.calles.count }}</span> {% endcomment %}
 </div>
 
 <div class="bg-white rounded-b-2xl rounded-t-none shadow overflow-hidden">
@@ -16,11 +15,40 @@
     </div>
   </div>
 </div>
-
-<div id="calles-list-config" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
 {% endblock %}
 
-
 {% block extra_js %}
-<script src="{% static 'js/features/bulk-crud.js' %}" defer></script>
+<script>
+(function() {
+  function updateItemCount(delta) {
+    var badge = document.getElementById('items-count-badge');
+    var newNum = document.getElementById('new_number');
+    if (!badge) return;
+    var count = parseInt(badge.textContent) || 0;
+    count += delta;
+    badge.textContent = count;
+    if (newNum) newNum.value = count + 1;
+  }
+  document.addEventListener('calle-created', function() {
+    var form = document.getElementById('new-calle-form');
+    if (form) form.reset();
+    updateItemCount(1);
+  });
+  document.addEventListener('calle-deleted', function() { updateItemCount(-1); });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && e.target.matches('.field-input')) {
+      var tr = e.target.closest('tr');
+      if (!tr) return;
+      tr.querySelectorAll('.field-input').forEach(function(inp) {
+        inp.value = inp.defaultValue;
+        inp.classList.add('hidden');
+        if (inp.previousElementSibling) inp.previousElementSibling.classList.remove('hidden');
+      });
+      var btn = tr.querySelector('.save-row-btn');
+      if (btn) btn.classList.add('hidden');
+    }
+  });
+})();
+</script>
 {% endblock %}
