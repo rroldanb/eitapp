@@ -17,8 +17,8 @@ skills*
 audit_report.md 
 plantilla_importacion_eitapp.xlsx 
 AGENTS*
-.gitignore
 TODO*
-*pencod*
+*pencod
 node_modules/
 tui.json
+media/
