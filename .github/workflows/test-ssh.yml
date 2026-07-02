@@ -18,4 +18,4 @@ jobs:
             echo "✅ Conexión SSH exitosa"
             echo "Host: $(hostname)"
             echo "Fecha: $(date)"
-            # ls -la /opt/eit-app/
+            ls -la /app/
