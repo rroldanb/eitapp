@@ -13,7 +13,7 @@ def get_fases_by_proyecto(proyecto_id: str, sort_by: str | None = None, order: s
         'punto_control__nodo'
     )
     valid_fields = {
-        'punto_control__nodo__numero': 'punto_control__nodo__numero',
+        'punto_control__nodo__numero_pc': 'punto_control__nodo__numero_pc',
         'punto_control__movimiento': 'punto_control__movimiento',
         'fase_numero': 'fase_numero',
         'verde_inicio': 'verde_inicio',

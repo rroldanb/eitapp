@@ -60,8 +60,8 @@ class ParametroArcoListView(ListView):
     context_object_name: str = 'items'
     template_name: str = 'red_vial/parametros_arco_list.html'
     paginate_by: int = 20
-    sort_fields: list[str] = ['punto_control__nodo__numero', 'punto_control__movimiento', 'flujo_saturacion', 'ponderador_demora', 'ponderador_detencion', 'capacidad_cola', 'tiene_tarjeta_38']
-    default_sort: str = 'punto_control__nodo__numero'
+    sort_fields: list[str] = ['punto_control__nodo__numero_pc', 'punto_control__movimiento', 'flujo_saturacion', 'ponderador_demora', 'ponderador_detencion', 'capacidad_cola', 'tiene_tarjeta_38']
+    default_sort: str = 'punto_control__nodo__numero_pc'
 
     @method_decorator(login_required)
     def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponse:
@@ -95,6 +95,14 @@ class ParametroArcoListView(ListView):
 
 
 class ParametroArcoCreateView(View):
+    @method_decorator(login_required)
+    def get(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
+        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+        form = ParametroArcoForm(proyecto=proyecto)
+        return render(request, 'partials/Transyt/parametro_arco_create.html', {
+            'proyecto': proyecto, 'form': form,
+        })
+
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['POST']))
     def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
@@ -166,8 +174,8 @@ class FaseSemaforicaListView(ListView):
     context_object_name: str = 'items'
     template_name: str = 'red_vial/fases_semaforicas_list.html'
     paginate_by: int = 20
-    sort_fields: list[str] = ['punto_control__nodo__numero', 'punto_control__movimiento', 'fase_numero', 'verde_inicio', 'verde_fin']
-    default_sort: str = 'punto_control__nodo__numero'
+    sort_fields: list[str] = ['punto_control__nodo__numero_pc', 'punto_control__movimiento', 'fase_numero', 'verde_inicio', 'verde_fin']
+    default_sort: str = 'punto_control__nodo__numero_pc'
 
     @method_decorator(login_required)
     def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponse:
@@ -201,6 +209,14 @@ class FaseSemaforicaListView(ListView):
 
 
 class FaseSemaforicaCreateView(View):
+    @method_decorator(login_required)
+    def get(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
+        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+        form = FaseSemaforicaForm(proyecto=proyecto)
+        return render(request, 'partials/Transyt/fase_semaforica_create.html', {
+            'proyecto': proyecto, 'form': form,
+        })
+
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['POST']))
     def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:

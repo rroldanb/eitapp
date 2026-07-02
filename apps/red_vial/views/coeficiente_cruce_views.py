@@ -45,6 +45,9 @@ class CoeficientesCruceListView(ListView):
         proyecto_id = self.kwargs.get('proyecto_id')
         if proyecto_id:
             ctx['proyecto'] = get_object_or_404(Proyecto, id=proyecto_id)
+        ctx['standard_coeficientes'] = CoeficienteCruce.objects.filter(is_standard=True, proyecto__isnull=True)
+        ctx['available_projects'] = Proyecto.objects.all().order_by('title')
+        ctx['form'] = CoeficienteCruceModelForm()
         ctx['sort_by'] = self.request.GET.get('sort_by', self.default_sort)
         ctx['sort_order'] = self.request.GET.get('sort_order', 'asc')
         ctx['sort_fields'] = self.sort_fields
@@ -57,6 +60,14 @@ class CoeficientesCruceListView(ListView):
 
 
 class CoeficienteCruceCreateView(View):
+    @method_decorator(login_required)
+    def get(self, request: HttpRequest) -> HttpResponse:
+        return render(request, 'partials/CoeficientesCruce/coeficiente_cruce_create.html', {
+            'form': CoeficienteCruceModelForm(),
+            'standard_coeficientes': CoeficienteCruce.objects.filter(is_standard=True, proyecto__isnull=True),
+            'available_projects': Proyecto.objects.all().order_by('title'),
+        })
+
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['POST']))
     def post(self, request: HttpRequest, proyecto_id: str | None = None) -> HttpResponse:
@@ -74,11 +85,15 @@ class CoeficienteCruceCreateView(View):
                 form.add_error(None, str(e))
                 response = render(request, 'partials/CoeficientesCruce/coeficiente_cruce_create.html', {
                     'form': form,
+                    'standard_coeficientes': CoeficienteCruce.objects.filter(is_standard=True, proyecto__isnull=True),
+                    'available_projects': Proyecto.objects.all().order_by('title'),
                 }, status=400)
                 response['HX-Reswap'] = 'outerHTML'
                 return response
         response = render(request, 'partials/CoeficientesCruce/coeficiente_cruce_create.html', {
             'form': form,
+            'standard_coeficientes': CoeficienteCruce.objects.filter(is_standard=True, proyecto__isnull=True),
+            'available_projects': Proyecto.objects.all().order_by('title'),
         }, status=400)
         response['HX-Reswap'] = 'outerHTML'
         return response

@@ -46,9 +46,11 @@ class PuntosControlListView(ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         ctx = super().get_context_data(**kwargs)
-        ctx['proyecto'] = get_object_or_404(
+        proyecto = get_object_or_404(
             Proyecto, id=self.kwargs['proyecto_id']
         )
+        ctx['proyecto'] = proyecto
+        ctx['form'] = PuntoControlForm(proyecto=proyecto)
         ctx['sort_by'] = self.request.GET.get('sort_by', self.default_sort)
         ctx['sort_order'] = self.request.GET.get('sort_order', 'asc')
         ctx['sort_fields'] = self.sort_fields
@@ -61,6 +63,14 @@ class PuntosControlListView(ListView):
 
 
 class PuntoControlCreateView(View):
+    @method_decorator(login_required)
+    def get(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:
+        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+        form = PuntoControlForm(proyecto=proyecto)
+        return render(request, 'partials/PuntosControl/punto_control_create.html', {
+            'proyecto': proyecto, 'form': form,
+        })
+
     @method_decorator(login_required)
     @method_decorator(require_http_methods(['POST']))
     def post(self, request: HttpRequest, proyecto_id: str) -> HttpResponse:

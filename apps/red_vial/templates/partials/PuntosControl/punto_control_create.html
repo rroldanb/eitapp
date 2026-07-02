@@ -1,7 +1,12 @@
 {# Partial template for creating a new punto de control #}
 
-{% load static %}<tr id="new-punto-control-form-row">
-  <td colspan="12" class="px-2 py-3 {% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}">
+{% load static %}<tr id="new-punto-control-form-row"
+  class="{% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}"
+  hx-get="{% url 'punto_control_create' proyecto.id %}"
+  hx-trigger="punto-control-deleted from:body, punto-control-created from:body"
+  hx-target="this"
+  hx-swap="outerHTML">
+  <td colspan="12" class="px-2 py-3">
     <form id="new-punto-control-form"
       data-action="create"
       hx-post="{% url 'punto_control_create' proyecto.id %}"

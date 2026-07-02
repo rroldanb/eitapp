@@ -1,6 +1,11 @@
 {# Partial template for creating a new coeficiente de cruce #}
 
-<tr id="new-coeficiente-cruce-form-row" class="{% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}">
+<tr id="new-coeficiente-cruce-form-row"
+  class="{% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}"
+  hx-get="{% url 'coeficiente_cruce_create' %}"
+  hx-trigger="coeficiente-cruce-deleted from:body, coeficiente-cruce-created from:body"
+  hx-target="this"
+  hx-swap="outerHTML">
   <td colspan="6" class="px-4 py-3">
     <form id="new-coeficiente-cruce-form" data-action="create"
       hx-post="{% url 'coeficiente_cruce_create' %}"
@@ -19,7 +24,7 @@
         {% endfor %}
       </div>
       {% endif %}
-      <div class="flex flex-wrap items-center gap-4 justify-center">
+      <div class="flex flex-wrap items-center gap-4 justify-between">
         <select name="nomenclatura" id="create-nomenclatura" aria-label="Nomenclatura"
           class="bg-slate-50 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 uppercase text-sm" required>
           <option value="">Seleccionar nomenclatura</option>

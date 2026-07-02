@@ -55,7 +55,7 @@ class ParametroArcoForm(forms.ModelForm):
         fields = ['punto_control', 'flujo_saturacion', 'ponderador_demora', 'ponderador_detencion', 'capacidad_cola', 'tiene_tarjeta_38']
         widgets = {
             'punto_control': forms.Select(attrs={
-                'class': 'w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50',
+                'class': ' w-68 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50',
             }),
             'flujo_saturacion': forms.NumberInput(attrs={
                 'class': 'w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50',
@@ -90,12 +90,8 @@ class ParametroArcoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.proyecto = proyecto
         if proyecto:
-            self.fields['punto_control'].queryset = proyecto.puntos_control.all().select_related('nodo')
+            self.fields['punto_control'].queryset = proyecto.puntos_control.select_related('nodo').order_by('nodo__numero_pc', 'nodo__numero')
             self.fields['punto_control'].label_from_instance = lambda obj: f'{obj.nombre} — Mov {obj.get_movimiento_display() or obj.movimiento}'
-            used = ParametroArco.objects.filter(proyecto=proyecto).values_list('punto_control_id', flat=True)
-            if self.instance and self.instance.pk:
-                used = [p for p in used if p != self.instance.punto_control_id]
-            self.fields['punto_control'].queryset = self.fields['punto_control'].queryset.exclude(id__in=used)
             self.fields['punto_control'].empty_label = 'Sel. Punto de Control'
 
     def save(self, commit=True):
@@ -113,7 +109,7 @@ class FaseSemaforicaForm(forms.ModelForm):
         fields = ['punto_control', 'fase_numero', 'verde_inicio', 'verde_fin']
         widgets = {
             'punto_control': forms.Select(attrs={
-                'class': 'w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50',
+                'class': 'w-full max-w-[180px] px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50',
             }),
             'fase_numero': forms.NumberInput(attrs={
                 'class': 'w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50',
@@ -139,7 +135,7 @@ class FaseSemaforicaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.proyecto = proyecto
         if proyecto:
-            self.fields['punto_control'].queryset = proyecto.puntos_control.all().select_related('nodo')
+            self.fields['punto_control'].queryset = proyecto.puntos_control.select_related('nodo').order_by('nodo__numero_pc', 'nodo__numero')
             self.fields['punto_control'].label_from_instance = lambda obj: f'{obj.nombre} — Mov {obj.get_movimiento_display() or obj.movimiento}'
             self.fields['punto_control'].empty_label = 'Sel. Punto de Control'
 

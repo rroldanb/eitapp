@@ -1,5 +1,10 @@
 {% load l10n %}
-<tr id="periodo-create-row" class="periodo-create-row {% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}">
+<tr id="periodo-create-row"
+  class="periodo-create-row {% if form.errors %}bg-red-100{% else %}bg-green-100{% endif %}"
+  hx-get="{% url 'periodo_create' proyecto.id %}"
+  hx-trigger="periodo-deleted from:body, periodo-created from:body"
+  hx-target="this"
+  hx-swap="outerHTML">
   <td colspan="5" class="px-2 py-3">
     <form id="new-periodo-form"
       data-action="create"
@@ -21,7 +26,7 @@
         {% endfor %}
       </div>
       {% endif %}
-      <div class="flex flex-wrap items-center gap-4 justify-center">
+      <div class="flex flex-wrap items-center gap-4 justify-between">
         <select name="codigo" aria-label="Código de período"
           class="bg-slate-50 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 text-sm">
           {% for v, l in form.codigo.field.choices %}
@@ -37,7 +42,7 @@
           Laboral
         </label>
         <button type="submit"
-          class="px-2 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-800 transition-colors font-medium action-btn"
+          class="px-2 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-800 transition-colors font-medium action-btn mr-20"
           data-action="create"
           aria-label="Agregar periodo">
           Agregar

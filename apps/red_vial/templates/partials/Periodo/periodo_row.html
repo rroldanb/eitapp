@@ -1,11 +1,27 @@
 {% load l10n %}
 <tr id="periodo-row-{{ periodo.id }}" class="periodo-row hover:bg-gray-50" data-periodo-id="{{ periodo.id }}">
-  <td class="px-2 py-1 whitespace-nowrap">
-    <span class="text-sm font-medium text-gray-700">{{ periodo.get_codigo_display }}</span>
-    <input type="hidden" name="codigo" value="{{ periodo.codigo }}">
+  <td class="px-2 py-1 whitespace-nowrap editable-field" data-field="codigo">
+    <span class="field-display cursor-pointer"
+      _="on click
+        add .hidden to me
+        remove .hidden from next .field-input
+        call me.nextElementSibling.focus()
+        remove .hidden from #save-row-btn-{{ periodo.id }}">
+      {{ periodo.codigo }} - {{ periodo.get_codigo_display }}
+    </span>
+    <select name="codigo"
+      class="field-input hidden w-full max-w-[240px] px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50"
+      _="on change
+        add .hidden to me
+        remove .hidden from previous .field-display
+        trigger click on #save-row-btn-{{ periodo.id }}">
+      {% for v, label in periodo.TipoPeriodo.choices %}
+        <option value="{{ v }}" {% if periodo.codigo == v %}selected{% endif %}>{{ v }} - {{ label }}</option>
+      {% endfor %}
+    </select>
   </td>
   <td class="px-2 py-1 whitespace-nowrap editable-field" data-field="hora_inicio">
-    <span class="field-display"
+    <span class="field-display cursor-pointer"
       _="on click
         add .hidden to me
         remove .hidden from next .field-input
@@ -21,7 +37,7 @@
         trigger click on #save-row-btn-{{ periodo.id }}">
   </td>
   <td class="px-2 py-1 whitespace-nowrap editable-field" data-field="hora_fin">
-    <span class="field-display"
+    <span class="field-display cursor-pointer"
       _="on click
         add .hidden to me
         remove .hidden from next .field-input
@@ -37,7 +53,7 @@
         trigger click on #save-row-btn-{{ periodo.id }}">
   </td>
   <td class="px-2 py-1 text-center whitespace-nowrap editable-field" data-field="es_laboral">
-    <span class="field-display"
+    <span class="field-display cursor-pointer"
       _="on click
         add .hidden to me
         remove .hidden from next .field-input-container

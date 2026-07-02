@@ -4,15 +4,15 @@
       <thead class="bg-slate-200">
         <tr>
           <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
-            aria-sort="{% if sort_by == 'punto_control__nodo__numero' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
+            aria-sort="{% if sort_by == 'punto_control__nodo__numero_pc' %}{% if sort_order == 'asc' %}ascending{% else %}descending{% endif %}{% else %}none{% endif %}">
             <a role="button"
-              href="?sort_by=punto_control__nodo__numero&sort_order={% if sort_by == 'punto_control__nodo__numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
-              hx-get="?sort_by=punto_control__nodo__numero&sort_order={% if sort_by == 'punto_control__nodo__numero' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              href="?sort_by=punto_control__nodo__numero_pc&sort_order={% if sort_by == 'punto_control__nodo__numero_pc' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-get="?sort_by=punto_control__nodo__numero_pc&sort_order={% if sort_by == 'punto_control__nodo__numero_pc' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
               hx-target="#parametro-arco-table-container"
               hx-swap="outerHTML"
               class="inline-flex items-center gap-1 hover:text-indigo-700">
               PC
-              {% if sort_by == 'punto_control__nodo__numero' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
+              {% if sort_by == 'punto_control__nodo__numero_pc' %}{% if sort_order == 'asc' %}<i class="fas fa-sort-numeric-up text-indigo-700 ml-1"></i>{% else %}<i class="fas fa-sort-numeric-down-alt text-indigo-700 ml-1"></i>{% endif %}{% endif %}
             </a>
           </th>
           <th class="px-2 py-2 text-left font-bold text-gray-900 uppercase"
