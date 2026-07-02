@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models.signals import post_save
 from django.conf import settings
@@ -125,13 +126,17 @@ def restore_database(request):
                     call_command('flush', database=target_database, interactive=False, verbosity=0)
                     call_command('migrate', database=target_database, no_input=True, run_syncdb=True)
 
+                    # Remove auto-created content types so loaddata
+                    # can recreate them from the fixture via natural keys.
+                    ContentType.objects.using(target_database).all().delete()
+
                     # Disconnect post_save signals on User to avoid UNIQUE constraint
                     # conflicts when loaddata creates UserProfiles from the fixture
                     # after the signal auto-creates one for each User.
                     post_save.disconnect(create_user_profile, sender=User)
                     post_save.disconnect(save_user_profile, sender=User)
                     try:
-                        call_command('loaddata', tmp_path, database=target_database)
+                        call_command('loaddata', tmp_path, database=target_database, ignorenonexistent=True)
                     finally:
                         # Disconnect first to prevent duplicates, then reconnect once
                         post_save.disconnect(create_user_profile, sender=User)

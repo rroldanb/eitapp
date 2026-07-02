@@ -20,7 +20,7 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             set -e
-            cd /opt/eit-app
+            cd /app/
             git pull origin main
             docker compose build
             docker compose down
