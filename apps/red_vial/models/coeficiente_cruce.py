@@ -1,10 +1,10 @@
 from django.db import models
-from apps.proyectos.models import Proyecto
+
 from apps.common.models import BaseModel
+from apps.proyectos.models import Proyecto
 
 
 class CoeficienteCruceManager(models.Manager):
-
     def resolver_para_proyecto(self, proyecto) -> dict[str, float]:
         """
         Devuelve un dict {nomenclatura: coeficiente} resolviendo
@@ -12,12 +12,12 @@ class CoeficienteCruceManager(models.Manager):
 
         Uso: CoeficienteCruce.objects.resolver_para_proyecto(proyecto)
         """
-        estandares = self.filter(proyecto__isnull=True).values('nomenclatura', 'coeficiente')
-        propios    = self.filter(proyecto=proyecto).values('nomenclatura', 'coeficiente')
+        estandares = self.filter(proyecto__isnull=True).values("nomenclatura", "coeficiente")
+        propios = self.filter(proyecto=proyecto).values("nomenclatura", "coeficiente")
 
         # Estándares como base, propios sobreescriben
-        coefs = {c['nomenclatura']: c['coeficiente'] for c in estandares}
-        coefs.update({c['nomenclatura']: c['coeficiente'] for c in propios})
+        coefs = {c["nomenclatura"]: c["coeficiente"] for c in estandares}
+        coefs.update({c["nomenclatura"]: c["coeficiente"] for c in propios})
         return coefs
 
 
@@ -27,17 +27,18 @@ class CoeficienteCruce(BaseModel):
     - is_standard=True, proyecto=None → librería global (semilla inicial)
     - is_standard=False, proyecto=X  → sobreescritura específica del proyecto
     """
-    nomenclatura    = models.CharField(max_length=10)
+
+    nomenclatura = models.CharField(max_length=10)
     tipo_transporte = models.CharField(max_length=50)
-    coeficiente     = models.FloatField()
-    is_standard     = models.BooleanField(default=False)
+    coeficiente = models.FloatField()
+    is_standard = models.BooleanField(default=False)
 
     proyecto = models.ForeignKey(
         Proyecto,
         on_delete=models.CASCADE,
-        related_name='coeficientes',
+        related_name="coeficientes",
         blank=True,
-        null=True,   # null = coeficiente estándar global
+        null=True,  # null = coeficiente estándar global
     )
 
     objects = CoeficienteCruceManager()
@@ -46,14 +47,13 @@ class CoeficienteCruce(BaseModel):
         constraints = [
             # Solo puede existir un coeficiente por nomenclatura dentro de un proyecto
             models.UniqueConstraint(
-                fields=['nomenclatura', 'proyecto'],
-                name='unique_coef_por_proyecto'
+                fields=["nomenclatura", "proyecto"], name="unique_coef_por_proyecto"
             ),
             # Y solo uno estándar global por nomenclatura
             models.UniqueConstraint(
-                fields=['nomenclatura'],
+                fields=["nomenclatura"],
                 condition=models.Q(proyecto__isnull=True),
-                name='unique_coef_estandar'
+                name="unique_coef_estandar",
             ),
         ]
 

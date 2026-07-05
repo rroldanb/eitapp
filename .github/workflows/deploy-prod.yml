@@ -1,0 +1,32 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Escribi 'deploy' para confirmar"
+        required: true
+        default: ""
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'deploy'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            cd /app/
+            git pull origin main
+            docker compose -f docker-compose.prod.yml build
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
+            docker image prune -f

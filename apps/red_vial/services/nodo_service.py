@@ -1,26 +1,29 @@
 from typing import Any
-from django.core.exceptions import ValidationError
-from django.db.models import Count, F, QuerySet
 
-from apps.red_vial.models import Nodo
+from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
+
 from apps.proyectos.models import Proyecto
 from apps.red_vial.forms.nodo_form import NodoForm
+from apps.red_vial.models import Nodo
 from apps.red_vial.services.base_service import (
     apply_sort_to_queryset,
-    update_item,
-    delete_item,
     bulk_update_items,
+    delete_item,
+    update_item,
 )
 
 
-def get_nodos_by_proyecto(proyecto_id: str, sort_by: str | None = None, order: str = 'asc') -> QuerySet[Nodo]:
-    qs = Nodo.objects.filter(proyecto__id=proyecto_id).select_related('calle_1', 'calle_2')
+def get_nodos_by_proyecto(
+    proyecto_id: str, sort_by: str | None = None, order: str = "asc"
+) -> QuerySet[Nodo]:
+    qs = Nodo.objects.filter(proyecto__id=proyecto_id).select_related("calle_1", "calle_2")
     valid_fields = {
-        'numero': 'numero',
-        'calle_1': 'calle_1__nombre',
-        'calle_2': 'calle_2__nombre',
-        'is_pc': 'is_pc',
-        'numero_pc': 'numero_pc',
+        "numero": "numero",
+        "calle_1": "calle_1__nombre",
+        "calle_2": "calle_2__nombre",
+        "is_pc": "is_pc",
+        "numero_pc": "numero_pc",
     }
     return apply_sort_to_queryset(qs, sort_by=sort_by, order=order, valid_fields=valid_fields)
 
@@ -44,13 +47,15 @@ def delete_nodo(nodo_id: str) -> None:
 
 
 def bulk_update_nodos(items_data: list[dict]) -> list[str]:
-    fields = ['numero', 'is_pc', 'numero_pc', 'interseccion']
+    fields = ["numero", "is_pc", "numero_pc", "interseccion"]
     return bulk_update_items(Nodo, items_data, fields)
 
 
 def _update_nodo_file_field(nodo_id: str, file: Any, field: str) -> Nodo:
     from django.shortcuts import get_object_or_404
-    from apps.imagenes.services.storage_service import upload_image, delete_image
+
+    from apps.imagenes.services.storage_service import delete_image, upload_image
+
     nodo = get_object_or_404(Nodo, id=nodo_id)
     old_url = getattr(nodo, field, None)
     if old_url:
@@ -62,7 +67,9 @@ def _update_nodo_file_field(nodo_id: str, file: Any, field: str) -> Nodo:
 
 def _delete_nodo_file_field(nodo_id: str, field: str) -> Nodo:
     from django.shortcuts import get_object_or_404
+
     from apps.imagenes.services.storage_service import delete_image
+
     nodo = get_object_or_404(Nodo, id=nodo_id)
     old_url = getattr(nodo, field, None)
     if old_url:
@@ -73,16 +80,16 @@ def _delete_nodo_file_field(nodo_id: str, field: str) -> Nodo:
 
 
 def update_nodo_image(nodo_id: str, file: Any) -> Nodo:
-    return _update_nodo_file_field(nodo_id, file, 'imagen')
+    return _update_nodo_file_field(nodo_id, file, "imagen")
 
 
 def delete_nodo_image(nodo_id: str) -> Nodo:
-    return _delete_nodo_file_field(nodo_id, 'imagen')
+    return _delete_nodo_file_field(nodo_id, "imagen")
 
 
 def update_nodo_plano(nodo_id: str, file: Any) -> Nodo:
-    return _update_nodo_file_field(nodo_id, file, 'plano')
+    return _update_nodo_file_field(nodo_id, file, "plano")
 
 
 def delete_nodo_plano(nodo_id: str) -> Nodo:
-    return _delete_nodo_file_field(nodo_id, 'plano')
+    return _delete_nodo_file_field(nodo_id, "plano")

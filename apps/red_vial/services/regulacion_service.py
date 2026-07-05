@@ -1,17 +1,19 @@
 from typing import Any
+
 from django.db.models import QuerySet
 
-from apps.red_vial.models import Regulacion
 from apps.red_vial.forms.regulacion_form import RegulacionForm
-from .base_service import apply_sort_to_queryset, create_item, update_item, delete_item
+from apps.red_vial.models import Regulacion
+
+from .base_service import apply_sort_to_queryset, create_item, delete_item, update_item
 
 
-def get_all_regulaciones(sort_by: str | None = None, order: str = 'asc') -> QuerySet[Regulacion]:
+def get_all_regulaciones(sort_by: str | None = None, order: str = "asc") -> QuerySet[Regulacion]:
     qs = Regulacion.objects.all()
 
     valid_fields = {
-        'codigo': 'codigo',
-        'descripcion': 'descripcion',
+        "codigo": "codigo",
+        "descripcion": "descripcion",
     }
 
     return apply_sort_to_queryset(qs, sort_by=sort_by, order=order, valid_fields=valid_fields)

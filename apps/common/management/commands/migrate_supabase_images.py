@@ -1,8 +1,10 @@
 import logging
+
 import requests
-from django.db import connection
-from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
+from django.core.management.base import BaseCommand
+from django.db import connection
+
 from apps.imagenes.services.storage_service import upload_project_image
 
 logger = logging.getLogger(__name__)
@@ -32,16 +34,14 @@ def _find_supabase_records() -> list[tuple[str, str, str]]:
                 records.append(("proyectos_proyecto", "image_url", row[1]))
 
         cursor.execute(
-            "SELECT id, imagen FROM red_vial_nodo "
-            "WHERE imagen IS NOT NULL AND imagen != ''"
+            "SELECT id, imagen FROM red_vial_nodo WHERE imagen IS NOT NULL AND imagen != ''"
         )
         for row in cursor.fetchall():
             if _is_supabase_url(row[1]):
                 records.append(("red_vial_nodo", "imagen", row[1]))
 
         cursor.execute(
-            "SELECT id, plano FROM red_vial_nodo "
-            "WHERE plano IS NOT NULL AND plano != ''"
+            "SELECT id, plano FROM red_vial_nodo WHERE plano IS NOT NULL AND plano != ''"
         )
         for row in cursor.fetchall():
             if _is_supabase_url(row[1]):
@@ -105,9 +105,7 @@ class Command(BaseCommand):
                     if row_url == old_url:
                         affected += _update_url(table, field, old_url, new_url)
 
-                self.stdout.write(
-                    f"  OK  {new_url} ({affected} row(s) updated)"
-                )
+                self.stdout.write(f"  OK  {new_url} ({affected} row(s) updated)")
                 migrated += 1
             except Exception as e:
                 errors.append(f"{old_url}: {e}")

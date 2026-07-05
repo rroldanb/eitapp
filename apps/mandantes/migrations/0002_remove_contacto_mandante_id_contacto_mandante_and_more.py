@@ -5,30 +5,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mandantes', '0001_initial'),
+        ("mandantes", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='contacto',
-            name='mandante_id',
+            model_name="contacto",
+            name="mandante_id",
         ),
         migrations.AddField(
-            model_name='contacto',
-            name='mandante',
-            field=models.ForeignKey(default='00000000-0000-0000-0000-000000000000', on_delete=django.db.models.deletion.CASCADE, related_name='contactos', to='mandantes.mandante'),
+            model_name="contacto",
+            name="mandante",
+            field=models.ForeignKey(
+                default="00000000-0000-0000-0000-000000000000",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="contactos",
+                to="mandantes.mandante",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='mandante',
-            name='details',
+            model_name="mandante",
+            name="details",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='mandante',
-            name='location',
+            model_name="mandante",
+            name="location",
             field=models.CharField(max_length=100),
         ),
     ]

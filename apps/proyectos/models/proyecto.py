@@ -1,12 +1,14 @@
-from apps.common.models import BaseModel
-from django.db import models
+import contextlib
+
 from django.contrib.auth.models import User
-from apps.mandantes.models import Mandante
+from django.db import models
 from django.utils import timezone
+
+from apps.common.models import BaseModel
+from apps.mandantes.models import Mandante
 
 
 class Proyecto(BaseModel):
-
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     date_started = models.DateTimeField(default=timezone.now, blank=True)
@@ -19,30 +21,26 @@ class Proyecto(BaseModel):
 
     def delete(self, *args, **kwargs):
         from apps.imagenes.services.storage_service import delete_project_image
+
         # Clean up Nodo images before cascade (Django 5 uses bulk SQL, won't call Nodo.delete())
         for nodo in self.nodos.all():
-            for field in ('imagen', 'plano'):
+            for field in ("imagen", "plano"):
                 url = getattr(nodo, field, None)
                 if url:
-                    try:
+                    with contextlib.suppress(Exception):
                         delete_project_image(url)
-                    except Exception:
-                        pass
         if self.image_url:
-            try:
+            with contextlib.suppress(Exception):
                 delete_project_image(self.image_url)
-            except Exception:
-                pass
         super().delete(*args, **kwargs)
 
     def __str__(self):
-        return self.title + ' - ' + self.mandante.name + ' by ' + str(self.user.username)
-    
-    
+        return self.title + " - " + self.mandante.name + " by " + str(self.user.username)
+
 
 class Imagenes_proyecto(models.Model):
     image_url = models.URLField()
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='images')
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name="images")
 
     def __str__(self):
         return f"Imagen del proyecto: {self.proyecto.title}"

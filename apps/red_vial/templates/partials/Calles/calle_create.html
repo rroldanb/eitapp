@@ -10,7 +10,7 @@
       hx-indicator="#create-indicator"
     >
       {% csrf_token %}
-      {% if form.is_bound and form.errors %} 
+      {% if form.is_bound and form.errors %}
       <div class="mb-2 space-y-1">
         {% for field in form %}
           {% for error in field.errors %}
@@ -31,9 +31,9 @@
           class="bg-slate-50 w-120 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 calle-nombre"
 
           placeholder="Nombre de la calle" required />
-        <button type="submit" 
+        <button type="submit"
         class="px-2 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-800 transition-colors font-medium action-btn"
-        
+
         data-action="create">
         Agregar
         <i class="far fa-save ml-1" aria-hidden="true"></i>

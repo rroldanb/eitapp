@@ -6,41 +6,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Mandante',
+            name="Mandante",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=100)),
-                ('location', models.TextField(blank=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=100)),
+                ("location", models.TextField(blank=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Contacto',
+            name="Contacto",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=100)),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('phone', models.CharField(blank=True, max_length=20)),
-                ('cargo', models.CharField(max_length=100)),
-                ('details', models.TextField(blank=True)),
-                ('mandante_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mandantes.mandante')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=100)),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("cargo", models.CharField(max_length=100)),
+                ("details", models.TextField(blank=True)),
+                (
+                    "mandante_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="mandantes.mandante"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

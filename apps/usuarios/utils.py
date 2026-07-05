@@ -1,12 +1,13 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+
 from .models import Role
 
 
 def get_user_role(user):
     if not user.is_authenticated:
         return None
-    if hasattr(user, 'profile'):
+    if hasattr(user, "profile"):
         return user.profile.role
     return Role.ENCUESTADOR
 

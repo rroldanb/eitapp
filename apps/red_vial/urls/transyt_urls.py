@@ -2,24 +2,60 @@ from django.urls import path
 
 from apps.red_vial.views.transyt_views import (
     ConfiguracionTransytView,
-    ParametroArcoListView,
-    ParametroArcoCreateView,
-    ParametroArcoUpdateView,
-    ParametroArcoDeleteView,
-    FaseSemaforicaListView,
     FaseSemaforicaCreateView,
-    FaseSemaforicaUpdateView,
     FaseSemaforicaDeleteView,
+    FaseSemaforicaListView,
+    FaseSemaforicaUpdateView,
+    ParametroArcoCreateView,
+    ParametroArcoDeleteView,
+    ParametroArcoListView,
+    ParametroArcoUpdateView,
 )
 
 urlpatterns = [
-    path('proyecto/<uuid:proyecto_id>/configuracion-transyt/', ConfiguracionTransytView.as_view(), name='configuracion_transyt'),
-    path('proyecto/<uuid:proyecto_id>/parametros-arco/', ParametroArcoListView.as_view(), name='parametros_arco_list'),
-    path('proyecto/<uuid:proyecto_id>/parametros-arco/create/', ParametroArcoCreateView.as_view(), name='parametro_arco_create'),
-    path('parametro-arco/<uuid:item_id>/update/', ParametroArcoUpdateView.as_view(), name='parametro_arco_update'),
-    path('parametro-arco/<uuid:item_id>/delete/', ParametroArcoDeleteView.as_view(), name='parametro_arco_delete'),
-    path('proyecto/<uuid:proyecto_id>/fases-semaforicas/', FaseSemaforicaListView.as_view(), name='fases_semaforicas_list'),
-    path('proyecto/<uuid:proyecto_id>/fases-semaforicas/create/', FaseSemaforicaCreateView.as_view(), name='fase_semaforica_create'),
-    path('fase-semaforica/<uuid:item_id>/update/', FaseSemaforicaUpdateView.as_view(), name='fase_semaforica_update'),
-    path('fase-semaforica/<uuid:item_id>/delete/', FaseSemaforicaDeleteView.as_view(), name='fase_semaforica_delete'),
+    path(
+        "proyecto/<uuid:proyecto_id>/configuracion-transyt/",
+        ConfiguracionTransytView.as_view(),
+        name="configuracion_transyt",
+    ),
+    path(
+        "proyecto/<uuid:proyecto_id>/parametros-arco/",
+        ParametroArcoListView.as_view(),
+        name="parametros_arco_list",
+    ),
+    path(
+        "proyecto/<uuid:proyecto_id>/parametros-arco/create/",
+        ParametroArcoCreateView.as_view(),
+        name="parametro_arco_create",
+    ),
+    path(
+        "parametro-arco/<uuid:item_id>/update/",
+        ParametroArcoUpdateView.as_view(),
+        name="parametro_arco_update",
+    ),
+    path(
+        "parametro-arco/<uuid:item_id>/delete/",
+        ParametroArcoDeleteView.as_view(),
+        name="parametro_arco_delete",
+    ),
+    path(
+        "proyecto/<uuid:proyecto_id>/fases-semaforicas/",
+        FaseSemaforicaListView.as_view(),
+        name="fases_semaforicas_list",
+    ),
+    path(
+        "proyecto/<uuid:proyecto_id>/fases-semaforicas/create/",
+        FaseSemaforicaCreateView.as_view(),
+        name="fase_semaforica_create",
+    ),
+    path(
+        "fase-semaforica/<uuid:item_id>/update/",
+        FaseSemaforicaUpdateView.as_view(),
+        name="fase_semaforica_update",
+    ),
+    path(
+        "fase-semaforica/<uuid:item_id>/delete/",
+        FaseSemaforicaDeleteView.as_view(),
+        name="fase_semaforica_delete",
+    ),
 ]

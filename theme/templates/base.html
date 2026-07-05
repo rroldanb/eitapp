@@ -15,12 +15,12 @@
 
 <body class="bg-gray-50 text-gray-900 font-sans leading-normal tracking-normal">
     {% include "navbar.html" %}
-    
+
     <div id="toast-container"></div>
-    
+
     {% block content %}
     {% endblock %}
-    
+
     <script src="{% static 'js/core/toast.js' %}" defer></script>
     <script src="{% static 'js/core/modal.js' %}" defer></script>
     <script src="{% static 'js/core/htmx-csrf.js' %}" defer></script>

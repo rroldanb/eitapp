@@ -1,10 +1,10 @@
 import pytest
-from django.urls import reverse
 from django.contrib.auth.models import User
+from django.urls import reverse
+
 from apps.mandantes.models import Mandante
 from apps.proyectos.models import Proyecto
 from apps.red_vial.models import Calle
-
 
 pytestmark = pytest.mark.django_db
 
@@ -22,7 +22,9 @@ def mandante():
 @pytest.fixture
 def proyecto(user, mandante):
     return Proyecto.objects.create(
-        title="Proyecto Test", user=user, mandante=mandante,
+        title="Proyecto Test",
+        user=user,
+        mandante=mandante,
     )
 
 
@@ -126,13 +128,15 @@ class TestCalleUpdateView:
             content_type="application/x-www-form-urlencoded",
         )
         content = response.content.decode()
-        assert 'field-input hidden' in content
-        assert 'save-row-btn hidden' in content
-        assert 'field-display' in content
+        assert "field-input hidden" in content
+        assert "save-row-btn hidden" in content
+        assert "field-display" in content
 
     def test_redirects_anon(self, client, calle):
         url = reverse("calle_update", kwargs={"item_id": calle.id})
-        response = client.put(url, data="numero=1&nombre=X", content_type="application/x-www-form-urlencoded")
+        response = client.put(
+            url, data="numero=1&nombre=X", content_type="application/x-www-form-urlencoded"
+        )
         assert response.status_code == 302
 
 
