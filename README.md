@@ -1,6 +1,6 @@
 # EIT App — Gestión de Proyectos de Ingeniería de Transporte
 
-> 🇪🇸 Español · 🇺🇸 English (WIP) · 🇧🇷 Português (WIP)
+> 🇪🇸 Español · 🇺🇸 [English](README.en.md) · 🇧🇷 [Português](README.pt-br.md)
 
 Backend Django para gestión de proyectos de ingeniería de transporte, modelado de red vial, conteos vehiculares, análisis de flujos y exportación a TRANSYT 8S.
 
