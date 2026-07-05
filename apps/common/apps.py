@@ -6,7 +6,8 @@ class CommonConfig(AppConfig):
     name = "apps.common"
 
     def ready(self):
-        self.check_db_connections()
+        # No bloquear startup si la DB externa no está reachable
+        pass
 
     def check_db_connections(self):
         from django.db import connections

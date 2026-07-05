@@ -20,13 +20,13 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-4+3tbsm^#gh*4-%6)va
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',') if os.getenv('DJANGO_ALLOWED_HOSTS') else []
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()] if os.getenv('DJANGO_ALLOWED_HOSTS') else []
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-CSRF_TRUSTED_ORIGINS = os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS') else []
+CSRF_TRUSTED_ORIGINS = [h.strip() for h in os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if h.strip()] if os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS') else []
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
 
@@ -63,6 +63,7 @@ if DEBUG:
     INSTALLED_APPS += ["django_browser_reload"]
 
 TAILWIND_APP_NAME = "theme"
+TAILWIND_STANDALONE_START_COMMAND_ARGS = "-i static_src/src/styles.css -o static/css/dist/styles.css --watch=always"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
