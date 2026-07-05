@@ -1,8 +1,8 @@
 import pytest
 from django.urls import reverse
-from apps.red_vial.models.transyt import ParametroArco
-from apps.red_vial.models import PuntoControl, Nodo
 
+from apps.red_vial.models import Nodo, PuntoControl
+from apps.red_vial.models.transyt import ParametroArco
 
 pytestmark = pytest.mark.django_db
 
@@ -15,25 +15,33 @@ def nodo(proyecto):
 @pytest.fixture
 def arco(proyecto, nodo):
     from apps.red_vial.models import Arco
+
     return Arco.objects.create(
-        nodo_origen=nodo, nodo_destino=nodo,
-        proyecto=proyecto, longitud=100,
+        nodo_origen=nodo,
+        nodo_destino=nodo,
+        proyecto=proyecto,
+        longitud=100,
     )
 
 
 @pytest.fixture
 def punto_control(proyecto, nodo, arco):
     return PuntoControl.objects.create(
-        proyecto=proyecto, nodo=nodo, movimiento='12',
-        arco_entrada=arco, arco_salida=arco,
+        proyecto=proyecto,
+        nodo=nodo,
+        movimiento="12",
+        arco_entrada=arco,
+        arco_salida=arco,
     )
 
 
 @pytest.fixture
 def parametro_arco(proyecto, punto_control):
     return ParametroArco.objects.create(
-        proyecto=proyecto, punto_control=punto_control,
-        flujo_saturacion=1800, ponderador_demora=1.0,
+        proyecto=proyecto,
+        punto_control=punto_control,
+        flujo_saturacion=1800,
+        ponderador_demora=1.0,
         ponderador_detencion=1.0,
     )
 
@@ -70,12 +78,15 @@ class TestParametroArcoCreateView:
     def test_creates_parametro(self, client, user, proyecto, punto_control):
         client.force_login(user)
         url = reverse("parametro_arco_create", kwargs={"proyecto_id": proyecto.id})
-        response = client.post(url, {
-            "punto_control": punto_control.id,
-            "flujo_saturacion": "2000",
-            "ponderador_demora": "1.5",
-            "ponderador_detencion": "0.8",
-        })
+        response = client.post(
+            url,
+            {
+                "punto_control": punto_control.id,
+                "flujo_saturacion": "2000",
+                "ponderador_demora": "1.5",
+                "ponderador_detencion": "0.8",
+            },
+        )
         assert response.status_code == 200
         assert ParametroArco.objects.filter(proyecto=proyecto).exists()
         assert "partials/Transyt/parametro_arco_row.html" in [t.name for t in response.templates]
@@ -94,12 +105,15 @@ class TestParametroArcoCreateView:
     def test_sets_hx_trigger_on_create(self, client, user, proyecto, punto_control):
         client.force_login(user)
         url = reverse("parametro_arco_create", kwargs={"proyecto_id": proyecto.id})
-        response = client.post(url, {
-            "punto_control": punto_control.id,
-            "flujo_saturacion": "2000",
-            "ponderador_demora": "1.0",
-            "ponderador_detencion": "1.0",
-        })
+        response = client.post(
+            url,
+            {
+                "punto_control": punto_control.id,
+                "flujo_saturacion": "2000",
+                "ponderador_demora": "1.0",
+                "ponderador_detencion": "1.0",
+            },
+        )
         assert response["HX-Trigger"] == "parametro-arco-created"
 
 
@@ -119,7 +133,12 @@ class TestParametroArcoUpdateView:
         url = reverse("parametro_arco_update", kwargs={"item_id": parametro_arco.id})
         response = client.put(
             url,
-            data=self._put_data(parametro_arco, flujo_saturacion=2200, ponderador_demora=1.2, ponderador_detencion=0.9),
+            data=self._put_data(
+                parametro_arco,
+                flujo_saturacion=2200,
+                ponderador_demora=1.2,
+                ponderador_detencion=0.9,
+            ),
             content_type="application/x-www-form-urlencoded",
         )
         assert response.status_code == 200
@@ -146,14 +165,15 @@ class TestParametroArcoUpdateView:
             content_type="application/x-www-form-urlencoded",
         )
         content = response.content.decode()
-        assert 'field-input hidden' in content
-        assert 'save-row-btn hidden' in content
-        assert 'field-display' in content
+        assert "field-input hidden" in content
+        assert "save-row-btn hidden" in content
+        assert "field-display" in content
 
     def test_redirects_anon(self, client, parametro_arco):
         url = reverse("parametro_arco_update", kwargs={"item_id": parametro_arco.id})
         response = client.put(
-            url, data=f"punto_control={parametro_arco.punto_control_id}&flujo_saturacion=2000",
+            url,
+            data=f"punto_control={parametro_arco.punto_control_id}&flujo_saturacion=2000",
             content_type="application/x-www-form-urlencoded",
         )
         assert response.status_code == 302

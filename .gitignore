@@ -14,10 +14,10 @@ PRODUCT.md
 skills*
 .gitignore
 .impeccable
-audit_report.md 
-plantilla_importacion_eitapp.xlsx 
+audit_report.md
+plantilla_importacion_eitapp.xlsx
 AGENTS*
-TODO*
+
 *pencod
 node_modules/
 tui.json

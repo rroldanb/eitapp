@@ -1,16 +1,16 @@
 from django.urls import path
+
 from ..views.nodo_views_cbv import (
-    NodosListView,
     NodoCreateView,
-    NodoUpdateView,
     NodoDeleteView,
-    nodo_upload_image_view,
+    NodosListView,
+    NodoUpdateView,
     nodo_delete_image_view,
-    nodo_upload_plano_view,
     nodo_delete_plano_view,
     nodo_images_json_view,
+    nodo_upload_image_view,
+    nodo_upload_plano_view,
 )
-
 
 urlpatterns = [
     path("proyecto/<uuid:proyecto_id>/nodos/", NodosListView.as_view(), name="nodos_list"),

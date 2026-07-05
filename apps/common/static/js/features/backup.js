@@ -54,7 +54,9 @@
                 .trim()
                 .slice(0, 200) || message;
           }
-        } catch (ignored) {}
+        } catch (ignored) {
+          /* ignore */
+        }
         throw new Error(message);
       }
       const blob = await response.blob();

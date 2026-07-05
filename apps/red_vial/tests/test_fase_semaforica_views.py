@@ -1,8 +1,8 @@
 import pytest
 from django.urls import reverse
-from apps.red_vial.models.transyt import FaseSemaforica
-from apps.red_vial.models import PuntoControl, Nodo
 
+from apps.red_vial.models import Nodo, PuntoControl
+from apps.red_vial.models.transyt import FaseSemaforica
 
 pytestmark = pytest.mark.django_db
 
@@ -15,25 +15,34 @@ def nodo(proyecto):
 @pytest.fixture
 def arco(proyecto, nodo):
     from apps.red_vial.models import Arco
+
     return Arco.objects.create(
-        nodo_origen=nodo, nodo_destino=nodo,
-        proyecto=proyecto, longitud=100,
+        nodo_origen=nodo,
+        nodo_destino=nodo,
+        proyecto=proyecto,
+        longitud=100,
     )
 
 
 @pytest.fixture
 def punto_control(proyecto, nodo, arco):
     return PuntoControl.objects.create(
-        proyecto=proyecto, nodo=nodo, movimiento='12',
-        arco_entrada=arco, arco_salida=arco,
+        proyecto=proyecto,
+        nodo=nodo,
+        movimiento="12",
+        arco_entrada=arco,
+        arco_salida=arco,
     )
 
 
 @pytest.fixture
 def fase(proyecto, punto_control):
     return FaseSemaforica.objects.create(
-        proyecto=proyecto, punto_control=punto_control,
-        fase_numero=1, verde_inicio=10.0, verde_fin=30.0,
+        proyecto=proyecto,
+        punto_control=punto_control,
+        fase_numero=1,
+        verde_inicio=10.0,
+        verde_fin=30.0,
     )
 
 
@@ -69,12 +78,15 @@ class TestFaseSemaforicaCreateView:
     def test_creates_fase(self, client, user, proyecto, punto_control):
         client.force_login(user)
         url = reverse("fase_semaforica_create", kwargs={"proyecto_id": proyecto.id})
-        response = client.post(url, {
-            "punto_control": punto_control.id,
-            "fase_numero": "2",
-            "verde_inicio": "15.0",
-            "verde_fin": "35.0",
-        })
+        response = client.post(
+            url,
+            {
+                "punto_control": punto_control.id,
+                "fase_numero": "2",
+                "verde_inicio": "15.0",
+                "verde_fin": "35.0",
+            },
+        )
         assert response.status_code == 200
         assert FaseSemaforica.objects.filter(proyecto=proyecto, fase_numero=2).exists()
         assert "partials/Transyt/fase_semaforica_row.html" in [t.name for t in response.templates]
@@ -93,12 +105,15 @@ class TestFaseSemaforicaCreateView:
     def test_sets_hx_trigger_on_create(self, client, user, proyecto, punto_control):
         client.force_login(user)
         url = reverse("fase_semaforica_create", kwargs={"proyecto_id": proyecto.id})
-        response = client.post(url, {
-            "punto_control": punto_control.id,
-            "fase_numero": "2",
-            "verde_inicio": "10.0",
-            "verde_fin": "30.0",
-        })
+        response = client.post(
+            url,
+            {
+                "punto_control": punto_control.id,
+                "fase_numero": "2",
+                "verde_inicio": "10.0",
+                "verde_fin": "30.0",
+            },
+        )
         assert response["HX-Trigger"] == "fase-semaforica-created"
 
 
@@ -145,14 +160,15 @@ class TestFaseSemaforicaUpdateView:
             content_type="application/x-www-form-urlencoded",
         )
         content = response.content.decode()
-        assert 'field-input hidden' in content
-        assert 'save-row-btn hidden' in content
-        assert 'field-display' in content
+        assert "field-input hidden" in content
+        assert "save-row-btn hidden" in content
+        assert "field-display" in content
 
     def test_redirects_anon(self, client, fase):
         url = reverse("fase_semaforica_update", kwargs={"item_id": fase.id})
         response = client.put(
-            url, data=f"punto_control={fase.punto_control_id}&verde_inicio=20.0",
+            url,
+            data=f"punto_control={fase.punto_control_id}&verde_inicio=20.0",
             content_type="application/x-www-form-urlencoded",
         )
         assert response.status_code == 302

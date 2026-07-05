@@ -1,11 +1,10 @@
-import io
 import json
-from unittest.mock import patch, MagicMock
-from django.test import TestCase, Client
-from django.urls import reverse
+from unittest.mock import MagicMock, patch
+
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import Http404
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from apps.mandantes.models import Mandante
 from apps.proyectos.models import Proyecto
@@ -28,7 +27,9 @@ class NodoImagenViewsTest(TestCase):
     @patch("apps.red_vial.views.nodo_views_cbv.get_image_from_request")
     @patch("apps.red_vial.views.nodo_views_cbv.update_nodo_image")
     def test_upload_image_view_success(self, mock_update, mock_get_image):
-        mock_get_image.return_value = SimpleUploadedFile("test.webp", b"data", content_type="image/webp")
+        mock_get_image.return_value = SimpleUploadedFile(
+            "test.webp", b"data", content_type="image/webp"
+        )
         mock_update.return_value = self.nodo
 
         url = reverse("nodo_upload_image", args=[self.nodo.id])
@@ -179,7 +180,9 @@ class NodoPlanoViewsTest(TestCase):
     @patch("apps.red_vial.views.nodo_views_cbv.get_image_from_request")
     @patch("apps.red_vial.views.nodo_views_cbv.update_nodo_plano")
     def test_upload_plano_view_success(self, mock_update, mock_get_image):
-        mock_get_image.return_value = SimpleUploadedFile("test.webp", b"data", content_type="image/webp")
+        mock_get_image.return_value = SimpleUploadedFile(
+            "test.webp", b"data", content_type="image/webp"
+        )
         mock_update.return_value = self.nodo
 
         url = reverse("nodo_upload_plano", args=[self.nodo.id])
@@ -311,13 +314,16 @@ class NodoModelDeleteImageCleanupTest(TestCase):
         self.user = User.objects.create_user(username="testdel", password="12345")
         self.mandante = Mandante.objects.create(name="Del Mandante")
         self.proyecto = Proyecto.objects.create(
-            title="Del Proyecto", user=self.user, mandante=self.mandante,
+            title="Del Proyecto",
+            user=self.user,
+            mandante=self.mandante,
         )
 
     @patch("apps.imagenes.services.storage_service.delete_image")
     def test_delete_nodo_cleans_up_both_images(self, mock_delete):
         nodo = Nodo.objects.create(
-            numero=1, proyecto=self.proyecto,
+            numero=1,
+            proyecto=self.proyecto,
             imagen="https://bucket.supabase.co/img1.webp",
             plano="https://bucket.supabase.co/plano1.webp",
         )
@@ -335,7 +341,8 @@ class NodoModelDeleteImageCleanupTest(TestCase):
     @patch("apps.imagenes.services.storage_service.delete_image")
     def test_delete_nodo_with_only_imagen(self, mock_delete):
         nodo = Nodo.objects.create(
-            numero=3, proyecto=self.proyecto,
+            numero=3,
+            proyecto=self.proyecto,
             imagen="https://bucket.supabase.co/img3.webp",
         )
         nodo.delete()
@@ -344,7 +351,8 @@ class NodoModelDeleteImageCleanupTest(TestCase):
     @patch("apps.imagenes.services.storage_service.delete_image")
     def test_delete_nodo_with_only_plano(self, mock_delete):
         nodo = Nodo.objects.create(
-            numero=4, proyecto=self.proyecto,
+            numero=4,
+            proyecto=self.proyecto,
             plano="https://bucket.supabase.co/plano4.webp",
         )
         nodo.delete()
@@ -352,13 +360,15 @@ class NodoModelDeleteImageCleanupTest(TestCase):
 
     @patch("apps.imagenes.services.storage_service.delete_project_image")
     def test_proyecto_cascade_cleans_up_nodo_images(self, mock_delete):
-        nodo1 = Nodo.objects.create(
-            numero=10, proyecto=self.proyecto,
+        Nodo.objects.create(
+            numero=10,
+            proyecto=self.proyecto,
             imagen="https://bucket.supabase.co/n10-img.webp",
             plano="https://bucket.supabase.co/n10-plano.webp",
         )
-        nodo2 = Nodo.objects.create(
-            numero=11, proyecto=self.proyecto,
+        Nodo.objects.create(
+            numero=11,
+            proyecto=self.proyecto,
             imagen="https://bucket.supabase.co/n11-img.webp",
         )
         self.proyecto.delete()
@@ -406,7 +416,9 @@ class NodoImagesJsonViewTest(TestCase):
         self.assertEqual(data["plano"], "")
 
     def test_returns_partial_images(self):
-        nodo = Nodo.objects.create(numero=12, proyecto=self.proyecto, imagen="https://example.com/solo-img.webp")
+        nodo = Nodo.objects.create(
+            numero=12, proyecto=self.proyecto, imagen="https://example.com/solo-img.webp"
+        )
         response = self.client.get(self._url(nodo.id))
         self.assertEqual(response.status_code, 200)
         data = response.json()

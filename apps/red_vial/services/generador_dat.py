@@ -1,15 +1,15 @@
-from typing import Any
-
-from io import BytesIO
-import zipfile
-
 from django.db import transaction
-from django.db.models import Sum, QuerySet
 from django.shortcuts import get_object_or_404
+
 from apps.proyectos.models import Proyecto
 from apps.red_vial.models import (
-    ConfiguracionTransyt, ParametroArco, FaseSemaforica,
-    PuntoControl, ResumenFlujo, Periodo, Arco, Nodo,
+    ConfiguracionTransyt,
+    FaseSemaforica,
+    Nodo,
+    ParametroArco,
+    Periodo,
+    PuntoControl,
+    ResumenFlujo,
 )
 
 
@@ -22,16 +22,16 @@ class DatGenerator:
         self.errors: list[str] = []
 
     def i5(self, value: int, field_index: int = 0) -> str:
-        return f'{value:>5d}'
+        return f"{value:>5d}"
 
     def pad_line(self, fields: list[str]) -> str:
-        line = ''.join(fields)
+        line = "".join(fields)
         return line.ljust(self.CARD_WIDTH)
 
     def header_line(self) -> str:
-        title = (self.proyecto.title or 'SIN TITULO')[:60]
+        title = (self.proyecto.title or "SIN TITULO")[:60]
         nodos_pc = Nodo.objects.filter(proyecto=self.proyecto, numero_pc__isnull=False).count()
-        return f'  {title:<56}{nodos_pc:>4d}'.ljust(self.CARD_WIDTH)
+        return f"  {title:<56}{nodos_pc:>4d}".ljust(self.CARD_WIDTH)
 
     def card_1(self, config: ConfiguracionTransyt) -> str:
         nint = config.ciclo * 2
@@ -58,7 +58,9 @@ class DatGenerator:
 
     def cards_11(self):
         lines = []
-        nodos_pc = Nodo.objects.filter(proyecto=self.proyecto, numero_pc__isnull=False).order_by('numero_pc')
+        nodos_pc = Nodo.objects.filter(proyecto=self.proyecto, numero_pc__isnull=False).order_by(
+            "numero_pc"
+        )
         for nodo in nodos_pc:
             lines.append(self.pad_line([self.i5(11), self.i5(nodo.numero), self.i5(0)]))
         return lines
@@ -107,7 +109,7 @@ class DatGenerator:
                 entrada_groups[key] = []
             entrada_groups[key].append(pc)
 
-        for entrada_id, pc_group in entrada_groups.items():
+        for _entrada_id, pc_group in entrada_groups.items():
             entrada = pc_group[0].arco_entrada
             codigo_entrada = int(entrada.codigo_arco)
 
@@ -125,7 +127,7 @@ class DatGenerator:
             turn_fields = []
             for pc in pc_group:
                 codigo_salida = int(pc.arco_salida.codigo_arco)
-                pct = int(round(flows.get(pc.id, 0) / total_flow * 1000))
+                pct = round(flows.get(pc.id, 0) / total_flow * 1000)
 
                 fase = FaseSemaforica.objects.filter(
                     proyecto=self.proyecto, punto_control=pc
@@ -140,9 +142,9 @@ class DatGenerator:
                     proyecto=self.proyecto, punto_control=pc_group[0]
                 ).first()
                 if fase:
-                    offset = int(round(fase.verde_inicio * 10))
+                    offset = round(fase.verde_inicio * 10)
 
-            all_fields = [32, codigo_entrada, offset, 0] + turn_fields
+            all_fields = [32, codigo_entrada, offset, 0, *turn_fields]
             i5_fields = [self.i5(v) for v in all_fields]
             lines.append(self.pad_line(i5_fields))
 
@@ -151,21 +153,29 @@ class DatGenerator:
     def validate(self):
         errors = []
         if not ConfiguracionTransyt.objects.filter(proyecto=self.proyecto).exists():
-            errors.append('Configuración TRANSYT: debe configurar los parámetros globales (ciclo, W, K, etc.)')
+            errors.append(
+                "Configuración TRANSYT: debe configurar los parámetros globales (ciclo, W, K, etc.)"
+            )
         pcs = PuntoControl.objects.filter(proyecto=self.proyecto)
         if not pcs.exists():
-            errors.append('Puntos de Control: debe definir al menos un punto de control')
+            errors.append("Puntos de Control: debe definir al menos un punto de control")
         else:
             for pc in pcs:
                 if not ParametroArco.objects.filter(punto_control=pc).exists():
-                    errors.append(f'Parámetros de Arco: falta definir parámetros para {pc.nombre} ({pc.codigo_pc})')
-                if not FaseSemaforica.objects.filter(proyecto=self.proyecto, punto_control=pc).exists():
-                    errors.append(f'Fases Semafóricas: falta definir fases para {pc.nombre} ({pc.codigo_pc})')
+                    errors.append(
+                        f"Parámetros de Arco: falta definir parámetros para {pc.nombre} ({pc.codigo_pc})"
+                    )
+                if not FaseSemaforica.objects.filter(
+                    proyecto=self.proyecto, punto_control=pc
+                ).exists():
+                    errors.append(
+                        f"Fases Semafóricas: falta definir fases para {pc.nombre} ({pc.codigo_pc})"
+                    )
         periodos = Periodo.objects.filter(proyecto=self.proyecto)
         if not periodos.exists():
-            errors.append('Períodos: debe definir al menos un período de análisis')
+            errors.append("Períodos: debe definir al menos un período de análisis")
         if not ResumenFlujo.objects.filter(pc__proyecto=self.proyecto).exists():
-            errors.append('Resumen de Flujos: debe calcular los flujos para al menos un período')
+            errors.append("Resumen de Flujos: debe calcular los flujos para al menos un período")
         return errors
 
     def generate(self) -> tuple[str | None, list[str]]:
@@ -189,7 +199,7 @@ class DatGenerator:
         lines.extend(self.cards_31(periodo))
         lines.extend(self.cards_32(periodo))
 
-        content = '\r\n'.join(lines) + '\r\n'
+        content = "\r\n".join(lines) + "\r\n"
         return content, []
 
     def generate_all_periods(self) -> dict[str, str]:
@@ -206,7 +216,7 @@ class DatGenerator:
             lines.extend(self.cards_11())
             lines.extend(self.cards_31(periodo))
             lines.extend(self.cards_32(periodo))
-            files[periodo.codigo] = '\r\n'.join(lines) + '\r\n'
+            files[periodo.codigo] = "\r\n".join(lines) + "\r\n"
         return files
 
     def validate_output(self, content):
@@ -215,30 +225,32 @@ class DatGenerator:
         """
         errors = []
         if not content:
-            return ['El contenido está vacío']
+            return ["El contenido está vacío"]
 
         # Normalize line endings: handle both \r\n and \n
-        if '\r\n' in content:
-            lines = content.split('\r\n')
+        if "\r\n" in content:
+            lines = content.split("\r\n")
             has_crlf = True
         else:
-            lines = content.split('\n')
+            lines = content.split("\n")
             has_crlf = False
         # Remove trailing empty line from final terminator
-        if lines and lines[-1] == '':
+        if lines and lines[-1] == "":
             lines = lines[:-1]
 
         if not lines:
-            return ['No hay líneas en el contenido']
+            return ["No hay líneas en el contenido"]
 
         for i, line in enumerate(lines):
             line_num = i + 1
 
             if len(line) != self.CARD_WIDTH:
-                errors.append(f'Línea {line_num}: tiene {len(line)} caracteres (se esperan {self.CARD_WIDTH})')
+                errors.append(
+                    f"Línea {line_num}: tiene {len(line)} caracteres (se esperan {self.CARD_WIDTH})"
+                )
 
             if len(line) < 5:
-                errors.append(f'Línea {line_num}: muy corta para tener un número de tarjeta')
+                errors.append(f"Línea {line_num}: muy corta para tener un número de tarjeta")
                 continue
 
             try:
@@ -251,13 +263,15 @@ class DatGenerator:
                 continue
             # Validar que cada campo I5 sea numérico o espacio
             for j in range(0, len(line), 5):
-                field = line[j:j+5]
+                field = line[j : j + 5]
                 stripped = field.strip()
-                if stripped and not stripped.lstrip('-').isdigit():
-                    errors.append(f'Línea {line_num}, campo {j//5+1}: "{field}" no es un entero I5 válido')
+                if stripped and not stripped.lstrip("-").isdigit():
+                    errors.append(
+                        f'Línea {line_num}, campo {j // 5 + 1}: "{field}" no es un entero I5 válido'
+                    )
 
         if not has_crlf:
-            errors.append('El archivo no tiene terminación CRLF')
+            errors.append("El archivo no tiene terminación CRLF")
 
         # Check card ordering (skip header line)
         card_order = []
@@ -271,7 +285,9 @@ class DatGenerator:
         expected_prefix = [1, 2]
         for i, c in enumerate(card_order):
             if i < len(expected_prefix) and c != expected_prefix[i]:
-                errors.append(f'Línea {i+1}: se esperaba tarjeta {expected_prefix[i]}, se encontró {c}')
+                errors.append(
+                    f"Línea {i + 1}: se esperaba tarjeta {expected_prefix[i]}, se encontró {c}"
+                )
                 break
 
         return errors
@@ -287,9 +303,9 @@ def generar_parametros_arco(proyecto):
             proyecto=proyecto,
             punto_control=pc,
             defaults={
-                'flujo_saturacion': 1800.0,
-                'ponderador_demora': 1.0,
-                'ponderador_detencion': 1.0,
+                "flujo_saturacion": 1800.0,
+                "ponderador_demora": 1.0,
+                "ponderador_detencion": 1.0,
             },
         )
         if created:
@@ -308,8 +324,8 @@ def generar_fases_semaforicas(proyecto):
             punto_control=pc,
             fase_numero=1,
             defaults={
-                'verde_inicio': 0,
-                'verde_fin': 30,
+                "verde_inicio": 0,
+                "verde_fin": 30,
             },
         )
         if created:

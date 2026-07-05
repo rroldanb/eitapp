@@ -16,14 +16,23 @@
     "openModal": "writable",
     "closeModal": "writable",
     "ModalUtils": "writable",
-    "toggleSidebar": "writable"
+    "toggleSidebar": "writable",
+    "closeDeleteModal": "writable",
+    "closeNodoFileModal": "writable",
+    "uploadNodoFile": "writable",
+    "deleteNodoFile": "writable",
+    "closePendingModal": "writable",
+    "toggleDestino": "writable",
+    "toggleMandante": "writable",
+    "closeCreateModal": "writable",
+    "closePasswordModal": "writable"
   },
   "rules": {
     "no-var": "warn",
     "prefer-const": "warn",
     "no-undef": "warn",
     "no-unused-vars": ["warn", { "args": "none" }],
-    "no-console": "warn",
+    "no-console": ["warn", { "allow": ["error", "warn"] }],
     "no-empty": "warn"
   }
 }

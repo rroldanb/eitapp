@@ -1,4 +1,5 @@
 from django.db import models
+
 from apps.common.models import BaseModel
 
 
@@ -6,11 +7,13 @@ class Regulacion(BaseModel):
     """
     Tipos de regulación para movimientos en intersecciones (PARE, CEDA, SEMAFORO, LIBRE)
     """
+
     codigo = models.CharField(max_length=20, unique=True)
     descripcion = models.CharField(max_length=100)
 
     def __str__(self):
         return f"{self.codigo} - {self.descripcion}"
+
 
 class Coeficiente_Cruce(BaseModel):
     coeficiente = models.FloatField(blank=False, null=False)
@@ -20,4 +23,3 @@ class Coeficiente_Cruce(BaseModel):
 
     def __str__(self):
         return f"{self.nomenclatura} - {self.tipo_transporte} ({self.coeficiente})"
-

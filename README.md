@@ -1,5 +1,7 @@
 # EIT App — Gestión de Proyectos de Ingeniería de Transporte
 
+> 🇪🇸 Español · 🇺🇸 [English](README.en.md) · 🇧🇷 [Português](README.pt-br.md)
+
 Backend Django para gestión de proyectos de ingeniería de transporte, modelado de red vial, conteos vehiculares, análisis de flujos y exportación a TRANSYT 8S.
 
 ## Características
@@ -16,14 +18,25 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
 
 ## Stack Tecnológico
 
-- Django 4.2+
+- **Python 3.11** + **Django 5.2**
 - SQLite (desarrollo) / PostgreSQL (producción)
-- HTMX para interactividad (CRUD inline)
-- Tailwind CSS (modo desarrollo con `python manage.py tailwind.dev`)
+- HTMX 2.x para interactividad (CRUD inline)
+- Tailwind CSS v4 (modo desarrollo con `python manage.py tailwind.dev`)
 - WhiteNoise para archivos estáticos
-- Chart.js para gráficos de análisis
-- Font Awesome para iconografía
-- python-dotenv para configuración
+- Chart.js 4.x para gráficos de análisis
+- Font Awesome 6 (CDN) para iconografía
+- Supabase Storage para imágenes de proyecto/nodo
+
+## Tooling
+
+| Herramienta | Uso |
+|-------------|-----|
+| **ruff** | Linter + formatter Python |
+| **ESLint** | Linter JavaScript |
+| **Prettier** | Formatter JavaScript |
+| **pre-commit** | Git hooks automáticos |
+| **coverage** | Cobertura de tests (mín. 80%) |
+| **pytest** | Test runner |
 
 ## Estructura de Apps
 
@@ -115,15 +128,43 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
 | `/red-vial/proyecto/<id>/parametros-arco/` | Parámetros de arco |
 | `/red-vial/proyecto/<id>/fases-semaforicas/` | Fases semafóricas |
 
+## Branches
+
+| Rama | Propósito | Protegida | CI |
+|------|-----------|-----------|----|
+| `main` | Producción | Sí (PR + checks) | Solo manual (workflow_dispatch) |
+| `staging` | Pre-producción | Sí (PR + checks) | Auto-deploy al push |
+| `feature/*` | Desarrollo | No | lint + test en PR |
+| `fix/*` | Hotfix | No | lint + test en PR |
+
+## Ambientes
+
+| Ambiente | DB | URL | Deploy |
+|----------|----|-----|--------|
+| local | SQLite | localhost:8000 | `python manage.py runserver` |
+| staging | PostgreSQL (VPS) | — | Automático al merge a `staging` |
+| production | PostgreSQL (VPS) | — | Manual via GitHub Actions |
+
+## CI/CD
+
+Los pipelines de GitHub Actions corren en cada PR/push a `staging`:
+
+1. **Lint** — ruff (Python) + ESLint + Prettier (JS)
+2. **Test** — pytest + coverage (umbral 80%)
+3. **Build** — collectstatic
+4. **Deploy Staging** — automático al push a `staging`
+5. **Deploy Production** — manual via `workflow_dispatch`
+
 ## Inicio Rápido
 
 ```bash
 # Clonar y crear entorno virtual
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate
 
 # Instalar dependencias
 pip install -r requirements.txt
+pre-commit install
 
 # Configurar entorno
 cp .env.example .env
@@ -139,6 +180,16 @@ python manage.py runserver
 
 # Modo desarrollo (Tailwind):
 python manage.py tailwind.dev
+```
+
+### Lint & Format local
+
+```bash
+ruff check .                          # Python lint
+ruff format --check .                 # Python format
+npm run lint                          # JS lint
+npm run format                        # JS format check
+pre-commit run --all-files            # Todo junto
 ```
 
 ## Variables de Entorno

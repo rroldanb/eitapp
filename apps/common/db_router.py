@@ -1,4 +1,5 @@
 import threading
+
 from django.conf import settings
 
 _active_db = threading.local()
@@ -10,7 +11,7 @@ def set_active_db(alias):
 
 
 def get_active_db():
-    return getattr(_active_db, 'alias', None)
+    return getattr(_active_db, "alias", None)
 
 
 def clear_active_db():
@@ -19,12 +20,12 @@ def clear_active_db():
 
 class ActiveDatabaseRouter:
     def db_for_read(self, model, **hints):
-        if model._meta.app_label == 'sessions':
+        if model._meta.app_label == "sessions":
             return None
         return get_active_db() or None
 
     def db_for_write(self, model, **hints):
-        if model._meta.app_label == 'sessions':
+        if model._meta.app_label == "sessions":
             return None
         return get_active_db() or None
 
@@ -40,7 +41,7 @@ class DatabaseSelectorMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        alias = request.session.get('active_db')
+        alias = request.session.get("active_db")
         if alias:
             set_active_db(alias)
         try:

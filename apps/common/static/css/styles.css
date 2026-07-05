@@ -29,7 +29,7 @@ body::before {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image: url("../img/base2.jpg");
+    background-image: url("../img/EIT_AMS.webp");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -251,12 +251,12 @@ tr.row-fade-out {
     transition: height 0.4s ease;
 }
 
-.htmx-request { 
-    opacity: 0.7; 
-    pointer-events: none; 
+.htmx-request {
+    opacity: 0.7;
+    pointer-events: none;
 }
-.htmx-request .htmx-indicator { 
-    display: inline-block !important; 
+.htmx-request .htmx-indicator {
+    display: inline-block !important;
 }
 
 
@@ -270,9 +270,9 @@ tr.row-fade-out {
     display: none;
 }
 
-.htmx-request .btn { 
-    opacity: 0.5; 
-    pointer-events: none; 
+.htmx-request .btn {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 tr.htmx-swapping td {
@@ -283,8 +283,8 @@ tr.htmx-swapping td {
 
 /* .htmx-swapping {
   background-color: rgb(30, 0, 255) !important;
-  opacity: 0;                       
-  transition: all 1s ease-out;      
+  opacity: 0;
+  transition: all 1s ease-out;
 } */
 
 /* Sticky columns + scroll */
@@ -550,7 +550,7 @@ textarea:focus-visible {
     font-size: 1.1em;
     user-select: none;
     }
-    
+
 .sd-summary:hover {
     background-color: #905bb5;
     color: white;

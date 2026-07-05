@@ -107,7 +107,6 @@
 
   document.addEventListener('htmx:afterRequest', function (event) {
     const status = event.detail.xhr && event.detail.xhr.status;
-    const successful = event.detail.successful;
     const trigger = event.detail.elt || event.detail.target;
     const action = trigger && trigger.dataset && trigger.dataset.action;
     const row =
@@ -147,7 +146,9 @@
         try {
           const data = JSON.parse(event.detail.xhr.responseText);
           errorMsg = data.error || data.message || '';
-        } catch (e) {}
+        } catch (e) {
+          /* ignore */
+        }
       }
       if (errorMsg) showToast(errorMsg, false);
     }

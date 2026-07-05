@@ -2,19 +2,17 @@ from typing import Any
 
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+
 from apps.red_vial.models import (
-    Calle,
-    Nodo,
     Arco,
-    Regulacion,
+    Calle,
     Coeficiente_Cruce,
+    Nodo,
+    Regulacion,
 )
-from apps.proyectos.models import Proyecto
-
-
-
 
 # ========== REGULACION SERVICES ==========
+
 
 def get_all_regulaciones() -> QuerySet[Regulacion]:
     """Obtener todos los tipos de regulación"""
@@ -52,6 +50,7 @@ def regulacion_delete(regulacion_id: str) -> None:
 
 
 # ========== COEFICIENTE CRUCE SERVICES ==========
+
 
 def get_all_coeficientes() -> QuerySet[Coeficiente_Cruce]:
     """Obtener todos los coeficientes de cruce"""
@@ -95,41 +94,46 @@ def coeficiente_delete(coeficiente_id: str) -> None:
 
 # ========== IMPORT/EXPORT SERVICES ==========
 
+
 def import_calles_from_excel(proyecto_id: str, calles_data: list[dict[str, Any]]) -> list[Calle]:
     """Importar calles desde datos de Excel"""
     calles_creadas = []
     for data in calles_data:
-        data['proyecto_id'] = proyecto_id
+        data["proyecto_id"] = proyecto_id
         calle = Calle.objects.create(**data)
         calles_creadas.append(calle)
     return calles_creadas
 
 
-def import_nodos_from_excel(proyecto_id: str, nodos_data: list[dict[str, Any]], calles_mapping: dict[str | int, str]) -> list[Nodo]:
+def import_nodos_from_excel(
+    proyecto_id: str, nodos_data: list[dict[str, Any]], calles_mapping: dict[str | int, str]
+) -> list[Nodo]:
     """Importar nodos desde datos de Excel"""
     nodos_creados = []
     for data in nodos_data:
-        data['proyecto_id'] = proyecto_id
+        data["proyecto_id"] = proyecto_id
         # Mapear IDs de calles si es necesario
-        if 'calle_1_numero' in data:
-            data['calle_1_id'] = calles_mapping.get(data.pop('calle_1_numero'))
-        if 'calle_2_numero' in data:
-            data['calle_2_id'] = calles_mapping.get(data.pop('calle_2_numero'))
+        if "calle_1_numero" in data:
+            data["calle_1_id"] = calles_mapping.get(data.pop("calle_1_numero"))
+        if "calle_2_numero" in data:
+            data["calle_2_id"] = calles_mapping.get(data.pop("calle_2_numero"))
         nodo = Nodo.objects.create(**data)
         nodos_creados.append(nodo)
     return nodos_creados
 
 
-def import_arcos_from_excel(proyecto_id: str, arcos_data: list[dict[str, Any]], nodos_mapping: dict[str | int, str]) -> list[Arco]:
+def import_arcos_from_excel(
+    proyecto_id: str, arcos_data: list[dict[str, Any]], nodos_mapping: dict[str | int, str]
+) -> list[Arco]:
     """Importar arcos desde datos de Excel"""
     arcos_creados = []
     for data in arcos_data:
-        data['proyecto_id'] = proyecto_id
+        data["proyecto_id"] = proyecto_id
         # Mapear IDs de nodos
-        if 'nodo_origen_numero' in data:
-            data['nodo_origen_id'] = nodos_mapping.get(data.pop('nodo_origen_numero'))
-        if 'nodo_destino_numero' in data:
-            data['nodo_destino_id'] = nodos_mapping.get(data.pop('nodo_destino_numero'))
+        if "nodo_origen_numero" in data:
+            data["nodo_origen_id"] = nodos_mapping.get(data.pop("nodo_origen_numero"))
+        if "nodo_destino_numero" in data:
+            data["nodo_destino_id"] = nodos_mapping.get(data.pop("nodo_destino_numero"))
         arco = Arco.objects.create(**data)
         arcos_creados.append(arco)
     return arcos_creados
