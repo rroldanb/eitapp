@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
-from apps.red_vial.models import Periodo
 
+from apps.red_vial.models import Periodo
 
 pytestmark = pytest.mark.django_db
 
@@ -9,8 +9,11 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def periodo(proyecto):
     return Periodo.objects.create(
-        proyecto=proyecto, codigo='PM-L',
-        hora_inicio='08:00', hora_fin='09:00', es_laboral=True,
+        proyecto=proyecto,
+        codigo="PM-L",
+        hora_inicio="08:00",
+        hora_fin="09:00",
+        es_laboral=True,
     )
 
 
@@ -46,12 +49,17 @@ class TestPeriodoCreateView:
     def test_creates_periodo(self, client, user, proyecto):
         client.force_login(user)
         url = reverse("periodo_create", kwargs={"proyecto_id": proyecto.id})
-        response = client.post(url, {
-            "codigo": "PM-L", "hora_inicio": "08:00",
-            "hora_fin": "09:00", "es_laboral": "true",
-        })
+        response = client.post(
+            url,
+            {
+                "codigo": "PM-L",
+                "hora_inicio": "08:00",
+                "hora_fin": "09:00",
+                "es_laboral": "true",
+            },
+        )
         assert response.status_code == 200
-        assert Periodo.objects.filter(proyecto=proyecto, codigo='PM-L').exists()
+        assert Periodo.objects.filter(proyecto=proyecto, codigo="PM-L").exists()
         assert "partials/Periodo/periodo_row.html" in [t.name for t in response.templates]
 
     def test_rejects_empty_data(self, client, user, proyecto):
@@ -75,10 +83,15 @@ class TestPeriodoCreateView:
     def test_sets_hx_trigger_on_create(self, client, user, proyecto):
         client.force_login(user)
         url = reverse("periodo_create", kwargs={"proyecto_id": proyecto.id})
-        response = client.post(url, {
-            "codigo": "PM-L", "hora_inicio": "08:00",
-            "hora_fin": "09:00", "es_laboral": "true",
-        })
+        response = client.post(
+            url,
+            {
+                "codigo": "PM-L",
+                "hora_inicio": "08:00",
+                "hora_fin": "09:00",
+                "es_laboral": "true",
+            },
+        )
         assert response["HX-Trigger"] == "periodo-created"
 
 
@@ -115,9 +128,9 @@ class TestPeriodoUpdateView:
             content_type="application/x-www-form-urlencoded",
         )
         content = response.content.decode()
-        assert 'field-input hidden' in content
-        assert 'save-row-btn hidden' in content
-        assert 'field-display' in content
+        assert "field-input hidden" in content
+        assert "save-row-btn hidden" in content
+        assert "field-display" in content
 
     def test_redirects_anon(self, client, periodo):
         url = reverse("periodo_update", kwargs={"item_id": periodo.id})

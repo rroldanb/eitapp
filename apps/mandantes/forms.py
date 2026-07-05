@@ -1,9 +1,9 @@
 from django import forms
-from apps.mandantes.models import Mandante, Contacto
+
+from apps.mandantes.models import Contacto, Mandante
 
 
 class MandanteForm(forms.ModelForm):
-
     class Meta:
         model = Mandante
         fields = ["name", "location", "details"]
@@ -20,10 +20,9 @@ class MandanteForm(forms.ModelForm):
 
 
 class ContactoForm(forms.ModelForm):
-
     class Meta:
         model = Contacto
-        fields = ["name", "email", "phone","cargo", "position", "details"]
+        fields = ["name", "email", "phone", "cargo", "position", "details"]
         labels = {
             "name": "Nombre",
             "email": "Correo electrónico",
@@ -40,6 +39,3 @@ class ContactoForm(forms.ModelForm):
             "position": forms.TextInput(attrs={"class": "form-control"}),
             "details": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
-
-
-

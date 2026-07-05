@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models.proyecto import Proyecto, Imagenes_proyecto
+
+from .models.proyecto import Imagenes_proyecto, Proyecto
 
 
 class ImagenesProyectoInline(admin.TabularInline):
@@ -7,10 +8,11 @@ class ImagenesProyectoInline(admin.TabularInline):
 
 
 class ProyectoAdmin(admin.ModelAdmin):
-    list_display = ('title', 'mandante', 'date_completed')
-    search_fields = ('title', 'mandante__name')
-    list_filter = ('date_completed',)
+    list_display = ("title", "mandante", "date_completed")
+    search_fields = ("title", "mandante__name")
+    list_filter = ("date_completed",)
     inlines = [ImagenesProyectoInline]
+
 
 admin.site.register(Proyecto, ProyectoAdmin)
 

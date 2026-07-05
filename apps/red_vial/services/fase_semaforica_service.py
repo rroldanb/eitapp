@@ -1,23 +1,27 @@
 from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 
-from apps.red_vial.models.transyt import FaseSemaforica
 from apps.proyectos.models import Proyecto
 from apps.red_vial.forms.transyt_forms import FaseSemaforicaForm
-from .base_service import apply_sort_to_queryset, update_item, delete_item
+from apps.red_vial.models.transyt import FaseSemaforica
+
+from .base_service import apply_sort_to_queryset, delete_item, update_item
 
 
-def get_fases_by_proyecto(proyecto_id: str, sort_by: str | None = None, order: str = 'asc') -> QuerySet[FaseSemaforica]:
+def get_fases_by_proyecto(
+    proyecto_id: str, sort_by: str | None = None, order: str = "asc"
+) -> QuerySet[FaseSemaforica]:
     qs = FaseSemaforica.objects.filter(proyecto_id=proyecto_id).select_related(
-        'punto_control__nodo'
+        "punto_control__nodo"
     )
     valid_fields = {
-        'punto_control__nodo__numero_pc': 'punto_control__nodo__numero_pc',
-        'punto_control__movimiento': 'punto_control__movimiento',
-        'fase_numero': 'fase_numero',
-        'verde_inicio': 'verde_inicio',
-        'verde_fin': 'verde_fin',
+        "punto_control__nodo__numero_pc": "punto_control__nodo__numero_pc",
+        "punto_control__movimiento": "punto_control__movimiento",
+        "fase_numero": "fase_numero",
+        "verde_inicio": "verde_inicio",
+        "verde_fin": "verde_fin",
     }
     return apply_sort_to_queryset(qs, sort_by=sort_by, order=order, valid_fields=valid_fields)
 

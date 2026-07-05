@@ -5,18 +5,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('proyectos', '0003_proyecto_image_url'),
+        ("proyectos", "0003_proyecto_image_url"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Imagenes_proyecto',
+            name="Imagenes_proyecto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image_url', models.URLField()),
-                ('proyecto', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='proyectos.proyecto')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("image_url", models.URLField()),
+                (
+                    "proyecto",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="images",
+                        to="proyectos.proyecto",
+                    ),
+                ),
             ],
         ),
     ]

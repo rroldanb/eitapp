@@ -1,10 +1,12 @@
 from typing import Any
+
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+
 from apps.red_vial.models import Periodo
 
-
 # ========== PERIODO SERVICES ==========
+
 
 def get_all_periodos() -> QuerySet[Periodo]:
     """Obtener todos los períodos"""

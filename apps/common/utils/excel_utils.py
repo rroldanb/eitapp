@@ -1,7 +1,8 @@
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
 from io import BytesIO
+
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
 
 HEADER_FILL = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
 HEADER_FONT = Font(name="Calibri", bold=True, color="FFFFFF", size=11)
@@ -44,7 +45,7 @@ def write_sheet(ws, title, fields, samples, notes=None):
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         cell.border = THIN_BORDER
 
-    for c, (t, r) in enumerate(zip(types, required), 1):
+    for c, (t, r) in enumerate(zip(types, required, strict=False), 1):
         is_fk = t.startswith("FK")
         label = f"[{'REQ' if r else 'OPC'}] {t}"
         cell = ws.cell(row=2, column=c, value=label)
@@ -100,7 +101,8 @@ def _base_val(hour, minute, peak_low, peak_high, off_peak_low, off_peak_high):
     return (off_peak_low + off_peak_high) // 2
 
 
-PC_MOV = {'PC-01': '12', 'PC-02': '21'}
+PC_MOV = {"PC-01": "12", "PC-02": "21"}
+
 
 def _periodizacion_rows():
     rows = []
@@ -126,7 +128,23 @@ def _periodizacion_rows():
                 peat = _base_val(hour, minute, 150, 350, 60, 120)
                 cicl = _base_val(hour, minute, 25, 70, 10, 20)
                 moto = _base_val(hour, minute, 35, 100, 15, 30)
-                rows.append((BASE_DATE, hora, pc, period, proj, vl, txc, txb, c2e, c_mas2e, peat, cicl, moto))
+                rows.append(
+                    (
+                        BASE_DATE,
+                        hora,
+                        pc,
+                        period,
+                        proj,
+                        vl,
+                        txc,
+                        txb,
+                        c2e,
+                        c_mas2e,
+                        peat,
+                        cicl,
+                        moto,
+                    )
+                )
     return rows
 
 
@@ -170,7 +188,9 @@ def generar_plantilla():
         cell = ws_readme.cell(row=r, column=1, value=text)
         if r == 1:
             cell.font = Font(name="Calibri", bold=True, size=16, color="1F4E79")
-        elif text.startswith("INSTRUCCIONES") or text.startswith("ORDEN") or text.startswith("NOTA"):
+        elif (
+            text.startswith("INSTRUCCIONES") or text.startswith("ORDEN") or text.startswith("NOTA")
+        ):
             cell.font = Font(name="Calibri", bold=True, size=11, color="1F4E79")
         else:
             cell.font = Font(name="Calibri", size=11)
@@ -179,189 +199,358 @@ def generar_plantilla():
     ws_readme.sheet_properties.tabColor = "1F4E79"
 
     sheets_data = [
-        ("Mandante", [
-            ("name", "Texto (100)", True, "Nombre del mandante/cliente"),
-            ("location", "Texto (100)", True, "Ubicacion o direccion"),
-            ("details", "Texto", False, "Notas u observaciones"),
-        ], [
-            ("Municipalidad de Santiago", "Santiago Centro", "Comuna piloto"),
-            ("Gobierno Regional Metropolitano", "Santiago", ""),
-        ], "NOTA: El ID se genera automaticamente. El sistema asignara UUIDs."),
-
-        ("Contacto", [
-            ("name", "Texto (100)", True, "Nombre completo del contacto"),
-            ("email", "Email", False, "Correo electronico"),
-            ("phone", "Texto (20)", False, "Telefono / celular"),
-            ("cargo", "Texto (100)", False, "Cargo o puesto"),
-            ("position", "Texto (100)", False, "Posicion / departamento"),
-            ("details", "Texto", False, "Notas"),
-            ("mandante", "FK", True, fk("Mandante.name")),
-        ], [
-            ("Juan Perez", "jperez@msantiago.cl", "+56912345678", "Jefe de Transito", "Dpto. Vialidad", "", "Municipalidad de Santiago"),
-            ("Maria Rojas", "", "", "Ingeniera", "Obras", "", "Gobierno Regional Metropolitano"),
-        ], "NOTA: 'mandante' debe coincidir con el campo 'name' de la hoja Mandante."),
-
-        ("Proyecto", [
-            ("title", "Texto (100)", True, "Nombre del proyecto"),
-            ("description", "Texto", False, "Descripcion detallada"),
-            ("date_started", "Fecha (DD/MM/AAAA)", True, "Fecha de inicio"),
-            ("mandante", "FK", True, fk("Mandante.name")),
-        ], [
-            ("Estudio de Semaforos Av. Libertador", "Actualizacion de planes de tiempo", "01/03/2025", "Municipalidad de Santiago"),
-            ("Auditoria Red Vial Centro", "Levantamiento y analisis de flujos", "15/01/2025", "Gobierno Regional Metropolitano"),
-        ], "NOTA: El usuario y fechas de completado se asignan en el sistema. 'mandante' debe existir en la hoja Mandante."),
-
-        ("Calle", [
-            ("nombre", "Texto (100)", True, "Nombre de la calle / avenida"),
-            ("numero", "Entero", True, "Numero identificador unico por proyecto"),
-            ("proyecto", "FK", True, fk("Proyecto.title")),
-        ], [
-            ("Av. Libertador", 1, "Estudio de Semaforos Av. Libertador"),
-            ("Av. Providencia", 2, "Estudio de Semaforos Av. Libertador"),
-            ("Av. Manuel Montt", 3, "Estudio de Semaforos Av. Libertador"),
-            ("Av. Santa Maria", 1, "Auditoria Red Vial Centro"),
-            ("Av. Los Leones", 2, "Auditoria Red Vial Centro"),
-            ("Av. Tobalaba", 3, "Auditoria Red Vial Centro"),
-        ], "NOTA: La combinacion 'numero + proyecto' debe ser unica."),
-
-        ("Nodo", [
-            ("numero", "Entero", True, "Numero del nodo (unico por proyecto)"),
-            ("interseccion", "Texto (200)", False, "Descripcion de la interseccion"),
-            ("calle_1", "FK (Calle.nombre)", False, fk("Calle.nombre")),
-            ("calle_2", "FK (Calle.nombre)", False, fk("Calle.nombre")),
-            ("numero_pc", "Entero (0-99)", False, "Numero del punto de control si aplica"),
-            ("plano", "URL", False, "Link a imagen del plano"),
-            ("imagen", "URL", False, "Link a foto del nodo"),
-            ("proyecto", "FK", True, fk("Proyecto.title")),
-        ], [
-            (1, "Av. Libertador con Av. Providencia", "Av. Libertador", "Av. Providencia", 1, "", "", "Estudio de Semaforos Av. Libertador"),
-            (2, "Av. Libertador con Av. Manuel Montt", "Av. Libertador", "Av. Manuel Montt", 2, "", "", "Estudio de Semaforos Av. Libertador"),
-            (1, "Av. Santa Maria con Av. Los Leones", "Av. Santa Maria", "Av. Los Leones", 1, "", "", "Auditoria Red Vial Centro"),
-            (2, "Av. Santa Maria con Av. Tobalaba", "Av. Santa Maria", "Av. Tobalaba", 2, "", "", "Auditoria Red Vial Centro"),
-        ], "NOTA: 'calle_1' y 'calle_2' deben coincidir con 'nombre' en hoja Calle. 'numero_pc' asigna un PC al nodo."),
-
-        ("Arco", [
-            ("nodo_origen", "FK (Nodo.numero)", True, "Nodo de origen (debe existir en el proyecto)"),
-            ("nodo_destino", "FK (Nodo.numero)", True, "Nodo de destino"),
-            ("longitud", "Decimal", True, "Longitud en metros (ej: 120.5)"),
-            ("proyecto", "FK", True, fk("Proyecto.title")),
-        ], [
-            (1, 2, 150.0, "Estudio de Semaforos Av. Libertador"),
-            (2, 1, 150.0, "Estudio de Semaforos Av. Libertador"),
-            (1, 2, 120.0, "Auditoria Red Vial Centro"),
-            (2, 1, 120.0, "Auditoria Red Vial Centro"),
-        ], "NOTA: 'nodo_origen' y 'nodo_destino' se resuelven por 'numero + proyecto'. La terna (origen, destino, proyecto) debe ser unica."),
-
-        ("Regulacion", [
-            ("codigo", "Texto (20)", True, "Codigo unico de regulacion (ej: SEM01, CEDA)"),
-            ("descripcion", "Texto (100)", True, "Descripcion de la regulacion"),
-        ], [
-            ("SEM01", "Semaforo con etapa semaforica fija"),
-            ("CEDA", "Ceda el paso"),
-            ("PARE", "Señal de pare / stop"),
-        ], "NOTA: 'codigo' debe ser unico en todo el sistema (no solo por proyecto)."),
-
-        ("CoeficienteCruce", [
-            ("nomenclatura", "Texto (10)", True, "Codigo corto (ej: VL, TXC, C2E)"),
-            ("tipo_transporte", "Texto (50)", True, "Tipo de vehiculo (ej: Vehiculo Liviano, Taxi, Bus)"),
-            ("coeficiente", "Decimal", True, "Factor de conversion a vehiculos equivalentes"),
-            ("is_standard", "SI/NO", True, "¿Es estandar? 'SI'=global, 'NO'=solo para este proyecto"),
-            ("proyecto", "FK", False, fk("Proyecto.title (solo si is_standard=NO)")),
-        ], [
-            ("VL", "Vehiculo Liviano", 1.0, "SI", ""),
-            ("TXC", "Taxi Colectivo", 1.5, "SI", ""),
-            ("BUS", "Bus", 2.5, "NO", "Estudio de Semaforos Av. Libertador"),
-        ], "NOTA: Si 'is_standard' = SI, el coeficiente aplica a todos los proyectos. 'proyecto' solo se usa si NO es estandar."),
-
-        ("Periodo", [
-            ("codigo", "Texto (4)", True, "Codigo: PM-L / PN-L / PT-L / PE-L / PM-S / PN-S / PT-S / PE-S / PM-F / PN-F / PT-F / PE-F"),
-            ("hora_inicio", "Hora HH:MM", False, "Hora de inicio (ej: 07:30)"),
-            ("hora_fin", "Hora HH:MM", False, "Hora de termino (ej: 09:30)"),
-            ("es_laboral", "SI/NO", True, "¿Es periodo laboral?"),
-            ("proyecto", "FK", True, fk("Proyecto.title")),
-        ], [
-            ("PM-L", "06:00", "09:00", "SI", "Estudio de Semaforos Av. Libertador"),
-            ("PT-L", "18:00", "21:00", "SI", "Estudio de Semaforos Av. Libertador"),
-            ("PM-L", "06:00", "09:00", "SI", "Auditoria Red Vial Centro"),
-            ("PT-L", "18:00", "21:00", "SI", "Auditoria Red Vial Centro"),
-        ], "NOTA: Codigos: PM=Manana, PN=Mediodia, PT=Tarde, PE=Noche; L=Laboral, S=Sabado, F=Festivo. La combinacion (codigo, proyecto) debe ser unica."),
-
-        ("PuntoControl", [
-            ("nodo", "FK (Nodo.numero)", True, "Nodo asociado (numero dentro del proyecto)"),
-            ("movimiento", "Texto (2)", True, "Codigo movimiento: 12,13,14,15,21,23,24,25,31,32,34,35,41,42,43,45,51,52,53,54"),
-            ("viraje", "Texto (3)", False, "DIR=Directo, DER=Derecha, IZQ=Izquierda"),
-            ("is_prioritario", "SI/NO", True, "¿Es punto de control prioritario?"),
-            ("arco_entrada", "FK (Arco)", False, fk("Arco (nodo_origen > nodo_destino)")),
-            ("arco_salida", "FK (Arco)", False, fk("Arco (nodo_origen > nodo_destino)")),
-            ("regulacion", "FK (Regulacion.codigo)", False, "Codigo de regulacion (ej: SEM01)"),
-            ("numero_pistas", "Decimal", False, "Numero de pistas (ej: 2.5)"),
-            ("proyecto", "FK", True, fk("Proyecto.title")),
-        ], [
-            (1, "12", "DIR", "SI", "1>2", "2>1", "SEM01", 2.0, "Estudio de Semaforos Av. Libertador"),
-            (2, "21", "DIR", "SI", "2>1", "1>2", "SEM01", 2.0, "Estudio de Semaforos Av. Libertador"),
-            (1, "12", "DIR", "SI", "1>2", "2>1", "SEM01", 2.0, "Auditoria Red Vial Centro"),
-            (2, "21", "DIR", "SI", "2>1", "1>2", "SEM01", 2.0, "Auditoria Red Vial Centro"),
-        ], "NOTA: 'arco_entrada' y 'arco_salida' se indican como 'origen>destino' (ej: 1>2). 'movimiento' son 2 digitos: nodo_origen + nodo_destino."),
-
-        ("Periodizacion", [
-            ("fecha", "Fecha (DD/MM/AAAA)", True, "Fecha del conteo"),
-            ("hora", "Hora HH:MM", True, "Hora del conteo"),
-            ("pc", "FK (PuntoControl.nombre)", True, fk("Nombre del PC (ej: PC-01, PC-02)")),
-            ("periodo", "FK (Periodo.codigo)", True, fk("Periodo.codigo (ej: PM-L)")),
-            ("proyecto", "FK (Proyecto.title)", True, fk("Proyecto.title")),
-            ("vl", "Entero", True, "Vehiculos Livianos"),
-            ("txc", "Entero", True, "Taxi Colectivo"),
-            ("txb", "Entero", True, "Taxi Bus"),
-            ("c2e", "Entero", True, "Camion 2 ejes"),
-            ("c_mas2e", "Entero", True, "Camion mas de 2 ejes"),
-            ("peat", "Entero", True, "Peatones"),
-            ("cicl", "Entero", True, "Ciclistas"),
-            ("moto", "Entero", True, "Motocicletas"),
-        ], _periodizacion_rows(), "NOTA: 'ftot' (flujo total) se calcula automaticamente. La combinacion (fecha, pc_mov, hora) debe ser unica."),
-
-        ("ParametroArco", [
-            ("punto_control", "FK", True, fk("PuntoControl (nombre: PC-XX o Nodo-XX)")),
-            ("flujo_saturacion", "Decimal", True, "Flujo de saturacion en ADE/hr verde (ej: 1800)"),
-            ("ponderador_demora", "Decimal", True, "Ponderador de demora (ej: 1.0)"),
-            ("ponderador_detencion", "Decimal", True, "Ponderador de detencion (ej: 1.0)"),
-            ("capacidad_cola", "Decimal", False, "Capacidad de cola en vehiculos"),
-            ("tiene_tarjeta_38", "SI/NO", True, "¿Tiene tarjeta 38?"),
-            ("proyecto", "FK", True, fk("Proyecto.title")),
-        ], [
-            ("PC-01", 1800.0, 1.0, 1.0, 10.0, "SI", "Estudio de Semaforos Av. Libertador"),
-            ("PC-02", 1600.0, 1.2, 0.8, "", "NO", "Estudio de Semaforos Av. Libertador"),
-            ("PC-01", 1750.0, 1.0, 1.0, 12.0, "SI", "Auditoria Red Vial Centro"),
-            ("PC-02", 1550.0, 1.1, 0.9, "", "NO", "Auditoria Red Vial Centro"),
-        ], "NOTA: Cada PuntoControl tiene UN ParametroArco (relacion 1 a 1)."),
-
-        ("FaseSemaforica", [
-            ("punto_control", "FK", True, fk("PuntoControl (nombre: PC-XX o Nodo-XX)")),
-            ("fase_numero", "Entero", True, "Numero de fase (1, 2, 3...)"),
-            ("verde_inicio", "Decimal", True, "Inicio del verde en segundos (ej: 0.0)"),
-            ("verde_fin", "Decimal", True, "Fin del verde en segundos (ej: 25.0)"),
-            ("proyecto", "FK", True, fk("Proyecto.title")),
-        ], [
-            ("PC-01", 1, 0.0, 25.0, "Estudio de Semaforos Av. Libertador"),
-            ("PC-01", 2, 30.0, 55.0, "Estudio de Semaforos Av. Libertador"),
-            ("PC-02", 1, 0.0, 20.0, "Estudio de Semaforos Av. Libertador"),
-            ("PC-02", 2, 25.0, 45.0, "Estudio de Semaforos Av. Libertador"),
-            ("PC-01", 1, 0.0, 30.0, "Auditoria Red Vial Centro"),
-            ("PC-01", 2, 35.0, 60.0, "Auditoria Red Vial Centro"),
-            ("PC-02", 1, 0.0, 22.0, "Auditoria Red Vial Centro"),
-            ("PC-02", 2, 28.0, 50.0, "Auditoria Red Vial Centro"),
-        ], "NOTA: La combinacion (punto_control, fase_numero) debe ser unica. Los tiempos son relativos al inicio del ciclo."),
-
-        ("ConfiguracionTransyt", [
-            ("proyecto", "FK", True, fk("Proyecto.title")),
-            ("ciclo", "Entero", True, "Tiempo de ciclo en segundos (ej: 60)"),
-            ("W", "Decimal", True, "Costo por hora de demora (ej: 10.0)"),
-            ("K", "Decimal", True, "Costo por detencion (ej: 0.5)"),
-            ("perdida_inicial", "Decimal", True, "Perdida inicial en segundos (ej: 2.0)"),
-            ("ganancia_final", "Decimal", True, "Ganancia final en segundos (ej: 1.0)"),
-        ], [
-            ("Estudio de Semaforos Av. Libertador", 60, 10.0, 0.5, 2.0, 1.0),
-            ("Auditoria Red Vial Centro", 70, 12.0, 0.4, 3.0, 1.5),
-        ], "NOTA: Cada proyecto tiene UNA configuracion TRANSYT (relacion 1 a 1)."),
+        (
+            "Mandante",
+            [
+                ("name", "Texto (100)", True, "Nombre del mandante/cliente"),
+                ("location", "Texto (100)", True, "Ubicacion o direccion"),
+                ("details", "Texto", False, "Notas u observaciones"),
+            ],
+            [
+                ("Municipalidad de Santiago", "Santiago Centro", "Comuna piloto"),
+                ("Gobierno Regional Metropolitano", "Santiago", ""),
+            ],
+            "NOTA: El ID se genera automaticamente. El sistema asignara UUIDs.",
+        ),
+        (
+            "Contacto",
+            [
+                ("name", "Texto (100)", True, "Nombre completo del contacto"),
+                ("email", "Email", False, "Correo electronico"),
+                ("phone", "Texto (20)", False, "Telefono / celular"),
+                ("cargo", "Texto (100)", False, "Cargo o puesto"),
+                ("position", "Texto (100)", False, "Posicion / departamento"),
+                ("details", "Texto", False, "Notas"),
+                ("mandante", "FK", True, fk("Mandante.name")),
+            ],
+            [
+                (
+                    "Juan Perez",
+                    "jperez@msantiago.cl",
+                    "+56912345678",
+                    "Jefe de Transito",
+                    "Dpto. Vialidad",
+                    "",
+                    "Municipalidad de Santiago",
+                ),
+                (
+                    "Maria Rojas",
+                    "",
+                    "",
+                    "Ingeniera",
+                    "Obras",
+                    "",
+                    "Gobierno Regional Metropolitano",
+                ),
+            ],
+            "NOTA: 'mandante' debe coincidir con el campo 'name' de la hoja Mandante.",
+        ),
+        (
+            "Proyecto",
+            [
+                ("title", "Texto (100)", True, "Nombre del proyecto"),
+                ("description", "Texto", False, "Descripcion detallada"),
+                ("date_started", "Fecha (DD/MM/AAAA)", True, "Fecha de inicio"),
+                ("mandante", "FK", True, fk("Mandante.name")),
+            ],
+            [
+                (
+                    "Estudio de Semaforos Av. Libertador",
+                    "Actualizacion de planes de tiempo",
+                    "01/03/2025",
+                    "Municipalidad de Santiago",
+                ),
+                (
+                    "Auditoria Red Vial Centro",
+                    "Levantamiento y analisis de flujos",
+                    "15/01/2025",
+                    "Gobierno Regional Metropolitano",
+                ),
+            ],
+            "NOTA: El usuario y fechas de completado se asignan en el sistema. 'mandante' debe existir en la hoja Mandante.",
+        ),
+        (
+            "Calle",
+            [
+                ("nombre", "Texto (100)", True, "Nombre de la calle / avenida"),
+                ("numero", "Entero", True, "Numero identificador unico por proyecto"),
+                ("proyecto", "FK", True, fk("Proyecto.title")),
+            ],
+            [
+                ("Av. Libertador", 1, "Estudio de Semaforos Av. Libertador"),
+                ("Av. Providencia", 2, "Estudio de Semaforos Av. Libertador"),
+                ("Av. Manuel Montt", 3, "Estudio de Semaforos Av. Libertador"),
+                ("Av. Santa Maria", 1, "Auditoria Red Vial Centro"),
+                ("Av. Los Leones", 2, "Auditoria Red Vial Centro"),
+                ("Av. Tobalaba", 3, "Auditoria Red Vial Centro"),
+            ],
+            "NOTA: La combinacion 'numero + proyecto' debe ser unica.",
+        ),
+        (
+            "Nodo",
+            [
+                ("numero", "Entero", True, "Numero del nodo (unico por proyecto)"),
+                ("interseccion", "Texto (200)", False, "Descripcion de la interseccion"),
+                ("calle_1", "FK (Calle.nombre)", False, fk("Calle.nombre")),
+                ("calle_2", "FK (Calle.nombre)", False, fk("Calle.nombre")),
+                ("numero_pc", "Entero (0-99)", False, "Numero del punto de control si aplica"),
+                ("plano", "URL", False, "Link a imagen del plano"),
+                ("imagen", "URL", False, "Link a foto del nodo"),
+                ("proyecto", "FK", True, fk("Proyecto.title")),
+            ],
+            [
+                (
+                    1,
+                    "Av. Libertador con Av. Providencia",
+                    "Av. Libertador",
+                    "Av. Providencia",
+                    1,
+                    "",
+                    "",
+                    "Estudio de Semaforos Av. Libertador",
+                ),
+                (
+                    2,
+                    "Av. Libertador con Av. Manuel Montt",
+                    "Av. Libertador",
+                    "Av. Manuel Montt",
+                    2,
+                    "",
+                    "",
+                    "Estudio de Semaforos Av. Libertador",
+                ),
+                (
+                    1,
+                    "Av. Santa Maria con Av. Los Leones",
+                    "Av. Santa Maria",
+                    "Av. Los Leones",
+                    1,
+                    "",
+                    "",
+                    "Auditoria Red Vial Centro",
+                ),
+                (
+                    2,
+                    "Av. Santa Maria con Av. Tobalaba",
+                    "Av. Santa Maria",
+                    "Av. Tobalaba",
+                    2,
+                    "",
+                    "",
+                    "Auditoria Red Vial Centro",
+                ),
+            ],
+            "NOTA: 'calle_1' y 'calle_2' deben coincidir con 'nombre' en hoja Calle. 'numero_pc' asigna un PC al nodo.",
+        ),
+        (
+            "Arco",
+            [
+                (
+                    "nodo_origen",
+                    "FK (Nodo.numero)",
+                    True,
+                    "Nodo de origen (debe existir en el proyecto)",
+                ),
+                ("nodo_destino", "FK (Nodo.numero)", True, "Nodo de destino"),
+                ("longitud", "Decimal", True, "Longitud en metros (ej: 120.5)"),
+                ("proyecto", "FK", True, fk("Proyecto.title")),
+            ],
+            [
+                (1, 2, 150.0, "Estudio de Semaforos Av. Libertador"),
+                (2, 1, 150.0, "Estudio de Semaforos Av. Libertador"),
+                (1, 2, 120.0, "Auditoria Red Vial Centro"),
+                (2, 1, 120.0, "Auditoria Red Vial Centro"),
+            ],
+            "NOTA: 'nodo_origen' y 'nodo_destino' se resuelven por 'numero + proyecto'. La terna (origen, destino, proyecto) debe ser unica.",
+        ),
+        (
+            "Regulacion",
+            [
+                ("codigo", "Texto (20)", True, "Codigo unico de regulacion (ej: SEM01, CEDA)"),
+                ("descripcion", "Texto (100)", True, "Descripcion de la regulacion"),
+            ],
+            [
+                ("SEM01", "Semaforo con etapa semaforica fija"),
+                ("CEDA", "Ceda el paso"),
+                ("PARE", "Señal de pare / stop"),
+            ],
+            "NOTA: 'codigo' debe ser unico en todo el sistema (no solo por proyecto).",
+        ),
+        (
+            "CoeficienteCruce",
+            [
+                ("nomenclatura", "Texto (10)", True, "Codigo corto (ej: VL, TXC, C2E)"),
+                (
+                    "tipo_transporte",
+                    "Texto (50)",
+                    True,
+                    "Tipo de vehiculo (ej: Vehiculo Liviano, Taxi, Bus)",
+                ),
+                ("coeficiente", "Decimal", True, "Factor de conversion a vehiculos equivalentes"),
+                (
+                    "is_standard",
+                    "SI/NO",
+                    True,
+                    "¿Es estandar? 'SI'=global, 'NO'=solo para este proyecto",
+                ),
+                ("proyecto", "FK", False, fk("Proyecto.title (solo si is_standard=NO)")),
+            ],
+            [
+                ("VL", "Vehiculo Liviano", 1.0, "SI", ""),
+                ("TXC", "Taxi Colectivo", 1.5, "SI", ""),
+                ("BUS", "Bus", 2.5, "NO", "Estudio de Semaforos Av. Libertador"),
+            ],
+            "NOTA: Si 'is_standard' = SI, el coeficiente aplica a todos los proyectos. 'proyecto' solo se usa si NO es estandar.",
+        ),
+        (
+            "Periodo",
+            [
+                (
+                    "codigo",
+                    "Texto (4)",
+                    True,
+                    "Codigo: PM-L / PN-L / PT-L / PE-L / PM-S / PN-S / PT-S / PE-S / PM-F / PN-F / PT-F / PE-F",
+                ),
+                ("hora_inicio", "Hora HH:MM", False, "Hora de inicio (ej: 07:30)"),
+                ("hora_fin", "Hora HH:MM", False, "Hora de termino (ej: 09:30)"),
+                ("es_laboral", "SI/NO", True, "¿Es periodo laboral?"),
+                ("proyecto", "FK", True, fk("Proyecto.title")),
+            ],
+            [
+                ("PM-L", "06:00", "09:00", "SI", "Estudio de Semaforos Av. Libertador"),
+                ("PT-L", "18:00", "21:00", "SI", "Estudio de Semaforos Av. Libertador"),
+                ("PM-L", "06:00", "09:00", "SI", "Auditoria Red Vial Centro"),
+                ("PT-L", "18:00", "21:00", "SI", "Auditoria Red Vial Centro"),
+            ],
+            "NOTA: Codigos: PM=Manana, PN=Mediodia, PT=Tarde, PE=Noche; L=Laboral, S=Sabado, F=Festivo. La combinacion (codigo, proyecto) debe ser unica.",
+        ),
+        (
+            "PuntoControl",
+            [
+                ("nodo", "FK (Nodo.numero)", True, "Nodo asociado (numero dentro del proyecto)"),
+                (
+                    "movimiento",
+                    "Texto (2)",
+                    True,
+                    "Codigo movimiento: 12,13,14,15,21,23,24,25,31,32,34,35,41,42,43,45,51,52,53,54",
+                ),
+                ("viraje", "Texto (3)", False, "DIR=Directo, DER=Derecha, IZQ=Izquierda"),
+                ("is_prioritario", "SI/NO", True, "¿Es punto de control prioritario?"),
+                ("arco_entrada", "FK (Arco)", False, fk("Arco (nodo_origen > nodo_destino)")),
+                ("arco_salida", "FK (Arco)", False, fk("Arco (nodo_origen > nodo_destino)")),
+                ("regulacion", "FK (Regulacion.codigo)", False, "Codigo de regulacion (ej: SEM01)"),
+                ("numero_pistas", "Decimal", False, "Numero de pistas (ej: 2.5)"),
+                ("proyecto", "FK", True, fk("Proyecto.title")),
+            ],
+            [
+                (
+                    1,
+                    "12",
+                    "DIR",
+                    "SI",
+                    "1>2",
+                    "2>1",
+                    "SEM01",
+                    2.0,
+                    "Estudio de Semaforos Av. Libertador",
+                ),
+                (
+                    2,
+                    "21",
+                    "DIR",
+                    "SI",
+                    "2>1",
+                    "1>2",
+                    "SEM01",
+                    2.0,
+                    "Estudio de Semaforos Av. Libertador",
+                ),
+                (1, "12", "DIR", "SI", "1>2", "2>1", "SEM01", 2.0, "Auditoria Red Vial Centro"),
+                (2, "21", "DIR", "SI", "2>1", "1>2", "SEM01", 2.0, "Auditoria Red Vial Centro"),
+            ],
+            "NOTA: 'arco_entrada' y 'arco_salida' se indican como 'origen>destino' (ej: 1>2). 'movimiento' son 2 digitos: nodo_origen + nodo_destino.",
+        ),
+        (
+            "Periodizacion",
+            [
+                ("fecha", "Fecha (DD/MM/AAAA)", True, "Fecha del conteo"),
+                ("hora", "Hora HH:MM", True, "Hora del conteo"),
+                ("pc", "FK (PuntoControl.nombre)", True, fk("Nombre del PC (ej: PC-01, PC-02)")),
+                ("periodo", "FK (Periodo.codigo)", True, fk("Periodo.codigo (ej: PM-L)")),
+                ("proyecto", "FK (Proyecto.title)", True, fk("Proyecto.title")),
+                ("vl", "Entero", True, "Vehiculos Livianos"),
+                ("txc", "Entero", True, "Taxi Colectivo"),
+                ("txb", "Entero", True, "Taxi Bus"),
+                ("c2e", "Entero", True, "Camion 2 ejes"),
+                ("c_mas2e", "Entero", True, "Camion mas de 2 ejes"),
+                ("peat", "Entero", True, "Peatones"),
+                ("cicl", "Entero", True, "Ciclistas"),
+                ("moto", "Entero", True, "Motocicletas"),
+            ],
+            _periodizacion_rows(),
+            "NOTA: 'ftot' (flujo total) se calcula automaticamente. La combinacion (fecha, pc_mov, hora) debe ser unica.",
+        ),
+        (
+            "ParametroArco",
+            [
+                ("punto_control", "FK", True, fk("PuntoControl (nombre: PC-XX o Nodo-XX)")),
+                (
+                    "flujo_saturacion",
+                    "Decimal",
+                    True,
+                    "Flujo de saturacion en ADE/hr verde (ej: 1800)",
+                ),
+                ("ponderador_demora", "Decimal", True, "Ponderador de demora (ej: 1.0)"),
+                ("ponderador_detencion", "Decimal", True, "Ponderador de detencion (ej: 1.0)"),
+                ("capacidad_cola", "Decimal", False, "Capacidad de cola en vehiculos"),
+                ("tiene_tarjeta_38", "SI/NO", True, "¿Tiene tarjeta 38?"),
+                ("proyecto", "FK", True, fk("Proyecto.title")),
+            ],
+            [
+                ("PC-01", 1800.0, 1.0, 1.0, 10.0, "SI", "Estudio de Semaforos Av. Libertador"),
+                ("PC-02", 1600.0, 1.2, 0.8, "", "NO", "Estudio de Semaforos Av. Libertador"),
+                ("PC-01", 1750.0, 1.0, 1.0, 12.0, "SI", "Auditoria Red Vial Centro"),
+                ("PC-02", 1550.0, 1.1, 0.9, "", "NO", "Auditoria Red Vial Centro"),
+            ],
+            "NOTA: Cada PuntoControl tiene UN ParametroArco (relacion 1 a 1).",
+        ),
+        (
+            "FaseSemaforica",
+            [
+                ("punto_control", "FK", True, fk("PuntoControl (nombre: PC-XX o Nodo-XX)")),
+                ("fase_numero", "Entero", True, "Numero de fase (1, 2, 3...)"),
+                ("verde_inicio", "Decimal", True, "Inicio del verde en segundos (ej: 0.0)"),
+                ("verde_fin", "Decimal", True, "Fin del verde en segundos (ej: 25.0)"),
+                ("proyecto", "FK", True, fk("Proyecto.title")),
+            ],
+            [
+                ("PC-01", 1, 0.0, 25.0, "Estudio de Semaforos Av. Libertador"),
+                ("PC-01", 2, 30.0, 55.0, "Estudio de Semaforos Av. Libertador"),
+                ("PC-02", 1, 0.0, 20.0, "Estudio de Semaforos Av. Libertador"),
+                ("PC-02", 2, 25.0, 45.0, "Estudio de Semaforos Av. Libertador"),
+                ("PC-01", 1, 0.0, 30.0, "Auditoria Red Vial Centro"),
+                ("PC-01", 2, 35.0, 60.0, "Auditoria Red Vial Centro"),
+                ("PC-02", 1, 0.0, 22.0, "Auditoria Red Vial Centro"),
+                ("PC-02", 2, 28.0, 50.0, "Auditoria Red Vial Centro"),
+            ],
+            "NOTA: La combinacion (punto_control, fase_numero) debe ser unica. Los tiempos son relativos al inicio del ciclo.",
+        ),
+        (
+            "ConfiguracionTransyt",
+            [
+                ("proyecto", "FK", True, fk("Proyecto.title")),
+                ("ciclo", "Entero", True, "Tiempo de ciclo en segundos (ej: 60)"),
+                ("W", "Decimal", True, "Costo por hora de demora (ej: 10.0)"),
+                ("K", "Decimal", True, "Costo por detencion (ej: 0.5)"),
+                ("perdida_inicial", "Decimal", True, "Perdida inicial en segundos (ej: 2.0)"),
+                ("ganancia_final", "Decimal", True, "Ganancia final en segundos (ej: 1.0)"),
+            ],
+            [
+                ("Estudio de Semaforos Av. Libertador", 60, 10.0, 0.5, 2.0, 1.0),
+                ("Auditoria Red Vial Centro", 70, 12.0, 0.4, 3.0, 1.5),
+            ],
+            "NOTA: Cada proyecto tiene UNA configuracion TRANSYT (relacion 1 a 1).",
+        ),
     ]
 
     for title, fields, samples, notes in sheets_data:

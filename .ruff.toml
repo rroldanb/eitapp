@@ -1,0 +1,41 @@
+target-version = "py311"
+line-length = 100
+indent-width = 4
+
+[format]
+quote-style = "double"
+line-ending = "lf"
+
+[lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade (Python 3.11+)
+    "N",    # pep8-naming
+    "B",    # flake8-bugbear (bug detection)
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "F403",   # star imports (legacy pattern, too widespread to fix now)
+    "F405",   # star import undefined (same reason)
+    "N801",   # non-CapWords class names (model renames need migrations)
+    "N802",   # function name should be lowercase (Django CBVs use CamelCase)
+    "N803",   # argument name should be lowercase (Django signals)
+    "N806",   # variable in function should be lowercase (Django model field lookups)
+    "B904",   # raise from (intentional bare raises in services)
+    "RUF012", # mutable-class-default (Django model fields common pattern)
+]
+
+[lint.per-file-ignores]
+"**/migrations/*" = ["E", "F", "I", "UP", "N", "SIM", "RUF"]
+"**/settings.py" = ["I", "F403", "F405", "E402", "SIM112"]
+"**/conftest.py" = ["N"]
+"**/tests/*" = ["N"]
+"transito_backend/urls.py" = ["E402"]
+"**/import_views.py" = ["SIM118"]
+"benchmark_js.py" = ["E402"]

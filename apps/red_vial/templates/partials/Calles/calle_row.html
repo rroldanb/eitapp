@@ -48,9 +48,9 @@
       Guardar
     </button>
 
-    <button type="button" 
+    <button type="button"
     aria-label="Eliminar calle"
-    class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors action-btn" 
+    class="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors action-btn"
     data-action="delete"
       hx-delete="{% url 'calle_delete' calle.id %}"
 
@@ -58,7 +58,7 @@
       hx-swap="outerHTML transition:true swap:50"
       hx-indicator="#delete-indicator-{{ calle.id }}"
     >
-      <span id="delete-indicator-{{ calle.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator" 
+      <span id="delete-indicator-{{ calle.id }}" class="inline-block w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin mr-1 htmx-indicator"
       style="display: none;"></span>
       Eliminar
     </button>

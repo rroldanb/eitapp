@@ -5,15 +5,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('proyectos', '0004_imagenes_proyecto'),
+        ("proyectos", "0004_imagenes_proyecto"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proyecto',
-            name='date_started',
+            model_name="proyecto",
+            name="date_started",
             field=models.DateTimeField(blank=True, default=django.utils.timezone.now),
         ),
     ]

@@ -239,7 +239,9 @@
         try {
           const j = await resp.json();
           msg = j.error || msg;
-        } catch (_) {}
+        } catch (_) {
+          /* ignore */
+        }
         showToast(msg, false);
       }
     } catch (e) {
@@ -272,7 +274,9 @@
         try {
           const j = await resp.json();
           msg = j.error || msg;
-        } catch (_) {}
+        } catch (_) {
+          /* ignore */
+        }
         showToast(msg, false);
       }
     } catch (e) {

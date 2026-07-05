@@ -1,45 +1,48 @@
 from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.db.models import Count, F, QuerySet
 
-from apps.red_vial.models import Calle
 from apps.proyectos.models import Proyecto
 from apps.red_vial.forms.calle_form import CalleForm
-from .base_service import apply_sort_to_queryset, update_item, delete_item
+from apps.red_vial.models import Calle
 
+from .base_service import apply_sort_to_queryset, delete_item, update_item
 
 # ========== CALLE VIEWS ==========
 
-def get_calles_by_proyecto(proyecto_id: str, sort_by: str | None = None, order: str = 'asc') -> QuerySet[Calle]:
+
+def get_calles_by_proyecto(
+    proyecto_id: str, sort_by: str | None = None, order: str = "asc"
+) -> QuerySet[Calle]:
     """
     Obtener calles de un proyecto con ordenamiento.
-    
+
     Args:
         proyecto_id: ID del proyecto
         sort_by: Campo para ordenar ('numero', 'nombre', 'nodos')
         order: 'asc' o 'desc'
-        
+
     Returns:
         QuerySet de Calle ordenado
     """
-    queryset = Calle.objects.filter(proyecto_id=proyecto_id).annotate(
-        nodos_1=Count('nodos_calle_1', distinct=True),
-        nodos_2=Count('nodos_calle_2', distinct=True),
-    ).annotate(
-        nodos_total=F('nodos_1') + F('nodos_2')
+    queryset = (
+        Calle.objects.filter(proyecto_id=proyecto_id)
+        .annotate(
+            nodos_1=Count("nodos_calle_1", distinct=True),
+            nodos_2=Count("nodos_calle_2", distinct=True),
+        )
+        .annotate(nodos_total=F("nodos_1") + F("nodos_2"))
     )
-    
+
     valid_sort_fields = {
-        'numero': 'numero',
-        'nombre': 'nombre',
-        'nodos': 'nodos_total',
+        "numero": "numero",
+        "nombre": "nombre",
+        "nodos": "nodos_total",
     }
-    
+
     return apply_sort_to_queryset(
-        queryset,
-        sort_by=sort_by,
-        order=order,
-        valid_fields=valid_sort_fields
+        queryset, sort_by=sort_by, order=order, valid_fields=valid_sort_fields
     )
 
 

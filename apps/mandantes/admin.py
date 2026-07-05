@@ -1,13 +1,17 @@
 from django.contrib import admin
-from .models.mandante import Mandante, Contacto
+
+from .models.mandante import Contacto, Mandante
+
 
 class MandanteAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location')
-    search_fields = ('name', 'location')
+    list_display = ("name", "location")
+    search_fields = ("name", "location")
+
 
 class ContactoAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'phone', 'cargo')
-    search_fields = ('name', 'email')
+    list_display = ("name", "email", "phone", "cargo")
+    search_fields = ("name", "email")
+
 
 admin.site.register(Mandante, MandanteAdmin)
 admin.site.register(Contacto, ContactoAdmin)

@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth.models import User
+
 from apps.mandantes.models import Mandante
 from apps.proyectos.models import Proyecto
 

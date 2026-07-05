@@ -1,13 +1,24 @@
 from datetime import date, time
 from unittest.mock import patch
-from django.test import TestCase
+
 from django.contrib.auth.models import User
-from apps.mandantes.models import Mandante, Contacto
-from apps.proyectos.models import Proyecto, Imagenes_proyecto
+from django.test import TestCase
+
+from apps.mandantes.models import Contacto, Mandante
+from apps.proyectos.models import Imagenes_proyecto, Proyecto
 from apps.red_vial.models import (
-    Calle, Nodo, Arco, Regulacion, Periodo, PuntoControl,
-    Periodizacion, ResumenFlujo, CoeficienteCruce,
-    ParametroArco, FaseSemaforica, ConfiguracionTransyt,
+    Arco,
+    Calle,
+    CoeficienteCruce,
+    ConfiguracionTransyt,
+    FaseSemaforica,
+    Nodo,
+    ParametroArco,
+    Periodizacion,
+    Periodo,
+    PuntoControl,
+    Regulacion,
+    ResumenFlujo,
 )
 
 
@@ -16,47 +27,108 @@ class ProyectoDeleteCascadeTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="12345")
         self.mandante = Mandante.objects.create(name="MandanteTest", location="Loc")
         self.contacto = Contacto.objects.create(
-            name="ContactoTest", mandante=self.mandante,
-            email="c@test.cl", phone="", cargo="", position="", details="",
+            name="ContactoTest",
+            mandante=self.mandante,
+            email="c@test.cl",
+            phone="",
+            cargo="",
+            position="",
+            details="",
         )
         self.proyecto = Proyecto.objects.create(
-            title="ProyectoTest", user=self.user, mandante=self.mandante,
+            title="ProyectoTest",
+            user=self.user,
+            mandante=self.mandante,
         )
         # Calle
         self.calle = Calle.objects.create(nombre="Calle A", numero=1, proyecto=self.proyecto)
         # Nodo
-        self.nodo1 = Nodo.objects.create(numero=1, interseccion="N1", proyecto=self.proyecto, numero_pc=1)
-        self.nodo2 = Nodo.objects.create(numero=2, interseccion="N2", proyecto=self.proyecto, numero_pc=2)
+        self.nodo1 = Nodo.objects.create(
+            numero=1, interseccion="N1", proyecto=self.proyecto, numero_pc=1
+        )
+        self.nodo2 = Nodo.objects.create(
+            numero=2, interseccion="N2", proyecto=self.proyecto, numero_pc=2
+        )
         # Arco
-        self.arco1 = Arco.objects.create(nodo_origen=self.nodo1, nodo_destino=self.nodo2, longitud=100.0, proyecto=self.proyecto)
-        self.arco2 = Arco.objects.create(nodo_origen=self.nodo2, nodo_destino=self.nodo1, longitud=100.0, proyecto=self.proyecto)
+        self.arco1 = Arco.objects.create(
+            nodo_origen=self.nodo1, nodo_destino=self.nodo2, longitud=100.0, proyecto=self.proyecto
+        )
+        self.arco2 = Arco.objects.create(
+            nodo_origen=self.nodo2, nodo_destino=self.nodo1, longitud=100.0, proyecto=self.proyecto
+        )
         # Regulacion
         self.regulacion = Regulacion.objects.create(codigo="SEM01", descripcion="Test")
         # Periodo
-        self.periodo = Periodo.objects.create(codigo="PM-L", hora_inicio=time(6, 0), hora_fin=time(9, 0), es_laboral=True, proyecto=self.proyecto)
+        self.periodo = Periodo.objects.create(
+            codigo="PM-L",
+            hora_inicio=time(6, 0),
+            hora_fin=time(9, 0),
+            es_laboral=True,
+            proyecto=self.proyecto,
+        )
         # PuntoControl
         self.pc = PuntoControl.objects.create(
-            nodo=self.nodo1, movimiento="12", viraje="DIR", is_prioritario=True,
-            arco_entrada=self.arco1, arco_salida=self.arco2,
-            regulacion=self.regulacion, numero_pistas=2, proyecto=self.proyecto,
+            nodo=self.nodo1,
+            movimiento="12",
+            viraje="DIR",
+            is_prioritario=True,
+            arco_entrada=self.arco1,
+            arco_salida=self.arco2,
+            regulacion=self.regulacion,
+            numero_pistas=2,
+            proyecto=self.proyecto,
         )
         # Periodizacion
         self.periodizacion = Periodizacion.objects.create(
-            fecha=date(2025, 3, 15), hora=time(6, 0), pc=self.pc, periodo=self.periodo,
-            vl=100, txc=20, txb=10, c2e=5, c_mas2e=2, peat=50, cicl=10, moto=5,
+            fecha=date(2025, 3, 15),
+            hora=time(6, 0),
+            pc=self.pc,
+            periodo=self.periodo,
+            vl=100,
+            txc=20,
+            txb=10,
+            c2e=5,
+            c_mas2e=2,
+            peat=50,
+            cicl=10,
+            moto=5,
         )
         # ResumenFlujo
         self.resumen = ResumenFlujo.objects.create(pc=self.pc, periodo=self.periodo, flujo=100)
         # Imagenes_proyecto
-        self.imagen = Imagenes_proyecto.objects.create(image_url="http://example.com/img.jpg", proyecto=self.proyecto)
+        self.imagen = Imagenes_proyecto.objects.create(
+            image_url="http://example.com/img.jpg", proyecto=self.proyecto
+        )
         # CoeficienteCruce
-        self.coef = CoeficienteCruce.objects.create(nomenclatura="VL", tipo_transporte="Vehículo", coeficiente=1.0, is_standard=False, proyecto=self.proyecto)
+        self.coef = CoeficienteCruce.objects.create(
+            nomenclatura="VL",
+            tipo_transporte="Vehículo",
+            coeficiente=1.0,
+            is_standard=False,
+            proyecto=self.proyecto,
+        )
         # ConfiguracionTransyt
-        self.config = ConfiguracionTransyt.objects.create(proyecto=self.proyecto, ciclo=60, W=10.0, K=0.5, perdida_inicial=2.0, ganancia_final=1.0)
+        self.config = ConfiguracionTransyt.objects.create(
+            proyecto=self.proyecto, ciclo=60, W=10.0, K=0.5, perdida_inicial=2.0, ganancia_final=1.0
+        )
         # ParametroArco
-        self.param = ParametroArco.objects.create(proyecto=self.proyecto, punto_control=self.pc, flujo_saturacion=1800.0, ponderador_demora=1.0, ponderador_detencion=1.0, capacidad_cola=10.0, tiene_tarjeta_38=True)
+        self.param = ParametroArco.objects.create(
+            proyecto=self.proyecto,
+            punto_control=self.pc,
+            flujo_saturacion=1800.0,
+            ponderador_demora=1.0,
+            ponderador_detencion=1.0,
+            capacidad_cola=10.0,
+            tiene_tarjeta_38=True,
+        )
         # FaseSemaforica
-        self.fase = FaseSemaforica.objects.create(proyecto=self.proyecto, punto_control=self.pc, fase_numero=1, verde_inicio=0.0, verde_fin=25.0)
+        self.fase = FaseSemaforica.objects.create(
+            proyecto=self.proyecto,
+            punto_control=self.pc,
+            fase_numero=1,
+            verde_inicio=0.0,
+            verde_fin=25.0,
+        )
 
     def test_cascade_deletes_all_associated_data(self):
         p_id = self.proyecto.id
@@ -114,7 +186,9 @@ class ProyectoImageCleanupOnDeleteTest(TestCase):
     @patch("apps.imagenes.services.storage_service.delete_project_image")
     def test_proyecto_delete_cleans_up_image_url(self, mock_delete):
         proyecto = Proyecto.objects.create(
-            title="Img Proyecto", user=self.user, mandante=self.mandante,
+            title="Img Proyecto",
+            user=self.user,
+            mandante=self.mandante,
             image_url="https://bucket.supabase.co/project-img.webp",
         )
         proyecto.delete()
@@ -123,7 +197,9 @@ class ProyectoImageCleanupOnDeleteTest(TestCase):
     @patch("apps.imagenes.services.storage_service.delete_project_image")
     def test_proyecto_delete_without_image(self, mock_delete):
         proyecto = Proyecto.objects.create(
-            title="No Img", user=self.user, mandante=self.mandante,
+            title="No Img",
+            user=self.user,
+            mandante=self.mandante,
         )
         proyecto.delete()
         mock_delete.assert_not_called()
@@ -131,17 +207,22 @@ class ProyectoImageCleanupOnDeleteTest(TestCase):
     @patch("apps.imagenes.services.storage_service.delete_project_image")
     def test_proyecto_cascade_cleans_up_nodo_images(self, mock_delete):
         from apps.red_vial.models import Nodo
+
         proyecto = Proyecto.objects.create(
-            title="Cascade Img", user=self.user, mandante=self.mandante,
+            title="Cascade Img",
+            user=self.user,
+            mandante=self.mandante,
             image_url="https://bucket.supabase.co/p-img.webp",
         )
-        nodo1 = Nodo.objects.create(
-            numero=1, proyecto=proyecto,
+        Nodo.objects.create(
+            numero=1,
+            proyecto=proyecto,
             imagen="https://bucket.supabase.co/n1-img.webp",
             plano="https://bucket.supabase.co/n1-plano.webp",
         )
-        nodo2 = Nodo.objects.create(
-            numero=2, proyecto=proyecto,
+        Nodo.objects.create(
+            numero=2,
+            proyecto=proyecto,
             imagen="https://bucket.supabase.co/n2-img.webp",
         )
         proyecto.delete()

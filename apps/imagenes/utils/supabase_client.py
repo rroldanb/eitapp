@@ -1,6 +1,7 @@
-from supabase import create_client
-from functools import lru_cache
 import os
+from functools import lru_cache
+
+from supabase import create_client
 
 
 @lru_cache(maxsize=1)
