@@ -1,7 +1,7 @@
 db.sqlite3
 venv
 __pycache__
-.env
+.env*
 context
 migrations
 data.json
@@ -18,7 +18,7 @@ audit_report.md
 plantilla_importacion_eitapp.xlsx
 AGENTS*
 
-*pencod
+*pencod*
 node_modules/
 tui.json
 media/
