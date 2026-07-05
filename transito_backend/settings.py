@@ -119,66 +119,34 @@ WSGI_APPLICATION = "transito_backend.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 
-####### DEFAULT DATABASE CONFIGURATION #######
-
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-####### LOCAL PG DATABASE CONFIGURATION #######
-
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default='postgresql://postgres:1234@localhost:5432/eitapp',
-#         conn_max_age=600
-#     )
-# }
-
-
 ####### DATABASE CONFIGURATION #######
 
+# default: DATABASE_URL env var (set locally to local PG, on VPS to ORA)
 DATABASES = {
     "default": dj_database_url.config(
-        default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
+        env="DATABASE_URL",
+        default="postgresql://postgres:1234@localhost:5432/eitapp",
         conn_max_age=int(os.getenv("CONN_MAX_AGE", "0")),
     ),
 }
 
 # ── ORA: PostgreSQL en VPS (Coolify / Oracle Cloud) ──
-# Toma las vars individuales del .env: host, user, password, port, dbname
-_url_ora = os.getenv("DATABASE_URL_ORA")
-if not _url_ora:
+_ora_url = os.getenv("DATABASE_URL_ORA")
+if not _ora_url:
     _user = os.getenv("user")
     _password = os.getenv("password")
     _host = os.getenv("host")
     _port = os.getenv("port")
     _dbname = os.getenv("dbname")
     if all([_user, _password, _host, _port, _dbname]):
-        _url_ora = f"postgresql://{_user}:{_password}@{_host}:{_port}/{_dbname}"
-if _url_ora:
+        _ora_url = f"postgresql://{_user}:{_password}@{_host}:{_port}/{_dbname}"
+if _ora_url:
     DATABASES["ORA"] = dj_database_url.parse(
-        _url_ora,
+        _ora_url,
         conn_max_age=int(os.getenv("CONN_MAX_AGE", "0")),
     )
 
-# ── supa: PostgreSQL en Supabase (referencia, solo si se definen las vars) ──
-_supa_url = os.getenv("DATABASE_URL_SUPA")
-if not _supa_url:
-    _su = os.getenv("supa_user") or os.getenv("SUPA_USER")
-    _sp = os.getenv("supa_password") or os.getenv("SUPA_PASSWORD")
-    _sh = os.getenv("supa_host") or os.getenv("SUPA_HOST")
-    _spt = os.getenv("supa_port") or os.getenv("SUPA_PORT")
-    _sd = os.getenv("supa_dbname") or os.getenv("SUPA_DBNAME")
-    if all([_su, _sp, _sh, _spt, _sd]):
-        _supa_url = f"postgresql://{_su}:{_sp}@{_sh}:{_spt}/{_sd}"
-if _supa_url:
-    DATABASES["supa"] = dj_database_url.parse(_supa_url, conn_max_age=0)
-
-# ── pg_local: PostgreSQL local (tu máquina) ──
+# ── pg_local: PostgreSQL local (para desarrollo, para switchear desde ORA) ──
 DATABASES["pg_local"] = dj_database_url.config(
     env="DATABASE_URL_LOCAL",
     default="postgresql://postgres:1234@localhost:5432/eitapp",
