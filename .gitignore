@@ -22,3 +22,4 @@ AGENTS*
 node_modules/
 tui.json
 media/
+deployment_result*
