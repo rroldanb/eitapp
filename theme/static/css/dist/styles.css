@@ -479,6 +479,9 @@
   .mb-8 {
     margin-bottom: calc(var(--spacing) * 8);
   }
+  .ml-0 {
+    margin-left: calc(var(--spacing) * 0);
+  }
   .ml-0\.5 {
     margin-left: calc(var(--spacing) * 0.5);
   }
@@ -529,6 +532,9 @@
   }
   .table {
     display: table;
+  }
+  .h-1 {
+    height: calc(var(--spacing) * 1);
   }
   .h-1\.5 {
     height: calc(var(--spacing) * 1.5);
@@ -587,6 +593,9 @@
   .min-h-screen {
     min-height: 100vh;
   }
+  .w-1 {
+    width: calc(var(--spacing) * 1);
+  }
   .w-1\.5 {
     width: calc(var(--spacing) * 1.5);
   }
@@ -641,6 +650,9 @@
   .w-full {
     width: 100%;
   }
+  .max-w-2 {
+    max-width: calc(var(--spacing) * 2);
+  }
   .max-w-2\/3 {
     max-width: calc(2/3 * 100%);
   }
@@ -668,6 +680,9 @@
   .max-w-md {
     max-width: var(--container-md);
   }
+  .max-w-none {
+    max-width: none;
+  }
   .min-w-0 {
     min-width: calc(var(--spacing) * 0);
   }
@@ -685,6 +700,9 @@
   }
   .flex-1 {
     flex: 1;
+  }
+  .flex-shrink {
+    flex-shrink: 1;
   }
   .shrink-0 {
     flex-shrink: 0;
@@ -709,6 +727,9 @@
   }
   .cursor-pointer {
     cursor: pointer;
+  }
+  .resize {
+    resize: both;
   }
   .list-inside {
     list-style-position: inside;
@@ -1205,6 +1226,9 @@
       background-color: color-mix(in oklab, var(--color-indigo-600) 90%, transparent);
     }
   }
+  .bg-orange-50 {
+    background-color: var(--color-orange-50);
+  }
   .bg-orange-50\/40 {
     background-color: color-mix(in srgb, oklch(98% 0.016 73.684) 40%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1244,11 +1268,17 @@
   .bg-slate-200 {
     background-color: var(--color-slate-200);
   }
+  .bg-slate-600 {
+    background-color: var(--color-slate-600);
+  }
   .bg-slate-600\/80 {
     background-color: color-mix(in srgb, oklch(44.6% 0.043 257.281) 80%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-slate-600) 80%, transparent);
     }
+  }
+  .bg-slate-900 {
+    background-color: var(--color-slate-900);
   }
   .bg-slate-900\/80 {
     background-color: color-mix(in srgb, oklch(20.8% 0.042 265.755) 80%, transparent);
@@ -1278,6 +1308,12 @@
     background-color: color-mix(in srgb, #fff 60%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-white) 60%, transparent);
+    }
+  }
+  .bg-white\/70 {
+    background-color: color-mix(in srgb, #fff 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-white) 70%, transparent);
     }
   }
   .bg-white\/80 {
@@ -1352,6 +1388,9 @@
   .px-8 {
     padding-inline: calc(var(--spacing) * 8);
   }
+  .py-0 {
+    padding-block: calc(var(--spacing) * 0);
+  }
   .py-0\.5 {
     padding-block: calc(var(--spacing) * 0.5);
   }
@@ -1405,6 +1444,9 @@
   }
   .pt-5 {
     padding-top: calc(var(--spacing) * 5);
+  }
+  .pb-0 {
+    padding-bottom: calc(var(--spacing) * 0);
   }
   .pb-0\.5 {
     padding-bottom: calc(var(--spacing) * 0.5);
@@ -1724,6 +1766,10 @@
   }
   .ring-indigo-300 {
     --tw-ring-color: var(--color-indigo-300);
+  }
+  .outline {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
   }
   .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
@@ -2079,6 +2125,13 @@
       }
     }
   }
+  .hover\:bg-white {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-white);
+      }
+    }
+  }
   .hover\:bg-white\/30 {
     &:hover {
       @media (hover: hover) {
@@ -2135,6 +2188,13 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-indigo-300);
+      }
+    }
+  }
+  .hover\:text-indigo-600 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-indigo-600);
       }
     }
   }
@@ -2720,6 +2780,11 @@
   inherits: false;
   initial-value: 0 0 #0000;
 }
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
 @property --tw-blur {
   syntax: "*";
   inherits: false;
@@ -2846,6 +2911,7 @@
       --tw-ring-offset-width: 0px;
       --tw-ring-offset-color: #fff;
       --tw-ring-offset-shadow: 0 0 #0000;
+      --tw-outline-style: solid;
       --tw-blur: initial;
       --tw-brightness: initial;
       --tw-contrast: initial;

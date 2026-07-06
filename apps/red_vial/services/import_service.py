@@ -1014,23 +1014,32 @@ def execute_import(validation_result, proyecto, user, update_duplicates=None):
 
         report[sheet_name] = sheet_report
 
-    review_lines = []
     if "Periodizacion" in report:
         pr = report["Periodizacion"]
-        for item in pr.get("auto_created_pcs", []):
-            review_lines.append(
-                f"PC auto-creado: {item['pc_name']} (movimiento {item['movement']})"
+        lines = []
+        pcs = pr.get("auto_created_pcs", [])
+        if pcs:
+            grouped = {}
+            for item in pcs:
+                key = (item["pc_name"], item["movement"])
+                grouped[key] = grouped.get(key, 0) + 1
+            lines.append("--- PCs auto-creados ---")
+            for (name, mov), count in sorted(grouped.items()):
+                lines.append(f"{name} (movimiento {mov}) x{count}")
+            lines.append("")
+        rejected = pr.get("rejected", [])
+        if rejected:
+            lines.append("--- Filas rechazadas ---")
+            for r in rejected:
+                lines.append(f"Fila {r['row']}: {r['reason']}")
+            lines.append("")
+        if lines:
+            _safe_create_task(
+                title="Registros a revisar en importación de Periodización",
+                description="\n".join(lines),
+                proyecto=proyecto,
+                created_by=user,
             )
-        for rejected in pr.get("rejected", []):
-            review_lines.append(f"Fila {rejected['row']} rechazada: {rejected['reason']}")
-
-    if review_lines:
-        _safe_create_task(
-            title="Registros a revisar en importación de Periodización",
-            description="\n".join(review_lines),
-            proyecto=proyecto,
-            created_by=user,
-        )
 
     return report
 
