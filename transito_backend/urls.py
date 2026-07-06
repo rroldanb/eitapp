@@ -15,6 +15,8 @@ from apps.admin_views import (
 )
 from apps.usuarios import views as user_views
 
+handler404 = "apps.usuarios.views.handler404_view"
+
 urlpatterns = [
     path("health/", lambda r: HttpResponse("OK"), name="health"),
     path("admin/generar-planilla/", descargar_plantilla, name="generar_planilla"),
@@ -33,6 +35,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", user_views.home, name="home"),
     path("docs/", user_views.docs_view, name="docs"),
+    path("docs/<str:lang>/", user_views.docs_view, name="docs_lang"),
     path("switch-db/<str:alias>/", user_views.switch_db, name="switch_db"),
     path("logout/", user_views.signout, name="signout"),
     path("signin/", user_views.signin, name="signin"),

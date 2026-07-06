@@ -22,16 +22,33 @@ from django.views.decorators.http import require_POST
 
 from apps.usuarios.models import Role
 
+LANG_MAP = {
+    "es": "README.md",
+    "en": "README.en.md",
+    "pt": "README.pt-br.md",
+}
 
-def docs_view(request: HttpRequest) -> HttpResponse:
-    readme_path = os.path.join(settings.BASE_DIR, "README.md")
-    with open(readme_path, encoding="utf-8") as f:
-        content = f.read()
+
+def docs_view(request: HttpRequest, lang: str = "es") -> HttpResponse:
+    filename = LANG_MAP.get(lang, "README.md")
+    readme_path = os.path.join(settings.BASE_DIR, filename)
+    try:
+        with open(readme_path, encoding="utf-8") as f:
+            content = f.read()
+    except FileNotFoundError:
+        content = f"# {lang.upper()} · Not found\n\nDocumentation not available in this language."
+    content = content.replace("README.en.md", "/docs/en/")
+    content = content.replace("README.pt-br.md", "/docs/pt/")
+    content = content.replace("(README.md)", "(/docs/)")
     html = markdown.markdown(
         content,
         extensions=["fenced_code", "tables", "codehilite"],
     )
-    return render(request, "docs.html", {"content": mark_safe(html)})
+    return render(request, "docs.html", {"content": mark_safe(html), "lang": lang})
+
+
+def handler404_view(request: HttpRequest, exception=None) -> HttpResponse:
+    return render(request, "404.html", status=404)
 
 
 def switch_db(request: HttpRequest, alias: str) -> HttpResponse:
