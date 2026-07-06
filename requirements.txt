@@ -10,6 +10,7 @@ openpyxl>=3.1
 Pillow>=10
 pandas>=2,<3
 requests>=2.30
+markdown>=3.6
 python-decouple>=3.8
 
 # Dev

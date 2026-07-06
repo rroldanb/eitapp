@@ -32,6 +32,7 @@ urlpatterns = [
     path("admin/restore-db/", restore_database, name="restore_database"),
     path("admin/", admin.site.urls),
     path("", user_views.home, name="home"),
+    path("docs/", user_views.docs_view, name="docs"),
     path("switch-db/<str:alias>/", user_views.switch_db, name="switch_db"),
     path("logout/", user_views.signout, name="signout"),
     path("signin/", user_views.signin, name="signin"),

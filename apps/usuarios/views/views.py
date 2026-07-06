@@ -1,3 +1,6 @@
+import os
+
+import markdown
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -14,9 +17,21 @@ from django.db import IntegrityError, connection
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 
 from apps.usuarios.models import Role
+
+
+def docs_view(request: HttpRequest) -> HttpResponse:
+    readme_path = os.path.join(settings.BASE_DIR, "README.md")
+    with open(readme_path, encoding="utf-8") as f:
+        content = f.read()
+    html = markdown.markdown(
+        content,
+        extensions=["fenced_code", "tables", "codehilite"],
+    )
+    return render(request, "docs.html", {"content": mark_safe(html)})
 
 
 def switch_db(request: HttpRequest, alias: str) -> HttpResponse:

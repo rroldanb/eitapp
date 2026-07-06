@@ -578,3 +578,27 @@ textarea:focus-visible {
     color: #171717;
     border-top: 1px solid #7853a3;
 }
+
+
+/* ============================================================================
+    14. DOCS CONTENT - Estilos para la documentación renderizada
+    ============================================================================ */
+.docs-content h1 { font-size: 1.75rem; font-weight: 700; color: #111827; margin-top: 2rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb; }
+.docs-content h1:first-child { margin-top: 0; }
+.docs-content h2 { font-size: 1.4rem; font-weight: 700; color: #1f2937; margin-top: 1.75rem; margin-bottom: 0.5rem; }
+.docs-content h3 { font-size: 1.15rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+.docs-content p { color: #374151; line-height: 1.7; margin-bottom: 0.75rem; }
+.docs-content a { color: #4f46e5; text-decoration: underline; }
+.docs-content a:hover { color: #4338ca; }
+.docs-content code { background-color: #eef2ff; color: #4338ca; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.875em; }
+.docs-content pre { background-color: #1f2937; color: #f3f4f6; padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1rem; }
+.docs-content pre code { background: none; color: inherit; padding: 0; }
+.docs-content ul, .docs-content ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.docs-content li { color: #374151; line-height: 1.7; margin-bottom: 0.25rem; }
+.docs-content table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; }
+.docs-content th { background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem; }
+.docs-content td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; color: #374151; font-size: 0.875rem; }
+.docs-content blockquote { border-left: 4px solid #4f46e5; padding-left: 1rem; margin-left: 0; margin-bottom: 0.75rem; color: #6b7280; font-style: italic; }
+.docs-content hr { border: none; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }
+.docs-content strong { font-weight: 700; color: #111827; }
+.docs-content img { max-width: 100%; border-radius: 8px; margin: 1rem 0; }
