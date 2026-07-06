@@ -3,7 +3,7 @@ from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
@@ -23,7 +23,7 @@ from apps.red_vial.services.generador_dat import (
 
 
 @login_required
-def proyectos_view(request):
+def proyectos_view(request: HttpRequest) -> HttpResponse:
     active_proyectos = get_active_proyectos()
     completed_proyectos = get_completed_proyectos()
     return render(
@@ -38,7 +38,7 @@ def proyectos_view(request):
 
 
 @login_required
-def proyecto_detail_view(request, proyecto_id):
+def proyecto_detail_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
 
     if request.method == "GET":
@@ -86,7 +86,7 @@ def proyecto_detail_view(request, proyecto_id):
 
 
 @login_required
-def proyecto_create_view(request):
+def proyecto_create_view(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = ProyectoForm(request.POST, request.FILES)
 
@@ -115,7 +115,7 @@ def proyecto_create_view(request):
 
 @login_required
 @require_POST
-def proyecto_finalizar_view(request, proyecto_id):
+def proyecto_finalizar_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     proyecto.is_completed = True
     proyecto.date_completed = timezone.now()
@@ -125,7 +125,7 @@ def proyecto_finalizar_view(request, proyecto_id):
 
 @login_required
 @require_POST
-def proyecto_reactivar_view(request, proyecto_id):
+def proyecto_reactivar_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     proyecto.is_completed = False
     proyecto.date_completed = None
@@ -135,7 +135,7 @@ def proyecto_reactivar_view(request, proyecto_id):
 
 @login_required
 @require_POST
-def proyecto_delete_image_view(request, proyecto_id):
+def proyecto_delete_image_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     try:
         if proyecto.image_url:
@@ -148,7 +148,7 @@ def proyecto_delete_image_view(request, proyecto_id):
 
 
 @login_required
-def proyecto_delete_view(request, proyecto_id):
+def proyecto_delete_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     try:
         proyecto_delete(proyecto_id)
         return redirect("proyectos")
@@ -161,8 +161,7 @@ def proyecto_delete_view(request, proyecto_id):
 
 
 @login_required
-def proyecto_resumen_view(request, proyecto_id):
-    """Vista de resumen de Red Vial del proyecto"""
+def proyecto_resumen_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     calles = proyecto.calles.all()
     nodos = proyecto.nodos.all().select_related("calle_1", "calle_2")
@@ -185,7 +184,7 @@ def proyecto_resumen_view(request, proyecto_id):
 
 @login_required
 @require_GET
-def proyecto_generar_dat_view(request, proyecto_id):
+def proyecto_generar_dat_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     periodo_id = request.GET.get("periodo")
 
@@ -226,7 +225,7 @@ def proyecto_generar_dat_view(request, proyecto_id):
 
 @login_required
 @require_POST
-def proyecto_generar_parametros_arco_view(request, proyecto_id):
+def proyecto_generar_parametros_arco_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     count = generar_parametros_arco(proyecto)
     messages.success(request, f"Se crearon {count} parámetros de arco.")
@@ -235,7 +234,7 @@ def proyecto_generar_parametros_arco_view(request, proyecto_id):
 
 @login_required
 @require_POST
-def proyecto_generar_fases_semaforicas_view(request, proyecto_id):
+def proyecto_generar_fases_semaforicas_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     count = generar_fases_semaforicas(proyecto)
     messages.success(request, f"Se crearon {count} fases semafóricas.")
@@ -244,7 +243,7 @@ def proyecto_generar_fases_semaforicas_view(request, proyecto_id):
 
 @login_required
 @require_GET
-def proyecto_generar_plantilla_view(request, proyecto_id):
+def proyecto_generar_plantilla_view(request: HttpRequest, proyecto_id: str) -> HttpResponse:
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     buf = generar_plantilla_bytes()
     filename = f"plantilla_importacion_{proyecto.title.replace(' ', '_')}.xlsx"

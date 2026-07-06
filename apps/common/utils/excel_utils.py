@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import Any
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -21,7 +22,7 @@ THIN_BORDER = Border(
 FK_FILL = PatternFill(start_color="F4B942", end_color="F4B942", fill_type="solid")
 
 
-def auto_width(ws, min_w=10, max_w=40):
+def auto_width(ws: Any, min_w: int = 10, max_w: int = 40) -> None:
     for col in ws.columns:
         mx = min_w
         for cell in col:
@@ -30,7 +31,9 @@ def auto_width(ws, min_w=10, max_w=40):
         ws.column_dimensions[get_column_letter(col[0].column)].width = mx
 
 
-def write_sheet(ws, title, fields, samples, notes=None):
+def write_sheet(
+    ws: Any, title: str, fields: list[tuple], samples: list[tuple], notes: str | None = None
+) -> None:
     ws.title = title
 
     headers = [f[0] for f in fields]
@@ -82,15 +85,16 @@ def write_sheet(ws, title, fields, samples, notes=None):
     auto_width(ws)
 
 
-def fk(desc):
+def fk(desc: str) -> str:
     return f"{desc} (ID existente)"
 
 
 BASE_DATE = "17/03/2025"
 
 
-def _base_val(hour, minute, peak_low, peak_high, off_peak_low, off_peak_high):
-    """interpolate between off-peak and peak values based on time proximity to peak."""
+def _base_val(
+    hour: int, minute: int, peak_low: int, peak_high: int, off_peak_low: int, off_peak_high: int
+) -> int:
     minutes = hour * 60 + minute
     if 7 * 60 <= minutes <= 9 * 60:
         frac = (minutes - 7 * 60) / 120
@@ -104,7 +108,7 @@ def _base_val(hour, minute, peak_low, peak_high, off_peak_low, off_peak_high):
 PC_MOV = {"PC-01": "12", "PC-02": "21"}
 
 
-def _periodizacion_rows():
+def _periodizacion_rows() -> list[tuple]:
     rows = []
     combos = [
         ("Estudio de Semaforos Av. Libertador", "PC-01", "PM-L", 6, 9),
@@ -148,7 +152,7 @@ def _periodizacion_rows():
     return rows
 
 
-def generar_plantilla():
+def generar_plantilla() -> Workbook:
     wb = Workbook()
 
     ws_readme = wb.active
@@ -198,7 +202,7 @@ def generar_plantilla():
     ws_readme.column_dimensions["A"].width = 95
     ws_readme.sheet_properties.tabColor = "1F4E79"
 
-    sheets_data = [
+    sheets_data: list[tuple[str, list[tuple], list[tuple], str | None]] = [
         (
             "Mandante",
             [
@@ -560,7 +564,7 @@ def generar_plantilla():
     return wb
 
 
-def generar_plantilla_bytes():
+def generar_plantilla_bytes() -> BytesIO:
     wb = generar_plantilla()
     buf = BytesIO()
     wb.save(buf)

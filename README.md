@@ -19,13 +19,13 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
 ## Stack Tecnológico
 
 - **Python 3.11** + **Django 5.2**
-- SQLite (desarrollo) / PostgreSQL (producción)
+- **PostgreSQL** (multi-DB: default + ORA para VPS)
 - HTMX 2.x para interactividad (CRUD inline)
 - Tailwind CSS v4 (modo desarrollo con `python manage.py tailwind.dev`)
 - WhiteNoise para archivos estáticos
 - Chart.js 4.x para gráficos de análisis
 - Font Awesome 6 (CDN) para iconografía
-- Supabase Storage para imágenes de proyecto/nodo
+- Filesystem local para imágenes (Sin Supabase)
 
 ## Tooling
 
@@ -51,18 +51,15 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
 ## Flujo de Trabajo (Mini Manual)
 
 ```
-1. REGISTRO → /signup/
-   Crear cuenta de usuario.
-
-2. MANDANTE → /mandantes/
+1. MANDANTE → /mandantes/
    Crear cliente/organización.
    Agregar contactos asociados (nombre, email, teléfono, cargo).
 
-3. PROYECTO → /proyectos/ → "Crear Proyecto"
+2. PROYECTO → /proyectos/ → "Crear Proyecto"
    Asociar a un mandante. Completar datos generales, subir imagen.
    El proyecto puede estar Activo o Finalizado.
 
-4. RED VIAL → /proyectos/<id>/resumen/
+3. RED VIAL → /proyectos/<id>/resumen/
    Resumen del proyecto con cantidades de calles, nodos, arcos, PCs.
    Acceso a cada sección de modelado:
 
@@ -73,16 +70,16 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
    e. Puntos de Control → Asignar movimiento (6 direcciones),
       viraje (DIR/DER/IZQ), arco entrada/salida, regulación, pistas
    f. Períodos → Definir ventanas de análisis (AM-L, PM-L, etc.)
-   g. Coeficientes de Cruce → Factores de equivalencia vehicular
-      (estándar global + sobreescritura por proyecto)
+    g. Coeficientes de Cruce → Factores de equivalencia vehicular
+       (estándar global + sobreescritura por proyecto)
 
-5. PERIODIZACIÓN → /proyectos/<id>/periodizacion/
+4. PERIODIZACIÓN → /proyectos/<id>/periodizacion/
    Seleccionar nodos (PCs), períodos, movimiento, fecha.
    "Generar" → crea filas de intervalos de 15 min.
    Ingresar conteos por tipo vehicular (VL, TXC, TXB, etc.).
    ftot se calcula automáticamente.
 
-6. ANÁLISIS DE FLUJOS → /proyectos/<id>/analisis-flujos/
+5. ANÁLISIS DE FLUJOS → /proyectos/<id>/analisis-flujos/
    Filtrar por nodo, período, movimiento, fecha.
    Visualizar:
    - Tabla detalle (flujo total, promedio, registros)
@@ -91,14 +88,14 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
    - Gráfico Chart.js (barras agrupadas por PC y período)
    "Recalcular" para agregar datos de periodización a ResumenFlujo.
 
-7. TRANSYT → /proyectos/<id>/configuracion-transyt/
+6. TRANSYT → /proyectos/<id>/configuracion-transyt/
    a. Configuración global → ciclo, W, K, pérdida/ganancia
    b. Parámetros de Arco → flujo saturación, ponderadores
       (1 por PC, con generación automática de defaults)
    c. Fases Semafóricas → verde inicio/fin por PC y fase
       (con generación automática de fase 1 por PC)
 
-8. EXPORTAR .dat → Desde detalle del proyecto
+7. EXPORTAR .dat → Desde detalle del proyecto
    Validar datos completos. Seleccionar período o "todos".
    Genera archivo TRANSYT-8S (.dat por período, .zip para todos).
    Formato ancho fijo 80 columnas con validación de salida.
@@ -110,7 +107,7 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
 |------|-------|
 | `/` | Dashboard / Home |
 | `/signin/` | Iniciar sesión |
-| `/signup/` | Registrarse |
+| `/usuarios/` | Gestión de usuarios (admin) |
 | `/mandantes/` | Lista de mandantes |
 | `/mandantes/create/` | Crear mandante |
 | `/mandantes/<id>/` | Detalle / editar mandante |
@@ -141,9 +138,74 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
 
 | Ambiente | DB | URL | Deploy |
 |----------|----|-----|--------|
-| local | SQLite | localhost:8000 | `python manage.py runserver` |
-| staging | PostgreSQL (VPS) | — | Automático al merge a `staging` |
-| production | PostgreSQL (VPS) | — | Manual via GitHub Actions |
+| local | PostgreSQL local (eitapp) | localhost:8000 | `python manage.py runserver` |
+| staging | PostgreSQL (VPS ORA) | — | Automático al merge a `staging` |
+| production | PostgreSQL (VPS ORA) | — | Manual via GitHub Actions |
+
+### Arquitectura Multi-DB
+
+```
+                    ┌──────────────────────────────┐
+                    │      Django (settings.py)      │
+                    │  default: DATABASE_URL cascade   │
+                    │  ORA: DATABASE_URL_ORA (VPS)    │
+                    │  pg_local: DATABASE_URL_LOCAL   │
+                    └──────┬───────────────┬─────────┘
+                           │               │
+              ┌────────────┘               └────────────┐
+              ▼                                          ▼
+   ┌──────────────────┐                    ┌──────────────────────┐
+   │  localhost:5432   │                    │  161.153.14.37:5432  │
+   │  eitapp (default) │                    │  eitapp (ORA)       │
+   │  PG nativo        │                    │  Coolify / Docker   │
+   └──────────────────┘                    └──────────────────────┘
+```
+
+### Resolución de `default`
+
+```
+DATABASE_URL=postgresql://user:pass@host:5432/eitapp    ← si está seteado
+  ↓ no
+DATABASE_URL_ORA=postgresql://user:pass@161.153.14.37:5432/eitapp    ← VPS
+  ↓ no
+postgresql://postgres:1234@localhost:5432/eitapp    ← fallback local
+```
+
+- **Local**: `DATABASE_URL` apunta a PostgreSQL local (`eitapp`). `ORA` disponible para switchear.
+- **VPS (Coolify)**: Solo `DATABASE_URL_ORA` está definido → `default` cae a ORA automáticamente. Sin configuración extra.
+
+### Multi-tenancy (futuro)
+
+La aplicación soportará dos modelos de despliegue:
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│                   Balanceador / Proxy                          │
+│                 (nginx + server_name o path)                    │
+└──────┬─────────────────────────┬───────────────────────────────┘
+       │                         │
+       ▼                         ▼
+┌──────────────────┐   ┌───────────────────────────┐
+│  Plan Compartido  │   │    Plan Pro (consultora)  │
+│  DB compartida    │   │  Stack Docker individual:  │
+│  schema: tenant_* │   │  - web (Django)            │
+│  (postgres1)      │   │  - db (PostgreSQL)         │
+│                   │   │  - pgadmin4 (opcional)     │
+│  Un solo pgAdmin  │   │  - redis (futuro)          │
+│  multi-schema     │   │                             │
+└──────────────────┘   └───────────────────────────┘
+```
+
+| Factor | Compartido | Pro |
+|--------|-----------|------|
+| Aislamiento de datos | Schema | Database independiente |
+| Costo | Bajo (1 VPS) | Medio (1 VPS por tenant) |
+| Escala | Hasta ~50 tenants | Ilimitado |
+| Backup | Completo + schema dump | Completo por stack |
+| Upgrade | Un deploy | Por stack (rollback individual) |
+| Aprovisionamiento | `CREATE SCHEMA` | `docker compose up` |
+
+**Estado:** Diseño definido. Pendiente de implementar (`ActiveDatabaseRouter` + `TenantMiddleware`).
 
 ## CI/CD
 
@@ -195,23 +257,23 @@ pre-commit run --all-files            # Todo junto
 ## Variables de Entorno
 
 ```
+# Django
 SECRET_KEY=...
 DEBUG=True
-DATABASE_URL=...
+DATABASE_URL=postgresql://postgres:1234@localhost:5432/eitapp  # default DB
+
+# ORA (VPS / Coolify)
+DATABASE_URL_ORA=postgresql://user:pass@161.153.14.37:5432/eitapp
+CONN_MAX_AGE=600
+
+# Local second DB (opcional, para switchear)
+DATABASE_URL_LOCAL=postgresql://postgres:1234@localhost:5432/eitapp
+
+# Cloud storage (local filesystem, no Supabase)
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_STORAGE_BUCKET_NAME=
 ```
-
-## Mejoras Recientes de UI
-
-- Consistencia visual en todas las pantallas de mandantes y contactos (cards, títulos, botones)
-- Labels de formularios traducidos al español
-- Campos editables con contraste mejorado (fondo blanco, borde visible)
-- Botones de acción en grid de 2 columnas para ancho uniforme
-- Contador de contactos en lista de mandantes
-- Jerarquía de encabezados corregida para accesibilidad
-- Atributos `aria-label` y `aria-hidden` en iconos y botones
-- Enlace skip-to-content y foco visible (`focus-visible`) en todos los elementos interactivos
-- Contraste de color mejorado (`text-gray-400` → `text-gray-500`)
-- Protección double-submit en formularios POST
 
 ## Licencia
 

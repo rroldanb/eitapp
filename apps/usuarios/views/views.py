@@ -11,6 +11,7 @@ from django.contrib.auth.forms import (
 )
 from django.contrib.auth.models import User
 from django.db import IntegrityError, connection
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -18,13 +19,13 @@ from django.views.decorators.http import require_POST
 from apps.usuarios.models import Role
 
 
-def switch_db(request, alias):
+def switch_db(request: HttpRequest, alias: str) -> HttpResponse:
     if alias in settings.DATABASES:
         request.session["active_db"] = alias if alias != "default" else None
     return redirect(request.META.get("HTTP_REFERER", "home"))
 
 
-def home(request):
+def home(request: HttpRequest) -> HttpResponse:
     db_info = {
         "alias": request.session.get("active_db") or "default",
         "engine": connection.vendor,
@@ -51,7 +52,7 @@ def home(request):
     return render(request, "home.html", context)
 
 
-def signup(request):
+def signup(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         return render(request, "signup.html", {"form": UserCreationForm})
 
@@ -79,8 +80,7 @@ def signup(request):
             )
 
 
-def signin(request):
-
+def signin(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         return render(request, "signin.html", {"form": AuthenticationForm})
     else:
@@ -100,13 +100,13 @@ def signin(request):
 
 
 @login_required
-def signout(request):
+def signout(request: HttpRequest) -> HttpResponse:
     logout(request)
     return redirect("home")
 
 
 @staff_member_required
-def admin_create_user_view(request):
+def admin_create_user_view(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = AdminUserCreationForm(request.POST)
         if form.is_valid():
@@ -124,7 +124,7 @@ def admin_create_user_view(request):
 
 
 @staff_member_required
-def user_management_view(request):
+def user_management_view(request: HttpRequest) -> HttpResponse:
     sort_map = {
         "username": "username",
         "role": "profile__role",
@@ -151,7 +151,7 @@ def user_management_view(request):
 
 @staff_member_required
 @require_POST
-def user_toggle_active_view(request, user_id):
+def user_toggle_active_view(request: HttpRequest, user_id: int) -> HttpResponse:
     user = get_object_or_404(User, id=user_id)
     if user == request.user:
         messages.error(request, "No puedes deshabilitarte a ti mismo.")
@@ -165,7 +165,7 @@ def user_toggle_active_view(request, user_id):
 
 @staff_member_required
 @require_POST
-def user_change_role_view(request, user_id):
+def user_change_role_view(request: HttpRequest, user_id: int) -> HttpResponse:
     user = get_object_or_404(User, id=user_id)
     if user == request.user:
         messages.error(request, "No puedes cambiar tu propio rol.")
@@ -179,7 +179,7 @@ def user_change_role_view(request, user_id):
 
 
 @staff_member_required
-def user_change_password_view(request, user_id):
+def user_change_password_view(request: HttpRequest, user_id: int) -> HttpResponse:
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
         form = SetPasswordForm(user, request.POST)

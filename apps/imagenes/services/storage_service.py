@@ -1,17 +1,18 @@
 import os
 import uuid
+from typing import Any
 
 from django.conf import settings
 from PIL import Image
 
 
-def _media_path(subdir, filename):
+def _media_path(subdir: str, filename: str) -> str:
     path = os.path.join(settings.MEDIA_ROOT, subdir)
     os.makedirs(path, exist_ok=True)
     return os.path.join(path, filename)
 
 
-def upload_project_image(file):
+def upload_project_image(file: Any) -> str:
     try:
         img = Image.open(file)
     except Exception as e:
@@ -30,14 +31,11 @@ def upload_project_image(file):
     return f"{settings.MEDIA_URL}proyectos/{filename}"
 
 
-def delete_project_image(image_url):
+def delete_project_image(image_url: str | None) -> None:
     if not image_url:
         return
-
-    # Ignorar URLs externas (ej. Supabase, imágenes viejas)
     if not image_url.startswith(settings.MEDIA_URL):
         return
-
     rel_path = image_url[len(settings.MEDIA_URL) :].lstrip("/")
     abs_path = os.path.join(settings.MEDIA_ROOT, rel_path)
     if os.path.exists(abs_path):
