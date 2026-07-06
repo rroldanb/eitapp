@@ -121,15 +121,6 @@ WSGI_APPLICATION = "transito_backend.wsgi.application"
 
 ####### DATABASE CONFIGURATION #######
 
-# default: DATABASE_URL env var (set locally to local PG, on VPS to ORA)
-DATABASES = {
-    "default": dj_database_url.config(
-        env="DATABASE_URL",
-        default="postgresql://postgres:1234@localhost:5432/eitapp",
-        conn_max_age=int(os.getenv("CONN_MAX_AGE", "0")),
-    ),
-}
-
 # ── ORA: PostgreSQL en VPS (Coolify / Oracle Cloud) ──
 _ora_url = os.getenv("DATABASE_URL_ORA")
 if not _ora_url:
@@ -140,6 +131,17 @@ if not _ora_url:
     _dbname = os.getenv("dbname")
     if all([_user, _password, _host, _port, _dbname]):
         _ora_url = f"postgresql://{_user}:{_password}@{_host}:{_port}/{_dbname}"
+
+# default: DATABASE_URL > ORA > local PG fallback
+# - Local: DATABASE_URL apunta a PG local, ORA disponible para switcheo
+# - VPS (Coolify): DATABASE_URL no está seteada, cae a ORA automáticamente
+DATABASES = {
+    "default": dj_database_url.parse(
+        os.getenv("DATABASE_URL") or _ora_url or "postgresql://postgres:1234@localhost:5432/eitapp",
+        conn_max_age=int(os.getenv("CONN_MAX_AGE", "0")),
+    ),
+}
+
 if _ora_url:
     DATABASES["ORA"] = dj_database_url.parse(
         _ora_url,
