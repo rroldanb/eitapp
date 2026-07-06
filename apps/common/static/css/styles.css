@@ -583,5 +583,3 @@ textarea:focus-visible {
 /* ============================================================================
     14. MARKDOWN BODY - Box sizing fix for github-markdown-css
     ============================================================================ */
-.markdown-body { box-sizing: border-box; min-width: 200px; }
-.markdown-body table { display: table; }

@@ -26,7 +26,7 @@ class Periodizacion(BaseModel):
     ftot = models.FloatField(default=0, editable=False)
 
     class Meta:
-        unique_together = ["fecha", "pc_mov", "hora"]
+        unique_together = ["fecha", "pc", "pc_mov", "hora"]
 
     def calcular_ftot(self) -> float:
         """

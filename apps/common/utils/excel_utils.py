@@ -105,7 +105,7 @@ def _base_val(
     return (off_peak_low + off_peak_high) // 2
 
 
-PC_MOV = {"PC-01": "12", "PC-02": "21"}
+PC_MOV = {"PC-01": "12", "PC-02": "21", "PC-01_1": "13", "PC-02_1": "23"}
 
 
 def _periodizacion_rows() -> list[tuple]:
@@ -132,11 +132,13 @@ def _periodizacion_rows() -> list[tuple]:
                 peat = _base_val(hour, minute, 150, 350, 60, 120)
                 cicl = _base_val(hour, minute, 25, 70, 10, 20)
                 moto = _base_val(hour, minute, 35, 100, 15, 30)
+                pc_mov_val = PC_MOV.get(pc, "")
                 rows.append(
                     (
                         BASE_DATE,
                         hora,
                         pc,
+                        pc_mov_val,
                         period,
                         proj,
                         vl,
@@ -480,7 +482,18 @@ def generar_plantilla() -> Workbook:
                 ("fecha", "Fecha (DD/MM/AAAA)", True, "Fecha del conteo"),
                 ("hora", "Hora HH:MM", True, "Hora del conteo"),
                 ("pc", "FK (PuntoControl.nombre)", True, fk("Nombre del PC (ej: PC-01, PC-02)")),
-                ("periodo", "FK (Periodo.codigo)", True, fk("Periodo.codigo (ej: PM-L)")),
+                (
+                    "pc_mov",
+                    "Texto (2)",
+                    False,
+                    "Movimiento del PC (ej: 12). Opcional; si el PC no existe y se provee, se auto-crea con datos por defecto.",
+                ),
+                (
+                    "periodo",
+                    "FK (Periodo.codigo)",
+                    False,
+                    "Codigo de periodo (ej: PM-L). Opcional; si se omite se deduce automaticamente desde la hora.",
+                ),
                 ("proyecto", "FK (Proyecto.title)", True, fk("Proyecto.title")),
                 ("vl", "Entero", True, "Vehiculos Livianos"),
                 ("txc", "Entero", True, "Taxi Colectivo"),
@@ -492,7 +505,7 @@ def generar_plantilla() -> Workbook:
                 ("moto", "Entero", True, "Motocicletas"),
             ],
             _periodizacion_rows(),
-            "NOTA: 'ftot' (flujo total) se calcula automaticamente. La combinacion (fecha, pc_mov, hora) debe ser unica.",
+            "NOTA: 'ftot' se calcula automaticamente. 'periodo' es opcional — si se omite se deduce desde la hora. 'pc_mov' opcional: si se omite se auto-genera desde el PC; si se provee y el PC no existe, se crea automaticamente con arcos por defecto y se genera una tarea de revision.",
         ),
         (
             "ParametroArco",

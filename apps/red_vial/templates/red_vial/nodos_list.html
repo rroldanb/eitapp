@@ -135,13 +135,13 @@
 
 {% endblock %}
 
-<div id="data-crud-config" data-table-id="nodos-table" data-model-name="Nodo" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
+{% block extra_js %}
 {% url 'nodo_upload_image' item_id='00000000-0000-0000-0000-000000000000' as upload_imagen_url %}
 {% url 'nodo_delete_image' item_id='00000000-0000-0000-0000-000000000000' as delete_imagen_url %}
 {% url 'nodo_upload_plano' item_id='00000000-0000-0000-0000-000000000000' as upload_plano_url %}
 {% url 'nodo_delete_plano' item_id='00000000-0000-0000-0000-000000000000' as delete_plano_url %}
 <div id="nodo-file-config" hidden data-upload-imagen="{{ upload_imagen_url }}" data-delete-imagen="{{ delete_imagen_url }}" data-upload-plano="{{ upload_plano_url }}" data-delete-plano="{{ delete_plano_url }}"></div>
-{% block extra_js %}
+<div id="data-crud-config" data-table-id="nodos-table" data-model-name="Nodo" data-proyecto-id="{{ proyecto.id }}" data-csrf-token="{{ csrf_token }}" hidden></div>
 <script src="{% static 'js/features/nodo-file.js' %}" defer></script>
 <script>
 (function() {

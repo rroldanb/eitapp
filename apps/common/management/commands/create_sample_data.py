@@ -31,6 +31,7 @@ class Command(BaseCommand):
         self._create_coeficientes()
         mandante = self._create_mandante()
         proyecto = self._create_proyecto(mandante)
+        self._clean_proyecto(proyecto)
         calles = self._create_calles(proyecto)
         nodos = self._create_nodos(proyecto, calles)
         arcos = self._create_arcos(proyecto, nodos)
@@ -42,6 +43,19 @@ class Command(BaseCommand):
         self._create_periodizacion(proyecto, pcs, periodos)
         self._create_resumen_flujo(proyecto, pcs, periodos)
         self.stdout.write(self.style.SUCCESS("Proyecto demo creado exitosamente"))
+
+    def _clean_proyecto(self, proyecto: Proyecto) -> None:
+        """Elimina datos previos del proyecto para regenerarlos limpios."""
+        Periodizacion.objects.filter(pc__proyecto=proyecto).delete()
+        ResumenFlujo.objects.filter(pc__proyecto=proyecto).delete()
+        ParametroArco.objects.filter(proyecto=proyecto).delete()
+        FaseSemaforica.objects.filter(proyecto=proyecto).delete()
+        ConfiguracionTransyt.objects.filter(proyecto=proyecto).delete()
+        PuntoControl.objects.filter(proyecto=proyecto).delete()
+        Arco.objects.filter(proyecto=proyecto).delete()
+        Calle.objects.filter(proyecto=proyecto).delete()
+        Nodo.objects.filter(proyecto=proyecto).delete()
+        Periodo.objects.filter(proyecto=proyecto).delete()
 
     def _create_user(self) -> User:
         user, _ = User.objects.get_or_create(
@@ -104,6 +118,7 @@ class Command(BaseCommand):
             (1, "Av. Libertador"),
             (2, "Av. Providencia"),
             (3, "Av. Manuel Montt"),
+            (4, "Av. Alameda"),
         ]:
             calle, _ = Calle.objects.get_or_create(
                 numero=numero, proyecto=proyecto, defaults={"nombre": nombre}
@@ -116,6 +131,7 @@ class Command(BaseCommand):
         data = [
             (1, "Av. Libertador con Av. Providencia", "Av. Libertador", "Av. Providencia", 1),
             (2, "Av. Libertador con Av. Manuel Montt", "Av. Libertador", "Av. Manuel Montt", 2),
+            (3, "Av. Libertador con Alameda", "Av. Libertador", "Av. Alameda", 3),
         ]
         for numero, interseccion, c1, c2, pc_num in data:
             nodo, _ = Nodo.objects.get_or_create(
@@ -136,6 +152,10 @@ class Command(BaseCommand):
         data = [
             (1, 2, 150.0),
             (2, 1, 150.0),
+            (1, 3, 200.0),
+            (3, 1, 200.0),
+            (2, 3, 180.0),
+            (3, 2, 180.0),
         ]
         for origen, destino, longitud in data:
             arco, _ = Arco.objects.get_or_create(
@@ -172,11 +192,15 @@ class Command(BaseCommand):
     ) -> dict[str, PuntoControl]:
         regulacion = Regulacion.objects.get(codigo="SEM01")
         pcs = {}
+        # (pc_key, nodo, movimiento, viraje, prioritario, arco_entrada, arco_salida, pistas)
         data = [
-            (1, "12", "DIR", True, "1>2", "2>1", 2.0, nodos[1]),
-            (2, "21", "DIR", True, "2>1", "1>2", 2.0, nodos[2]),
+            ("pc1_n1_12", nodos[1], "12", "DIR", True, "1>2", "2>1", 2.0),
+            ("pc2_n1_13", nodos[1], "13", "IZQ", False, "1>3", "3>1", 1.0),
+            ("pc3_n2_21", nodos[2], "21", "DIR", True, "2>1", "1>2", 2.0),
+            ("pc4_n2_23", nodos[2], "23", "DER", False, "2>3", "3>2", 1.0),
+            ("pc5_n3_31", nodos[3], "31", "DIR", True, "3>1", "1>3", 2.0),
         ]
-        for nodo_num, movimiento, viraje, prioritario, arco_in, arco_out, pistas, nodo in data:
+        for key, nodo, movimiento, viraje, prioritario, arco_in, arco_out, pistas in data:
             pc, _ = PuntoControl.objects.get_or_create(
                 nodo=nodo,
                 movimiento=movimiento,
@@ -190,13 +214,16 @@ class Command(BaseCommand):
                     "numero_pistas": pistas,
                 },
             )
-            pcs[nodo_num] = pc
+            pcs[key] = pc
         return pcs
 
     def _create_parametros_arco(self, proyecto: Proyecto, pcs: dict[str, PuntoControl]) -> None:
         data = [
-            (pcs[1], 1800.0, 1.0, 1.0, 10.0, True),
-            (pcs[2], 1600.0, 1.2, 0.8, None, False),
+            (pcs["pc1_n1_12"], 1800.0, 1.0, 1.0, 10.0, True),
+            (pcs["pc2_n1_13"], 1400.0, 1.2, 0.9, None, False),
+            (pcs["pc3_n2_21"], 1600.0, 1.2, 0.8, None, False),
+            (pcs["pc4_n2_23"], 1500.0, 1.0, 1.0, 8.0, True),
+            (pcs["pc5_n3_31"], 1700.0, 1.1, 0.9, None, False),
         ]
         for pc, flujo_sat, pond_dem, pond_det, cap_cola, tiene_t38 in data:
             ParametroArco.objects.get_or_create(
@@ -213,10 +240,16 @@ class Command(BaseCommand):
 
     def _create_fases_semaforicas(self, proyecto: Proyecto, pcs: dict[str, PuntoControl]) -> None:
         data = [
-            (pcs[1], 1, 0.0, 25.0),
-            (pcs[1], 2, 30.0, 55.0),
-            (pcs[2], 1, 0.0, 20.0),
-            (pcs[2], 2, 25.0, 45.0),
+            (pcs["pc1_n1_12"], 1, 0.0, 25.0),
+            (pcs["pc1_n1_12"], 2, 30.0, 55.0),
+            (pcs["pc2_n1_13"], 1, 5.0, 20.0),
+            (pcs["pc2_n1_13"], 2, 30.0, 50.0),
+            (pcs["pc3_n2_21"], 1, 0.0, 20.0),
+            (pcs["pc3_n2_21"], 2, 25.0, 45.0),
+            (pcs["pc4_n2_23"], 1, 0.0, 15.0),
+            (pcs["pc4_n2_23"], 2, 25.0, 40.0),
+            (pcs["pc5_n3_31"], 1, 0.0, 22.0),
+            (pcs["pc5_n3_31"], 2, 28.0, 50.0),
         ]
         for pc, fase, inicio, fin in data:
             FaseSemaforica.objects.get_or_create(
@@ -245,6 +278,7 @@ class Command(BaseCommand):
 
         fecha = date(2025, 3, 17)
         for pc in pcs.values():
+            pc_mov = f"{pc.arco_salida.codigo_arco}_{pc.arco_entrada.codigo_arco}"
             for periodo in periodos.values():
                 h_start = periodo.hora_inicio.hour
                 h_end = periodo.hora_fin.hour
@@ -253,7 +287,7 @@ class Command(BaseCommand):
                         base = 500 if "PM" in periodo.codigo else 300
                         Periodizacion.objects.get_or_create(
                             fecha=fecha,
-                            pc_mov=f"{pc.nombre}_{pc.movimiento}",
+                            pc_mov=pc_mov,
                             hora=time(hour, minute),
                             pc=pc,
                             periodo=periodo,

@@ -87,8 +87,8 @@
 - [x] 8.2 — Pre-commit hooks configurados (ruff, eslint, prettier, trailing-whitespace, end-of-file-fixer)
 - [x] 8.3 — ruff configurado como linter/formatter Python (`.ruff.toml`)
 
-### Pendiente
-- [ ] 8.4 — Healthcheck endpoint para monitorear multi-DB / schema status
+### Completado
+- [x] 8.4 — Healthcheck endpoint para monitorear multi-DB / schema status
 
 ---
 

@@ -1,6 +1,6 @@
 import os
+from typing import Any
 
-import markdown
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -13,13 +13,14 @@ from django.contrib.auth.forms import (
     UserCreationForm,
 )
 from django.contrib.auth.models import User
-from django.db import IntegrityError, connection
-from django.http import HttpRequest, HttpResponse
+from django.db import IntegrityError, connection, connections
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.utils.safestring import mark_safe
-from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 
+from apps.common.db_router import get_active_db
 from apps.usuarios.models import Role
 
 LANG_MAP = {
@@ -29,7 +30,8 @@ LANG_MAP = {
 }
 
 
-def docs_view(request: HttpRequest, lang: str = "es") -> HttpResponse:
+@require_GET
+def docs_api_view(request: HttpRequest, lang: str = "es") -> JsonResponse:
     filename = LANG_MAP.get(lang, "README.md")
     readme_path = os.path.join(settings.BASE_DIR, filename)
     try:
@@ -37,17 +39,61 @@ def docs_view(request: HttpRequest, lang: str = "es") -> HttpResponse:
             content = f.read()
     except FileNotFoundError:
         content = f"# {lang.upper()} · Not found\n\nDocumentation not available in this language."
-    content = content.replace("README.en.md", "/docs/en/")
-    content = content.replace("README.pt-br.md", "/docs/pt/")
-    content = content.replace("(README.md)", "(/docs/)")
-    html = markdown.markdown(
-        content,
-        extensions=["fenced_code", "tables", "codehilite"],
-    )
-    return render(request, "docs.html", {"content": mark_safe(html), "lang": lang})
+    return JsonResponse({"content": content})
 
 
-def handler404_view(request: HttpRequest, exception=None) -> HttpResponse:
+def docs_view(request: HttpRequest, lang: str = "es") -> HttpResponse:
+    return render(request, "docs.html", {"lang": lang})
+
+
+@csrf_exempt
+@require_GET
+def healthcheck_view(request: HttpRequest) -> JsonResponse:
+    """Check connectivity and status of all configured databases.
+
+    Returns a JSON with per-alias status, migration count, and overall
+    healthy/degraded status.  Intended for monitoring (load-balancer,
+    docker healthcheck, uptime robot, etc.).
+    """
+    import time
+
+    overall = "healthy"
+    status: dict[str, Any] = {}
+
+    for alias in settings.DATABASES:
+        db_info: dict[str, Any] = {
+            "engine": settings.DATABASES[alias].get("ENGINE", "unknown"),
+            "name": settings.DATABASES[alias].get("NAME", ""),
+            "host": settings.DATABASES[alias].get("HOST", ""),
+            "port": settings.DATABASES[alias].get("PORT", ""),
+        }
+        try:
+            t0 = time.monotonic()
+            conn = connections[alias]
+            conn.ensure_connection()
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+                cursor.execute("SELECT COUNT(*) FROM django_migrations")
+                migration_count = cursor.fetchone()[0]
+            db_info["latency_ms"] = round((time.monotonic() - t0) * 1000, 1)
+            db_info["migrations"] = migration_count
+            db_info["status"] = "ok"
+        except Exception as exc:
+            db_info["status"] = "error"
+            db_info["error"] = str(exc)
+            overall = "degraded"
+
+        status[alias] = db_info
+
+    status["_active_db"] = get_active_db() or "default"
+    status["_overall"] = overall
+
+    http_code = 200 if overall == "healthy" else 503
+    return JsonResponse(status, status=http_code)
+
+
+def handler404_view(request: HttpRequest, exception: Any = None) -> HttpResponse:
     return render(request, "404.html", status=404)
 
 

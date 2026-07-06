@@ -2,7 +2,40 @@
 {% load static %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.min.css" integrity="sha512-E98C4d6uQYwHN6W36f44S3tVQCkmRIG/1FStjFI7ePeL4UEW4jFK6fHX8XRBZbqh/XmF9AN4JP7V/Gj3SAzL1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+<style>
+  #md-content {
+    color: #e6edf3;
+    line-height: 1.6;
+    word-wrap: break-word;
+  }
+  #md-content h1 { font-size: 2em; font-weight: 700; color: #f0f6fc; border-bottom: 1px solid #30363d; padding-bottom: 0.3em; margin: 0.67em 0 0.5em; }
+  #md-content h2 { font-size: 1.5em; font-weight: 700; color: #f0f6fc; border-bottom: 1px solid #21262d; padding-bottom: 0.25em; margin: 0.83em 0 0.5em; }
+  #md-content h3 { font-size: 1.25em; font-weight: 600; color: #58a6ff; margin: 1em 0 0.5em; }
+  #md-content h4 { font-size: 1em; font-weight: 600; color: #8b949e; margin: 1em 0 0.5em; text-transform: uppercase; letter-spacing: 0.03em; }
+  #md-content h5 { font-size: 0.875em; font-weight: 600; color: #8b949e; margin: 1em 0 0.5em; }
+  #md-content h6 { font-size: 0.85em; font-weight: 600; color: #6e7681; margin: 1em 0 0.5em; }
+  #md-content p { margin: 0 0 1em; color: #e6edf3; }
+  #md-content a { color: #58a6ff; text-decoration: none; }
+  #md-content a:hover { text-decoration: underline; }
+  #md-content strong { color: #f0f6fc; font-weight: 600; }
+  #md-content em { color: #e6edf3; }
+  #md-content code { background-color: rgba(110,118,129,0.4); border-radius: 4px; padding: 0.15em 0.3em; font-size: 85%; color: #f0f6fc; font-family: ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace; }
+  #md-content pre { background-color: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 16px; overflow: auto; margin: 0 0 1em; }
+  #md-content pre code { background: none; padding: 0; font-size: 85%; color: #e6edf3; white-space: pre; }
+  #md-content hr { border: none; border-top: 1px solid #30363d; margin: 24px 0; }
+  #md-content blockquote { border-left: 4px solid #30363d; padding: 0 1em; margin: 0 0 1em; color: #8b949e; }
+  #md-content ul, #md-content ol { padding-left: 2em; margin: 0 0 1em; color: #e6edf3; }
+  #md-content li { margin: 0.25em 0; }
+  #md-content table { border-collapse: collapse; width: 100%; margin: 0 0 1em; display: block; overflow-x: auto; }
+  #md-content table th { background-color: #161b22; border: 1px solid #30363d; padding: 6px 13px; font-weight: 600; color: #f0f6fc; }
+  #md-content table td { border: 1px solid #30363d; padding: 6px 13px; color: #e6edf3; }
+  #md-content table tr:nth-child(2n) { background-color: #161b22; }
+  #md-content img { max-width: 100%; border-radius: 6px; }
+  #md-content input[type="checkbox"] { margin-right: 0.5em; }
+  #md-content kbd { background-color: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 2px 6px; font-size: 85%; color: #e6edf3; font-family: monospace; }
+  #md-content .loading { color: #8b949e; text-align: center; padding: 2em; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -14,7 +47,7 @@
           <i class="far fa-file-alt mr-2" style="color: #8b949e;"></i>README.md
         </span>
         <div class="flex items-center gap-1 ml-3 pl-3 border-l" style="border-color: #30363d;">
-          <a href="{% url 'docs' %}" class="px-2 py-0.5 text-xs rounded no-underline {% if not lang or lang == 'es' %}{% endif %}" style="{% if not lang or lang == 'es' %}background-color: rgba(56,139,253,0.15); color: #58a6ff;{% else %}color: #8b949e;{% endif %}">ES</a>
+          <a href="{% url 'docs' %}" class="px-2 py-0.5 text-xs rounded no-underline" style="{% if not lang or lang == 'es' %}background-color: rgba(56,139,253,0.15); color: #58a6ff;{% else %}color: #8b949e;{% endif %}">ES</a>
           <a href="{% url 'docs_lang' 'en' %}" class="px-2 py-0.5 text-xs rounded no-underline" style="{% if lang == 'en' %}background-color: rgba(56,139,253,0.15); color: #58a6ff;{% else %}color: #8b949e;{% endif %}">EN</a>
           <a href="{% url 'docs_lang' 'pt' %}" class="px-2 py-0.5 text-xs rounded no-underline" style="{% if lang == 'pt' %}background-color: rgba(56,139,253,0.15); color: #58a6ff;{% else %}color: #8b949e;{% endif %}">PT</a>
         </div>
@@ -23,9 +56,42 @@
         <i class="fas fa-arrow-left mr-1"></i>Dashboard
       </a>
     </div>
-    <div class="markdown-body px-8 py-6" style="box-sizing: border-box;">
-      {{ content }}
+    <div id="md-content" data-lang="{{ lang }}" class="px-8 py-6">
+      <p class="loading"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando...</p>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function() {
+    var mdEl = document.getElementById('md-content');
+    if (!mdEl) return;
+    var lang = mdEl.getAttribute('data-lang') || 'es';
+    var apiUrl = '/docs/api/' + lang + '/';
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', apiUrl, true);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        var data = JSON.parse(xhr.responseText);
+        if (data.content) {
+          data.content = data.content.replace(/README\.en\.md/g, '/docs/en/');
+          data.content = data.content.replace(/README\.pt-br\.md/g, '/docs/pt/');
+          data.content = data.content.replace(/\(README\.md\)/g, '(/docs/)');
+          data.content = data.content.replace(/\]\(README\.md\)/g, '](/docs/)');
+          mdEl.innerHTML = marked.parse(data.content);
+        } else {
+          mdEl.innerHTML = '<p style="color:#f85149;">Error: contenido vacío</p>';
+        }
+      } else {
+        mdEl.innerHTML = '<p style="color:#f85149;">Error al cargar la documentación (HTTP ' + xhr.status + ')</p>';
+      }
+    };
+    xhr.onerror = function() {
+      mdEl.innerHTML = '<p style="color:#f85149;">Error de conexión al cargar la documentación</p>';
+    };
+    xhr.send();
+  })();
+</script>
 {% endblock %}

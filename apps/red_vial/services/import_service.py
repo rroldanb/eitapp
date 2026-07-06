@@ -20,6 +20,7 @@ from apps.red_vial.models import (
     PuntoControl,
     Regulacion,
 )
+from apps.tasks.models.tasks import Task
 
 SHEET_ORDER = [
     "Mandante",
@@ -87,15 +88,6 @@ REQUIRED_FIELDS = {
         "fecha",
         "hora",
         "pc",
-        "periodo",
-        "vl",
-        "txc",
-        "txb",
-        "c2e",
-        "c_mas2e",
-        "peat",
-        "cicl",
-        "moto",
     ],
     "ParametroArco": [
         "punto_control",
@@ -251,6 +243,8 @@ def parse_excel(file: Any) -> dict[str, list[dict[str, Any]]]:
             row_dict = {}
             for i, val in enumerate(vals):
                 if i < len(headers) and headers[i]:
+                    if isinstance(val, (date, time)):
+                        val = val.isoformat()
                     row_dict[headers[i]] = val if val is not None else ""
             if row_dict:
                 data_rows.append(row_dict)
@@ -527,17 +521,16 @@ def _parse_row(sheet_name, row, idx, ctx, raw):
             errors.append("'fecha' no es una fecha válida")
         if data["hora"] is None:
             errors.append("'hora' no es una hora válida")
-        pc_id_val = str(row.get("pc", "") or row.get("pc_mov", "") or "").strip()
-        pc_ref = _resolve_fk("Periodizacion", "pc", pc_id_val, ctx)
-        if pc_ref is None:
-            errors.append(f"PuntoControl '{pc_id_val}' no encontrado")
-        else:
+        pc_val = str(row.get("pc", "") or "").strip()
+        pc_mov_val = str(row.get("pc_mov", "") or "").strip()
+        pc_ref = _resolve_fk("Periodizacion", "pc", pc_val, ctx)
+        if pc_ref is not None:
             data["pc"] = pc_ref
             # Auto-generate pc_mov from PuntoControl's arc codigos
             if isinstance(pc_ref, _VirtualObj):
                 # PuntoControl comes from the same import, can't verify arcs now;
                 # _execute_sheet will recompute pc_mov from the real PC object
-                data["pc_mov"] = pc_id_val
+                data["pc_mov"] = pc_val
             else:
                 arco_s = getattr(pc_ref, "arco_salida", None)
                 arco_e = getattr(pc_ref, "arco_entrada", None)
@@ -545,18 +538,37 @@ def _parse_row(sheet_name, row, idx, ctx, raw):
                     data["pc_mov"] = f"{arco_s.codigo_arco}_{arco_e.codigo_arco}"
                 else:
                     errors.append(
-                        f"PuntoControl '{pc_id_val}' no tiene arcos de entrada/salida definidos"
+                        f"PuntoControl '{pc_val}' no tiene arcos de entrada/salida definidos"
                     )
-        per_ref = _resolve_fk("Periodizacion", "periodo", row.get("periodo", ""), ctx)
-        if per_ref is None:
-            errors.append(f"Periodo '{row.get('periodo', '')}' no encontrado")
+        elif pc_mov_val:
+            # Auto-create PuntoControl in _execute_sheet
+            data["_pc_name"] = pc_val
+            data["_pc_mov"] = pc_mov_val
+            data["pc"] = None
+            # Set pc_mov to movement code for duplicate detection / get_or_create
+            data["pc_mov"] = pc_mov_val
         else:
-            data["periodo"] = per_ref
+            errors.append(f"PuntoControl '{pc_val}' no encontrado y no se proporcionó pc_mov")
         p = _resolve_fk("Periodizacion", "proyecto", row.get("proyecto", ""), ctx)
         if p is None:
             errors.append(f"Proyecto '{row.get('proyecto', '')}' no encontrado")
         else:
             data["proyecto"] = p
+        per_val = str(row.get("periodo", "") or "").strip()
+        per_ref = _resolve_fk("Periodizacion", "periodo", per_val, ctx) if per_val else None
+        if per_ref is not None:
+            data["periodo"] = per_ref
+        elif data.get("hora") and hasattr(p, "_meta"):
+            deduced = _deduce_periodo_from_hora(data["hora"], p)
+            if deduced:
+                data["periodo"] = deduced
+            else:
+                errors.append(
+                    "No se pudo deducir el periodo desde la hora; "
+                    "provee la columna 'periodo' explícitamente"
+                )
+        else:
+            errors.append("'periodo' es requerido (no se puede deducir sin hora válida)")
 
     elif sheet_name == "ParametroArco":
         data = {
@@ -746,6 +758,82 @@ def _resolve_sentinel_arco(proyecto):
         return None
 
 
+def _deduce_periodo_from_hora(hora, proyecto):
+    """Find the Periodo whose time range contains hora (semi-open: inicio <= hora < fin)."""
+    if not hora or not proyecto:
+        return None
+    periodos = Periodo.objects.filter(proyecto=proyecto).exclude(hora_inicio__isnull=True)
+    for p in periodos:
+        start = p.hora_inicio
+        end = p.hora_fin
+        if end is None:
+            if start <= hora:
+                return p
+        elif start <= hora < end:
+            return p
+    return None
+
+
+def _auto_create_pc(proyecto, pc_name, movement):
+    """Auto-create a minimal PuntoControl when importing Periodizacion rows
+    and the referenced PC does not exist yet.
+    Returns (pc_instance, created_bool) or (None, False)."""
+    if not proyecto or not pc_name or not movement:
+        return None, False
+    movement = str(movement).strip().zfill(2)
+    try:
+        pc_num = None
+        if pc_name.startswith("PC-"):
+            pc_num = int(pc_name[3:])
+        elif pc_name.startswith("Nodo-"):
+            pc_num = int(pc_name[5:])
+        if pc_num is None:
+            return None, False
+    except (ValueError, IndexError):
+        return None, False
+    try:
+        sentinel = _resolve_sentinel_arco(proyecto)
+        if not sentinel:
+            return None, False
+        nodo = Nodo.objects.filter(numero_pc=pc_num, proyecto=proyecto).first()
+        if not nodo:
+            nodo = Nodo.objects.filter(numero=pc_num, proyecto=proyecto).first()
+        if not nodo:
+            return None, False
+        pc, created = PuntoControl.objects.get_or_create(
+            nodo=nodo,
+            movimiento=movement,
+            proyecto=proyecto,
+            defaults={
+                "viraje": None,
+                "is_prioritario": False,
+                "arco_entrada": sentinel,
+                "arco_salida": sentinel,
+                "regulacion": None,
+                "numero_pistas": None,
+            },
+        )
+        return pc, created
+    except Exception:
+        return None, False
+
+
+def _safe_create_task(title, description, proyecto, created_by):
+    """Try to create a Task, silently ignore schema mismatches (e.g. legacy is_completed column)."""
+    try:
+        with transaction.atomic(savepoint=True):
+            Task.objects.create(
+                title=title,
+                description=description,
+                status="pendiente",
+                is_important=True,
+                proyecto=proyecto,
+                created_by=created_by,
+            )
+    except Exception:
+        pass
+
+
 def _get_model(name):
     models = {
         "Mandante": Mandante,
@@ -925,6 +1013,24 @@ def execute_import(validation_result, proyecto, user, update_duplicates=None):
             sheet_report["skipped_duplicates"] = len(dups)
 
         report[sheet_name] = sheet_report
+
+    review_lines = []
+    if "Periodizacion" in report:
+        pr = report["Periodizacion"]
+        for item in pr.get("auto_created_pcs", []):
+            review_lines.append(
+                f"PC auto-creado: {item['pc_name']} (movimiento {item['movement']})"
+            )
+        for rejected in pr.get("rejected", []):
+            review_lines.append(f"Fila {rejected['row']} rechazada: {rejected['reason']}")
+
+    if review_lines:
+        _safe_create_task(
+            title="Registros a revisar en importación de Periodización",
+            description="\n".join(review_lines),
+            proyecto=proyecto,
+            created_by=user,
+        )
 
     return report
 
@@ -1122,6 +1228,27 @@ def _execute_sheet(sheet_name, rows, proyecto, user, sheet_report):
 
                 elif sheet_name == "Periodizacion":
                     data.pop("proyecto", None)
+                    # Auto-create PuntoControl if referenced PC does not exist
+                    pc = data.get("pc")
+                    _pc_name = data.pop("_pc_name", None)
+                    _pc_mov = data.pop("_pc_mov", None)
+                    if pc is None and _pc_name and _pc_mov:
+                        auto_pc, created = _auto_create_pc(proyecto, _pc_name, _pc_mov)
+                        if auto_pc:
+                            pc = auto_pc
+                            data["pc"] = pc
+                            if created:
+                                sheet_report.setdefault("auto_created_pcs", []).append(
+                                    {"pc_name": _pc_name, "movement": _pc_mov}
+                                )
+                        else:
+                            sheet_report["rejected"].append(
+                                {
+                                    "row": data.get("_original_row", "?"),
+                                    "reason": f"No se pudo auto-crear PuntoControl '{_pc_name}'",
+                                }
+                            )
+                            continue
                     # Recompute pc_mov from re-resolved PuntoControl's arcs
                     pc = data.get("pc")
                     if isinstance(pc, PuntoControl) and pc.arco_salida_id and pc.arco_entrada_id:
@@ -1137,12 +1264,12 @@ def _execute_sheet(sheet_name, rows, proyecto, user, sheet_report):
                         continue
                     obj, created = Periodizacion.objects.get_or_create(
                         fecha=data["fecha"],
+                        pc=data.get("pc"),
                         pc_mov=data["pc_mov"],
                         hora=data["hora"],
                         defaults={
                             k: data.get(k)
                             for k in (
-                                "pc",
                                 "periodo",
                                 "vl",
                                 "txc",
@@ -1157,7 +1284,6 @@ def _execute_sheet(sheet_name, rows, proyecto, user, sheet_report):
                     )
                     if not created:
                         for k in (
-                            "pc",
                             "periodo",
                             "vl",
                             "txc",

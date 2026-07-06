@@ -161,6 +161,130 @@ def get_comparison(
     return result
 
 
+def get_detalle_horario(
+    proyecto_id: str,
+    pc_ids: list[str] | None = None,
+    periodo_ids: list[str] | None = None,
+    fecha: str | None = None,
+    movimiento_ids: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Retorna detalle horario agregando todos los PCs seleccionados.
+
+    Agrupa por (fecha, hora) sumando ftot de todos los PCs, calcula hora
+    móvil (rolling 4 intervalos) y etiqueta es_punta según período.
+    """
+    qs = Periodizacion.objects.filter(pc__proyecto_id=proyecto_id)
+    if pc_ids:
+        qs = qs.filter(pc_id__in=pc_ids)
+    if movimiento_ids:
+        qs = qs.filter(pc__movimiento__in=movimiento_ids)
+    if fecha:
+        qs = qs.filter(fecha=fecha)
+    if periodo_ids:
+        qs = qs.filter(periodo_id__in=periodo_ids)
+
+    from collections import defaultdict
+
+    # Fetch raw data with periodo info, aggregate by (fecha, hora) in Python
+    raw = qs.select_related("periodo").order_by("fecha", "hora", "pc_id")
+
+    groups: dict[tuple, dict] = {}
+    for r in raw:
+        key = (r.fecha, r.hora)
+        if key not in groups:
+            groups[key] = {"sum": 0.0, "periodo_codigos": defaultdict(int)}
+        groups[key]["sum"] += r.ftot
+        cod = r.periodo.codigo if r.periodo else "no"
+        if cod in ("PM-L", "PT-L"):
+            groups[key]["periodo_codigos"][cod] += 1
+
+    sorted_keys = sorted(groups.keys())
+
+    window: list[float] = []
+    all_results: list[dict[str, Any]] = []
+
+    for fecha, hora in sorted_keys:
+        g = groups[(fecha, hora)]
+        window.append(g["sum"])
+        if len(window) > 4:
+            window.pop(0)
+
+        hora_movil = round(sum(window), 2) if len(window) == 4 else None
+
+        # es_punta = majority period code among records at this time
+        pcodes = g["periodo_codigos"]
+        es_punta = max(pcodes, key=pcodes.get) if pcodes else "no"
+
+        all_results.append(
+            {
+                "fecha": fecha.isoformat() if hasattr(fecha, "isoformat") else str(fecha),
+                "hora": hora.strftime("%H:%M"),
+                "flujo_15min": round(g["sum"], 2),
+                "hora_movil": hora_movil,
+                "es_punta": es_punta,
+            }
+        )
+
+    return all_results
+
+
+def get_detalle_horario_chart_data(
+    detalle: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Prepara datos JSON para Chart.js combinado bar+line con bandas punta."""
+    if not detalle:
+        return {"labels": [], "flujo_15min": [], "hora_movil": [], "bandas": []}
+
+    labels = [r["hora"] for r in detalle]
+    flujo_data = [r["flujo_15min"] for r in detalle]
+    movil_data = [r["hora_movil"] for r in detalle]
+    periodos = [r["es_punta"] for r in detalle]
+
+    bandas = []
+    current_periodo = None
+    band_start = None
+    for i, p in enumerate(periodos):
+        if p in ("PM-L", "PT-L"):
+            if p != current_periodo:
+                if band_start is not None:
+                    bandas.append(
+                        {
+                            "from": band_start,
+                            "to": i,
+                            "label": current_periodo,
+                        }
+                    )
+                band_start = i
+                current_periodo = p
+        else:
+            if band_start is not None:
+                bandas.append(
+                    {
+                        "from": band_start,
+                        "to": i,
+                        "label": current_periodo,
+                    }
+                )
+                band_start = None
+                current_periodo = None
+
+    if band_start is not None:
+        bandas.append(
+            {
+                "from": band_start,
+                "to": len(periodos),
+                "label": current_periodo,
+            }
+        )
+
+    return {
+        "labels": labels,
+        "flujo_15min": flujo_data,
+        "hora_movil": movil_data,
+        "bandas": bandas,
+    }
+
+
 def get_chart_data(
     analisis_data: list[dict[str, Any]], periodos_ordered: list[Periodo]
 ) -> dict[str, Any]:
@@ -197,3 +321,102 @@ def get_chart_data(
         )
 
     return {"labels": labels, "datasets": datasets}
+
+
+def get_detalle_por_pc_chart_data(
+    proyecto_id: str,
+    pc_ids: list[str] | None = None,
+    periodo_ids: list[str] | None = None,
+    fecha: str | None = None,
+    movimiento_ids: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Retorna datos de time series (VEQ/15min) agrupados por PC para chart.js.
+
+    Cada PC genera un chart separado con fondo coloreado por periodo punta.
+    Si hay múltiples fechas, una línea por fecha.
+    """
+    qs = Periodizacion.objects.filter(pc__proyecto_id=proyecto_id)
+    if pc_ids:
+        qs = qs.filter(pc_id__in=pc_ids)
+    if movimiento_ids:
+        qs = qs.filter(pc__movimiento__in=movimiento_ids)
+    if periodo_ids:
+        qs = qs.filter(periodo_id__in=periodo_ids)
+    if fecha:
+        qs = qs.filter(fecha=fecha)
+
+    qs = qs.select_related("pc__nodo", "periodo").order_by("pc_id", "fecha", "hora")
+
+    from collections import OrderedDict, defaultdict
+
+    pc_groups: OrderedDict[str, dict[str, Any]] = OrderedDict()
+    for r in qs:
+        pc_id = str(r.pc_id)
+        if pc_id not in pc_groups:
+            nodo = r.pc.nodo
+            label = f"PC-{nodo.numero_pc:02d}" if nodo and nodo.numero_pc else r.pc.nombre
+            pc_groups[pc_id] = {"label": label, "records": []}
+        pc_groups[pc_id]["records"].append(r)
+
+    charts = []
+    for pc_id, group in pc_groups.items():
+        records = group["records"]
+        labels = [r.hora.strftime("%H:%M") for r in records]
+        periodos = [
+            r.periodo.codigo if r.periodo and r.periodo.codigo in ("PM-L", "PT-L") else "no"
+            for r in records
+        ]
+
+        # Compute bandas from periodos
+        bandas = []
+        cur = None
+        start = None
+        for i, p in enumerate(periodos):
+            if p in ("PM-L", "PT-L"):
+                if p != cur:
+                    if start is not None:
+                        bandas.append({"from": start, "to": i, "label": cur})
+                    start = i
+                    cur = p
+            else:
+                if start is not None:
+                    bandas.append({"from": start, "to": i, "label": cur})
+                    start = None
+                    cur = None
+        if start is not None:
+            bandas.append({"from": start, "to": len(periodos), "label": cur})
+
+        # Group by date
+        by_date: dict[str, list] = defaultdict(list)
+        for r in records:
+            by_date[r.fecha.isoformat()].append(r)
+
+        datasets = []
+        for i, (date_str, recs) in enumerate(sorted(by_date.items())):
+            data = [round(r.ftot, 2) for r in recs]
+            bg, border = CHART_COLORS[i % len(CHART_COLORS)]
+            datasets.append(
+                {
+                    "label": date_str,
+                    "data": data,
+                    "borderColor": border,
+                    "backgroundColor": bg,
+                    "fill": i == 0,
+                    "tension": 0.3,
+                    "pointRadius": 2,
+                    "pointHoverRadius": 4,
+                    "spanGaps": False,
+                }
+            )
+
+        charts.append(
+            {
+                "pc_id": pc_id,
+                "label": group["label"],
+                "labels": labels,
+                "datasets": datasets,
+                "bandas": bandas,
+            }
+        )
+
+    return charts

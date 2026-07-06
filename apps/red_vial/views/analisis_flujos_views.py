@@ -13,6 +13,9 @@ from apps.red_vial.services.resumen_flujo_service import (
     get_analisis_flujos,
     get_chart_data,
     get_comparison,
+    get_detalle_horario,
+    get_detalle_horario_chart_data,
+    get_detalle_por_pc_chart_data,
     get_ranking,
     recalcular_resumenes,
 )
@@ -79,6 +82,23 @@ class AnalisisFlujosView(View):
         comparison = get_comparison(analisis_data, all_periodos)
         chart_data = get_chart_data(analisis_data, all_periodos)
 
+        detalle_horario = get_detalle_horario(
+            proyecto_id=proyecto_id,
+            pc_ids=pc_ids or None,
+            periodo_ids=periodo_ids or None,
+            fecha=fecha,
+            movimiento_ids=movimiento_ids or None,
+        )
+        detalle_horario_chart = get_detalle_horario_chart_data(detalle_horario)
+
+        per_pc_charts = get_detalle_por_pc_chart_data(
+            proyecto_id=proyecto_id,
+            pc_ids=pc_ids or None,
+            periodo_ids=periodo_ids or None,
+            fecha=fecha,
+            movimiento_ids=movimiento_ids or None,
+        )
+
         context = {
             "proyecto": proyecto,
             "available_nodos": available_nodos,
@@ -95,6 +115,10 @@ class AnalisisFlujosView(View):
             "comparison_periodos": all_periodos,
             "chart_data_json": json.dumps(chart_data),
             "total_records": len(analisis_data),
+            "detalle_horario": detalle_horario,
+            "detalle_horario_chart_json": json.dumps(detalle_horario_chart),
+            "per_pc_charts": per_pc_charts,
+            "per_pc_charts_json": json.dumps(per_pc_charts),
         }
 
         if request.headers.get("HX-Request"):
