@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16 max-w-lg text-center">
+  <div class="rounded-lg border shadow-sm" style="background-color: #0d1117; border-color: #30363d;">
+    <div class="px-8 py-12">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background-color: rgba(248,81,73,0.15);">
+        <i class="fas fa-bug text-2xl" style="color: #f85149;"></i>
+      </div>
+      <h1 class="text-5xl font-bold mb-2" style="color: #f85149;">404</h1>
+      <p class="text-lg mb-6" style="color: #e6edf3;">Página no encontrada</p>
+      <p class="text-sm mb-8" style="color: #8b949e;">La ruta solicitada no existe o fue movida.</p>
+      <a href="{% url 'home' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline transition-colors" style="background-color: #238636; color: #fff;">
+        <i class="fas fa-arrow-left"></i> Volver al inicio
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

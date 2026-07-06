@@ -1,8 +1,10 @@
 import copy
 import json
+from datetime import date, time
 from typing import Any
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Model
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -10,6 +12,7 @@ from django.views.decorators.http import require_POST
 
 from apps.proyectos.models import Mandante, Proyecto
 from apps.red_vial.services.import_service import (
+    _VirtualObj,
     analyze_parsed_data,
     execute_import,
     filter_by_dataset,
@@ -17,6 +20,16 @@ from apps.red_vial.services.import_service import (
     reassign_to_project,
     validate_selection,
 )
+
+# Fields that must be restored to typed objects before execute_import
+_RESTORE_TIME_FIELDS = {
+    "Periodizacion": {"hora"},
+    "Periodo": {"hora_inicio", "hora_fin"},
+}
+_RESTORE_DATE_FIELDS = {
+    "Periodizacion": {"fecha"},
+    "Proyecto": {"date_started"},
+}
 
 SESSION_PREFIX = "import_"
 
@@ -35,6 +48,65 @@ def _step_data(request: HttpRequest) -> dict[str, Any]:
         "validation": request.session.get(f"{SESSION_PREFIX}validation"),
         "report": request.session.get(f"{SESSION_PREFIX}report"),
     }
+
+
+def _session_safe(obj: Any) -> Any:
+    """Deep-convert non-JSON-serializable types to strings."""
+    if isinstance(obj, (time, date)):
+        return obj.isoformat()
+    if isinstance(obj, _VirtualObj):
+        return obj._value
+    if isinstance(obj, Model):
+        return str(obj)
+    if isinstance(obj, dict):
+        return {k: _session_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_session_safe(v) for v in obj]
+    return obj
+
+
+def _restore_validation(validation: dict[str, Any]) -> dict[str, Any]:
+    """Restore time/date strings in valid/duplicate rows for execute_import."""
+    for sheet_name, result in validation.get("results", {}).items():
+        for row in result.get("valid", []):
+            for f in _RESTORE_TIME_FIELDS.get(sheet_name, set()):
+                v = row.get(f)
+                if isinstance(v, str):
+                    try:
+                        h, m = v.split(":")
+                        if len(h) == 2 and 0 <= int(h) <= 23 and 0 <= int(m) <= 59:
+                            row[f] = time(int(h), int(m))
+                    except (ValueError, AttributeError):
+                        pass
+            for f in _RESTORE_DATE_FIELDS.get(sheet_name, set()):
+                v = row.get(f)
+                if isinstance(v, str):
+                    try:
+                        parts = v.split("-")
+                        if len(parts) == 3:
+                            row[f] = date(int(parts[0]), int(parts[1]), int(parts[2]))
+                    except (ValueError, AttributeError):
+                        pass
+        for row in result.get("duplicates", []):
+            for f in _RESTORE_TIME_FIELDS.get(sheet_name, set()):
+                v = row.get(f)
+                if isinstance(v, str):
+                    try:
+                        h, m = v.split(":")
+                        if len(h) == 2 and 0 <= int(h) <= 23 and 0 <= int(m) <= 59:
+                            row[f] = time(int(h), int(m))
+                    except (ValueError, AttributeError):
+                        pass
+            for f in _RESTORE_DATE_FIELDS.get(sheet_name, set()):
+                v = row.get(f)
+                if isinstance(v, str):
+                    try:
+                        parts = v.split("-")
+                        if len(parts) == 3:
+                            row[f] = date(int(parts[0]), int(parts[1]), int(parts[2]))
+                    except (ValueError, AttributeError):
+                        pass
+    return validation
 
 
 STEPS_DATA = [
@@ -399,7 +471,7 @@ def import_validate(request: HttpRequest, proyecto_id: str) -> HttpResponse:
 
     request.session[f"{SESSION_PREFIX}selected"] = selected
     validation = validate_selection(parsed, selected, proyecto)
-    request.session[f"{SESSION_PREFIX}validation"] = validation
+    request.session[f"{SESSION_PREFIX}validation"] = _session_safe(validation)
 
     # Auto-execute if no errors and no duplicates
     if validation["total_errors"] == 0 and validation["total_duplicates"] == 0:
@@ -446,6 +518,8 @@ def import_execute(request: HttpRequest, proyecto_id: str) -> HttpResponse:
             "partials/Import/paso1_upload.html",
             {"error": "Sesión expirada. Vuelve a empezar."},
         )
+
+    validation = _restore_validation(copy.deepcopy(validation))
 
     update_duplicates = {}
     for key in request.POST:

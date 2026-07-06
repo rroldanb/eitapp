@@ -119,10 +119,10 @@ def generar_filas(
             while hora_actual < periodo.hora_fin:
                 _, created = Periodizacion.objects.get_or_create(
                     fecha=fecha,
+                    pc=pc,
                     pc_mov=pc_mov,
                     hora=hora_actual,
                     defaults={
-                        "pc": pc,
                         "periodo": periodo,
                         "vl": 0,
                         "txc": 0,

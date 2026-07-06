@@ -27,55 +27,19 @@
 
 ---
 
-## Fase 0: Infraestructura Docker (PostgreSQL + pgAdmin4)
+## ✅ Fase 0: PostgreSQL como DB por defecto
 
-**Objetivo:** Reemplazar SQLite/ORA por PostgreSQL en Docker, migrar datos, estandarizar stack.
+**Objetivo:** Reemplazar SQLite por PostgreSQL como motor principal, eliminar Supabase, unificar stack.
 
-### Arquitectura objetivo: Multi-tenancy Database-per-Tenant
+### Logros
+- SQLite → PostgreSQL migration completada (206 tests pasan)
+- Multi-DB routing: `default` (local PG o VPS ORA) + `ORA` (VPS) + `pg_local` (local switching)
+- UUID inconsistencies reparadas (109 duplicados, 203 FK updates)
+- Supabase eliminado: paquete, SDK, archivos legacy
+- `default` DB cascade: `DATABASE_URL` → `DATABASE_URL_ORA` → local PG fallback
 
-La aplicación soportará dos modelos de despliegue según el plan del tenant:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Balanceador / Proxy                       │
-│                      (nginx + server_name o path)                 │
-└──────┬──────────────────────────┬────────────────────────────────┘
-       │                          │
-       ▼                          ▼
-┌──────────────────┐   ┌────────────────────────────┐
-│  Plan Compartido  │   │     Plan Pro (consultora)   │
-│  DB compartida    │   │  Stack Docker individual:   │
-│  schema: tenant_* │   │  - web (Django)             │
-│  (postgres1)      │   │  - db (PostgreSQL)          │
-│                   │   │  - pgadmin4 (opcional)      │
-│  Un solo pgAdmin  │   │  - redis (futuro)           │
-│  multi-schema     │   │                              │
-└──────────────────┘   └────────────────────────────┘
-```
-
-**Criterio de decisión (escala):**
-
-| Factor | Compartido | Pro |
-|--------|-----------|-----|
-| Aislamiento de datos | Schema | Database independiente |
-| Costo | Bajo (1 VPS) | Medio (1 VPS por tenant) |
-| Escala | Hasta ~50 tenants | Ilimitado |
-| Backup | Completo + schema dump | Completo por stack |
-| Upgrade automático | Sí (un deploy) | Por stack (rollback individual) |
-| Aprovisionamiento | Instantáneo (CREATE SCHEMA) | `docker compose up` |
-
-**Decisión:** Implementar primero con DB compartida + schema por tenant
-(compatible con `ActiveDatabaseRouter`). El stack Pro se agrega después sin
-cambiar el modelo de datos — solo cambia el router de base de datos.
-
-### Tareas
-
-- [ ] 0.1 — Escribir `postgres-compose.yml` (PostgreSQL 16 + pgAdmin4 oficial)
-- [ ] 0.2 — Migrar dump SQLite/ORA a PostgreSQL local
-- [ ] 0.3 — Cambiar `settings.py`: `ENGINE=django.db.backends.postgresql`, multi-DB si aplica
-- [ ] 0.4 — Probar migraciones + `python manage.py check --deploy`
-- [ ] 0.5 — pgAdmin4: configurar server groups + login por tenant
-- [ ] 0.6 — Deploy a VPS: postgres + pgadmin en Docker, apuntar Django a contenedor DB
+### Pendiente
+- [ ] 0.5 — Dockerizar PostgreSQL + pgAdmin4 en VPS (opcional, para gestión visual)
 
 ## Fase 4: Multi-tenancy (Database-per-Tenant)
 
@@ -88,13 +52,18 @@ cambiar el modelo de datos — solo cambia el router de base de datos.
 - [ ] 4.7 — Actualizar vistas de login/signup para asociar usuario a tenant
 - [ ] 4.8 — Backup por tenant: script que dumpera cada base/schema por separado
 
-## Fase 5: Refactor y Eliminación de Legacy
-
-- [ ] 5.1 — Eliminar `_sort_header.html` (huérfano, ninguna tabla lo incluye)
-- [ ] 5.2 — Eliminar o simplificar `generic_views.py` (usa `inspect.signature()`, no se usa en producción)
-- [ ] 5.3 — Revisar `red_vial_views.py` y `trafico_views.py` (FBVs legacy que referencian vistas ya migradas a CBVs)
-- [ ] 5.4 — Type hints en views de otras apps (`mandantes/`, `proyectos/`, `usuarios/`)
-- [ ] 5.5 — Type hints en servicios de otras apps
+## ✅ Fase 5: Refactor y Eliminación de Legacy
+- [x] 5.0 — Eliminar `apps/imagenes/utils/supabase_client.py` (legacy)
+- [x] 5.0b — Eliminar management command `migrate_supabase_images.py` (one-time)
+- [x] 5.0c — Eliminar SDK supabase de `requirements.txt`
+- [x] 5.1 — Eliminar `_sort_header.html` (huérfano)
+- [x] 5.2 — Eliminar `generic_views.py` (usa `inspect.signature()`, huérfano)
+- [x] 5.3a — Eliminar `trafico_views.py` (4 FBVs período legacy)
+- [x] 5.3b — Podar `red_vial_views.py` (solo 2 FBVs coeficiente vivos)
+- [x] 5.3c — Podar `all_urls.py` (solo 2 patterns coeficiente FBV)
+- [x] 5.3d — Podar `red_vial_service.py` (solo 7 funciones coeficiente)
+- [x] 5.4 — Type hints en views (mandantes, proyectos, usuarios) — 31 FBVs tipadas
+- [x] 5.5 — Type hints en services (mandantes, proyectos, imagenes, common) — 5 archivos
 
 ## Fase 6: Tests
 
@@ -111,12 +80,15 @@ cambiar el modelo de datos — solo cambia el router de base de datos.
 - [ ] 7.2 — Periodización: migrar a CBVs built-in + click-to-activate (re-evaluar si aplica)
 - [ ] 7.3 — Planes Compartido vs Pro: billing, provisioning UI, monitoreo
 
-## Fase 8: DX y CI
+## ✅ Fase 8: DX y CI
 
+### Completado
 - [x] 8.1 — GitHub Action para deploy automático a Oracle VPS (.github/workflows/deploy.yml)
-- [ ] 8.2 — Pre-commit hooks (ruff, eslint, prettier)
-- [ ] 8.3 — Configurar ruff como linter/formatter Python
-- [ ] 8.4 — Healthcheck endpoint para monitorear multi-DB / schema status
+- [x] 8.2 — Pre-commit hooks configurados (ruff, eslint, prettier, trailing-whitespace, end-of-file-fixer)
+- [x] 8.3 — ruff configurado como linter/formatter Python (`.ruff.toml`)
+
+### Completado
+- [x] 8.4 — Healthcheck endpoint para monitorear multi-DB / schema status
 
 ---
 
@@ -127,7 +99,9 @@ cambiar el modelo de datos — solo cambia el router de base de datos.
 - [x] Verificar que `conftest.py` raíz no colisiona — solo hay un `conftest.py` en raíz, sin colisión
 - [x] Cobertura de templates: todas las tablas CRUD usan CBVs, `generic_views.py` no se importa en ningún lado
 - [x] Fix: tailwind dev moría con `Error: That port is already in use` / `rc=1` — matar proceso en 8000 + quitar `check_db_connections()` de `CommonConfig.ready()` + `--watch=always` + `.strip()` en ALLOWED_HOSTS
+- [x] Migrar SQLite → PostgreSQL default (settings.py, requirements.txt, UUID dedup)
+- [x] Eliminar Supabase del stack (SDK, archivos, requirements)
 
 ---
 
-**Estado actual:** 200 tests pasan ✅ | `npm run lint`: 0 errors, 19 warnings ✅
+**Estado actual:** 206 tests pasan ✅ | Fase 5 completada ✅ | Type hints en views + services en todas las apps ✅ | PostgreSQL default ✅ | Supabase removed ✅

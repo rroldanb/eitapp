@@ -35,7 +35,7 @@
           </div>
           <div>
             <p class="text-2xl font-bold text-gray-900 leading-none">{{ proyectos_count|default:"0" }}</p>
-            <p class="text-xs text-gray-500 mt-0.5">Proyectos activos</p>
+            <p class="text-xs text-gray-500 mt-0.5">Activos · {{ proyectos_total }} total</p>
           </div>
         </div>
       </a>
@@ -75,9 +75,31 @@
     </div>
   </section>
 
+  {# Secondary stats: red vial totals #}
+  <section class="container mx-auto px-4 mt-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="bg-white/80 rounded-lg border border-gray-200 px-4 py-3 text-center">
+        <p class="text-lg font-bold text-gray-900">{{ calles_count|default:"0" }}</p>
+        <p class="text-xs text-gray-500"><i class="fas fa-road mr-1"></i>Calles</p>
+      </div>
+      <div class="bg-white/80 rounded-lg border border-gray-200 px-4 py-3 text-center">
+        <p class="text-lg font-bold text-gray-900">{{ nodos_count|default:"0" }}</p>
+        <p class="text-xs text-gray-500"><i class="fas fa-crosshairs mr-1"></i>Nodos</p>
+      </div>
+      <div class="bg-white/80 rounded-lg border border-gray-200 px-4 py-3 text-center">
+        <p class="text-lg font-bold text-gray-900">{{ arcos_count|default:"0" }}</p>
+        <p class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Arcos</p>
+      </div>
+      <div class="bg-white/80 rounded-lg border border-gray-200 px-4 py-3 text-center">
+        <p class="text-lg font-bold text-gray-900">{{ periodos_count|default:"0" }}</p>
+        <p class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>Períodos</p>
+      </div>
+    </div>
+  </section>
+
   {# Pending tasks alert #}
   {% if pending_tasks_count > 0 %}
-  <section class="container mx-auto px-4 mt-6">
+  <section class="container mx-auto px-4 mt-4">
     <div class="bg-amber-50 rounded-lg p-4 flex items-start gap-3">
       <div class="w-8 h-8 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center shrink-0">
         <i class="fas fa-tasks text-sm"></i>
@@ -93,8 +115,27 @@
   </section>
   {% endif %}
 
+  {# Projects with most arcs #}
+  {% if proyecto_arcos_stats %}
+  <section class="container mx-auto px-4 mt-4">
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-3 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Proyectos con más arcos</h2>
+      </div>
+      <div class="px-5 py-3">
+        {% for p in proyecto_arcos_stats %}
+        <div class="flex items-center justify-between py-1.5 text-sm">
+          <a href="{% url 'proyecto_detail' p.id %}" class="text-indigo-600 hover:text-indigo-800 font-medium truncate mr-2">{{ p.title }}</a>
+          <span class="text-gray-600 shrink-0">{{ p.total_arcos }} arcos</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   {# Split: recent projects + pending tasks #}
-  <section class="container mx-auto px-4 mt-6 pb-16">
+  <section class="container mx-auto px-4 mt-4 pb-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div class="lg:col-span-2 bg-white rounded-lg border border-gray-200">
         <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
@@ -163,6 +204,14 @@
       </div>
     </div>
   </section>
+
+  {# README link #}
+  <section class="container mx-auto px-4 pb-6 text-center">
+    <a href="{% url 'docs' %}" class="inline-flex items-center gap-2 text-xs text-gray-600 hover:text-indigo-700 transition-colors no-underline border border-gray-300 hover:border-indigo-400 rounded-lg px-4 py-2 bg-white hover:bg-gray-50 shadow-sm">
+      <i class="fas fa-book mr-1 text-indigo-500"></i> Documentación completa del proyecto
+      <i class="fas fa-chevron-right text-[10px]"></i>
+    </a>
+  </section>
 </div>
 
 {% else %}
@@ -210,6 +259,14 @@
         </p>
       </div>
     </div>
+
+    {# README link #}
+    <div class="mt-12 text-center">
+      <a href="{% url 'docs' %}" class="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-indigo-700 transition-colors no-underline border border-gray-300 hover:border-indigo-400 rounded-lg px-5 py-2.5 bg-white hover:bg-gray-50 shadow-sm">
+        <i class="fas fa-book mr-1 text-indigo-500"></i> Ver documentación completa
+        <i class="fas fa-chevron-right text-xs"></i>
+      </a>
+    </div>
   </section>
 
 {% endif %}
@@ -230,7 +287,7 @@
         {% for alias, db in databases.items %}
           <a href="{% url 'switch_db' alias %}" class="block px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 hover:text-white no-underline {% if db_info.alias == alias %}bg-gray-700 text-white{% endif %}">
             {{ alias }}
-            <span class="text-gray-500 ml-1">({{ db.ENGINE|cut:"django.db.backends." }})</span>
+            <span class="text-gray-500 ml-1">{{ db.ENGINE|cut:"django.db.backends." }}</span>
           </a>
         {% endfor %}
       </div>

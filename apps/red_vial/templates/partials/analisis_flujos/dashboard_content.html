@@ -1,8 +1,12 @@
 {% load red_vial_extras %}
-{% load static %}
 <div class="space-y-6" id="dashboard-content-inner">
 
   {% if analisis_data %}
+
+
+    <!-- == SECCIÓN 5: DETALLE HORARIO == -->
+  {% include 'partials/analisis_flujos/detalle_horario.html' %}
+
 
   <!-- == SECCIÓN 1: TABLA RESUMEN == -->
   <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -107,18 +111,38 @@
 
   </div>
 
-  <!-- == SECCIÓN 4: GRÁFICO == -->
+  <!-- == SECCIÓN 4: GRÁFICOS POR PC == -->
+  {% if per_pc_charts %}
+  <div id="pc-charts-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {% for pc_chart in per_pc_charts %}
+    <div class="bg-white rounded-lg shadow overflow-hidden cursor-pointer chart-card" data-pc-id="{{ pc_chart.pc_id }}">
+      <div class="bg-violet-600 text-white px-3 py-2 flex justify-between items-center">
+        <h2 class="mb-0 font-semibold text-sm">{{ pc_chart.label }}</h2>
+        <i class="fas fa-expand text-xs opacity-70"></i>
+      </div>
+      <div class="p-3 relative" style="min-height: 200px;">
+        <canvas id="pcChart-{{ pc_chart.pc_id }}" width="800" height="180"></canvas>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
   <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="bg-violet-600 text-white px-4 py-3">
-      <h2 class="mb-0 font-semibold text-base">Flujo Total por PC y Período</h2>
+      <h2 class="mb-0 font-semibold text-base">Flujo por PC — 15 min</h2>
     </div>
-    <div class="p-4">
-      <canvas id="flujosChart" width="800" height="350"></canvas>
+    <div class="p-4 text-center text-gray-500 py-8">
+      Selecciona PC(s) y Período(s) para ver gráficos.
     </div>
   </div>
+  {% endif %}
 
-  <script id="chart-data" type="application/json">{{ chart_data_json|safe }}</script>
-  <script src="{% static 'js/features/chart-flujos.js' %}" defer></script>
+  {% if per_pc_charts %}
+  <script id="per-pc-chart-data" type="application/json">{{ per_pc_charts_json|safe }}</script>
+  <script>window.renderPcCharts && window.renderPcCharts();</script>
+  {% endif %}
+
+
 
   {% else %}
   <div class="text-center py-12 bg-white rounded-lg shadow">

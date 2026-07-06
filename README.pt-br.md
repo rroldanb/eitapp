@@ -19,13 +19,13 @@ Backend Django para gerenciamento de projetos de engenharia de transporte, model
 ## Stack Tecnológica
 
 - **Python 3.11** + **Django 5.2**
-- SQLite (desenvolvimento) / PostgreSQL (produção)
+- **PostgreSQL** (multi-DB: default + ORA para VPS)
 - HTMX 2.x para interatividade (CRUD inline)
 - Tailwind CSS v4 (modo dev com `python manage.py tailwind.dev`)
 - WhiteNoise para arquivos estáticos
 - Chart.js 4.x para gráficos de análise
 - Font Awesome 6 (CDN) para iconografia
-- Supabase Storage para imagens de projeto/nó
+- Sistema de arquivos local para imagens (sem Supabase)
 
 ## Ferramentas
 
@@ -51,18 +51,16 @@ Backend Django para gerenciamento de projetos de engenharia de transporte, model
 ## Fluxo de Trabalho (Mini Manual)
 
 ```
-1. REGISTRO → /signup/
-   Criar conta de usuário.
-
-2. MANDANTE → /mandantes/
+1. MANDANTE → /mandantes/
+   Criar cliente/organização.
    Criar cliente/organização.
    Adicionar contatos associados (nome, email, telefone, cargo).
 
-3. PROJETO → /proyectos/ → "Criar Projeto"
+2. PROJETO → /proyectos/ → "Criar Projeto"
    Associar a um mandante. Preencher dados gerais, enviar imagem.
    O projeto pode estar Ativo ou Finalizado.
 
-4. REDE VIÁRIA → /proyectos/<id>/resumen/
+3. REDE VIÁRIA → /proyectos/<id>/resumen/
    Resumo do projeto com quantidades de ruas, nós, arcos, PCs.
    Acesso a cada seção de modelagem:
 
@@ -76,13 +74,13 @@ Backend Django para gerenciamento de projetos de engenharia de transporte, model
    g. Coeficientes de Cruzamento → Fatores de equivalência veicular
       (padrão global + sobrescrita por projeto)
 
-5. PERIODIZAÇÃO → /proyectos/<id>/periodizacion/
+4. PERIODIZAÇÃO → /proyectos/<id>/periodizacion/
    Selecionar nós (PCs), períodos, movimento, data.
    "Gerar" → cria linhas de intervalos de 15 min.
    Inserir contagens por tipo veicular (VL, TXC, TXB, etc.).
    ftot é calculado automaticamente.
 
-6. ANÁLISE DE FLUXOS → /proyectos/<id>/analisis-flujos/
+5. ANÁLISE DE FLUXOS → /proyectos/<id>/analisis-flujos/
    Filtrar por nó, período, movimento, data.
    Visualizar:
    - Tabela detalhe (fluxo total, média, registros)
@@ -91,14 +89,14 @@ Backend Django para gerenciamento de projetos de engenharia de transporte, model
    - Gráfico Chart.js (barras agrupadas por PC e período)
    "Recalcular" para agregar dados de periodização ao ResumenFlujo.
 
-7. TRANSYT → /proyectos/<id>/configuracion-transyt/
+6. TRANSYT → /proyectos/<id>/configuracion-transyt/
    a. Configuração global → ciclo, W, K, perda/ganho
    b. Parâmetros de Arco → fluxo de saturação, ponderadores
       (1 por PC, com geração automática de defaults)
    c. Fases Semafóricas → verde início/fim por PC e fase
       (com geração automática de fase 1 por PC)
 
-8. EXPORTAR .dat → A partir do detalhe do projeto
+7. EXPORTAR .dat → A partir do detalhe do projeto
    Validar dados completos. Selecionar período ou "todos".
    Gera arquivo TRANSYT-8S (.dat por período, .zip para todos).
    Formato largura fixa de 80 colunas com validação de saída.
@@ -110,7 +108,7 @@ Backend Django para gerenciamento de projetos de engenharia de transporte, model
 |------|------|
 | `/` | Dashboard / Home |
 | `/signin/` | Login |
-| `/signup/` | Registrar-se |
+| `/usuarios/` | Gerenciamento de usuários (admin) |
 | `/mandantes/` | Lista de mandantes |
 | `/mandantes/create/` | Criar mandante |
 | `/mandantes/<id>/` | Detalhe / editar mandante |
@@ -141,9 +139,74 @@ Backend Django para gerenciamento de projetos de engenharia de transporte, model
 
 | Ambiente | DB | URL | Deploy |
 |----------|----|-----|--------|
-| local | SQLite | localhost:8000 | `python manage.py runserver` |
-| staging | PostgreSQL (VPS) | — | Automático ao merge no `staging` |
-| production | PostgreSQL (VPS) | — | Manual via GitHub Actions |
+| local | PostgreSQL local (eitapp) | localhost:8000 | `python manage.py runserver` |
+| staging | PostgreSQL (VPS ORA) | — | Automático ao merge no `staging` |
+| production | PostgreSQL (VPS ORA) | — | Manual via GitHub Actions |
+
+### Arquitetura Multi-DB
+
+```
+                    ┌──────────────────────────────┐
+                    │      Django (settings.py)      │
+                    │  default: DATABASE_URL cascade   │
+                    │  ORA: DATABASE_URL_ORA (VPS)    │
+                    │  pg_local: DATABASE_URL_LOCAL   │
+                    └──────┬───────────────┬─────────┘
+                           │               │
+              ┌────────────┘               └────────────┐
+              ▼                                          ▼
+   ┌──────────────────┐                    ┌──────────────────────┐
+   │  localhost:5432   │                    │  161.153.14.37:5432  │
+   │  eitapp (default) │                    │  eitapp (ORA)       │
+   │  PG nativo        │                    │  Coolify / Docker   │
+   └──────────────────┘                    └──────────────────────┘
+```
+
+### Resolução de `default`
+
+```
+DATABASE_URL=postgresql://user:pass@host:5432/eitapp    ← se definido
+  ↓ não
+DATABASE_URL_ORA=postgresql://user:pass@161.153.14.37:5432/eitapp    ← VPS
+  ↓ não
+postgresql://postgres:1234@localhost:5432/eitapp    ← fallback local
+```
+
+- **Local**: `DATABASE_URL` aponta para PostgreSQL local (`eitapp`). `ORA` disponível para alternar.
+- **VPS (Coolify)**: Apenas `DATABASE_URL_ORA` está definido → `default` cai em ORA automaticamente. Sem configuração extra.
+
+### Multi-tenancy (futuro)
+
+A aplicação suportará dois modelos de implantação:
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│                   Balanceador / Proxy                          │
+│                 (nginx + server_name ou path)                   │
+└──────┬─────────────────────────┬───────────────────────────────┘
+       │                         │
+       ▼                         ▼
+┌──────────────────┐   ┌───────────────────────────┐
+│  Plano Compartido │   │    Plano Pro (consultora) │
+│  DB compartilhada │   │  Stack Docker individual:  │
+│  schema: tenant_* │   │  - web (Django)            │
+│  (postgres1)      │   │  - db (PostgreSQL)         │
+│                   │   │  - pgadmin4 (opcional)    │
+│  Único pgAdmin    │   │  - redis (futuro)         │
+│  multi-schema     │   │                            │
+└──────────────────┘   └───────────────────────────┘
+```
+
+| Fator | Compartido | Pro |
+|-------|-----------|------|
+| Isolamento de dados | Schema | Database independente |
+| Custo | Baixo (1 VPS) | Médio (1 VPS por tenant) |
+| Escala | Até ~50 tenants | Ilimitado |
+| Backup | Completo + schema dump | Completo por stack |
+| Upgrade | Um deploy | Por stack (rollback individual) |
+| Provisionamento | `CREATE SCHEMA` | `docker compose up` |
+
+**Status:** Design definido. Pendente de implementação (`ActiveDatabaseRouter` + `TenantMiddleware`).
 
 ## CI/CD
 

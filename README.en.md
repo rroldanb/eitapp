@@ -19,13 +19,13 @@ Django backend for transportation engineering project management, road network m
 ## Tech Stack
 
 - **Python 3.11** + **Django 5.2**
-- SQLite (dev) / PostgreSQL (production)
+- **PostgreSQL** (multi-DB: default + ORA for VPS)
 - HTMX 2.x for interactivity (inline CRUD)
 - Tailwind CSS v4 (dev mode with `python manage.py tailwind.dev`)
 - WhiteNoise for static files
 - Chart.js 4.x for analysis charts
 - Font Awesome 6 (CDN) for icons
-- Supabase Storage for project/node images
+- Local filesystem for images (no Supabase)
 
 ## Tooling
 
@@ -51,18 +51,15 @@ Django backend for transportation engineering project management, road network m
 ## Workflow (Quick Manual)
 
 ```
-1. REGISTER → /signup/
-   Create user account.
-
-2. CLIENT → /mandantes/
+1. CLIENT → /mandantes/
    Create client/organization.
    Add associated contacts (name, email, phone, role).
 
-3. PROJECT → /proyectos/ → "Create Project"
+2. PROJECT → /proyectos/ → "Create Project"
    Associate with a client. Fill general data, upload image.
    Project can be Active or Completed.
 
-4. ROAD NETWORK → /proyectos/<id>/resumen/
+3. ROAD NETWORK → /proyectos/<id>/resumen/
    Project summary with street, node, arc, CP counts.
    Access each modeling section:
 
@@ -76,13 +73,13 @@ Django backend for transportation engineering project management, road network m
    g. Crossing Coefficients → Vehicle equivalence factors
       (global standard + project override)
 
-5. PERIODIZATION → /proyectos/<id>/periodizacion/
+4. PERIODIZATION → /proyectos/<id>/periodizacion/
    Select nodes (CPs), periods, movement, date.
    "Generate" → creates 15-min interval rows.
    Enter counts by vehicle type (VL, TXC, TXB, etc.).
    ftot is calculated automatically.
 
-6. FLOW ANALYSIS → /proyectos/<id>/analisis-flujos/
+5. FLOW ANALYSIS → /proyectos/<id>/analisis-flujos/
    Filter by node, period, movement, date.
    View:
    - Detail table (total flow, average, records)
@@ -91,14 +88,14 @@ Django backend for transportation engineering project management, road network m
    - Chart.js chart (grouped bars by CP and period)
    "Recalculate" to aggregate periodization data into ResumenFlujo.
 
-7. TRANSYT → /proyectos/<id>/configuracion-transyt/
+6. TRANSYT → /proyectos/<id>/configuracion-transyt/
    a. Global config → cycle, W, K, loss/gain
    b. Arc Parameters → saturation flow, weights
       (1 per CP, with auto-generated defaults)
    c. Signal Phases → green start/end by CP and phase
       (with auto-generated phase 1 per CP)
 
-8. EXPORT .dat → From project detail
+7. EXPORT .dat → From project detail
    Validate complete data. Select period or "all".
    Generates TRANSYT-8S file (.dat per period, .zip for all).
    80-column fixed width format with output validation.
@@ -110,7 +107,7 @@ Django backend for transportation engineering project management, road network m
 |-------|------|
 | `/` | Dashboard / Home |
 | `/signin/` | Login |
-| `/signup/` | Register |
+| `/usuarios/` | User management (admin) |
 | `/mandantes/` | Client list |
 | `/mandantes/create/` | Create client |
 | `/mandantes/<id>/` | Client detail / edit |
@@ -141,9 +138,74 @@ Django backend for transportation engineering project management, road network m
 
 | Environment | DB | URL | Deploy |
 |-------------|----|-----|--------|
-| local | SQLite | localhost:8000 | `python manage.py runserver` |
-| staging | PostgreSQL (VPS) | — | Auto on merge to `staging` |
-| production | PostgreSQL (VPS) | — | Manual via GitHub Actions |
+| local | PostgreSQL local (eitapp) | localhost:8000 | `python manage.py runserver` |
+| staging | PostgreSQL (VPS ORA) | — | Auto on merge to `staging` |
+| production | PostgreSQL (VPS ORA) | — | Manual via GitHub Actions |
+
+### Multi-DB Architecture
+
+```
+                    ┌─────────────────────────────────┐
+                    │      Django (settings.py)        │
+                    │  default: DATABASE_URL cascade    │
+                    │  ORA: DATABASE_URL_ORA (VPS)     │
+                    │  pg_local: DATABASE_URL_LOCAL    │
+                    └──────┬──────────────┬────────────┘
+                           │              │
+              ┌────────────┘              └────────────┐
+              ▼                                         ▼
+   ┌──────────────────┐                   ┌──────────────────────┐
+   │  localhost:5432   │                   │  161.153.14.37:5432  │
+   │  eitapp (default) │                   │  eitapp (ORA)       │
+   │  Native PG        │                   │  Coolify / Docker   │
+   └──────────────────┘                   └──────────────────────┘
+```
+
+### `default` resolution
+
+```
+DATABASE_URL=postgresql://user:pass@host:5432/eitapp    ← if set
+  ↓ no
+DATABASE_URL_ORA=postgresql://user:pass@161.153.14.37:5432/eitapp    ← VPS
+  ↓ no
+postgresql://postgres:1234@localhost:5432/eitapp    ← local fallback
+```
+
+- **Local**: `DATABASE_URL` points to local PostgreSQL (`eitapp`). `ORA` available for switching.
+- **VPS (Coolify)**: Only `DATABASE_URL_ORA` is set → `default` falls back to ORA automatically. No extra config.
+
+### Multi-tenancy (future)
+
+The app will support two deployment models:
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│                   Load Balancer / Proxy                        │
+│                 (nginx + server_name or path)                   │
+└──────┬─────────────────────────┬───────────────────────────────┘
+       │                         │
+       ▼                         ▼
+┌──────────────────┐   ┌───────────────────────────┐
+│  Shared Plan      │   │    Pro Plan (consultancy) │
+│  Shared DB        │   │  Individual Docker stack: │
+│  schema: tenant_* │   │  - web (Django)           │
+│  (postgres1)      │   │  - db (PostgreSQL)        │
+│                   │   │  - pgadmin4 (optional)    │
+│  Single pgAdmin   │   │  - redis (future)         │
+│  multi-schema     │   │                            │
+└──────────────────┘   └───────────────────────────┘
+```
+
+| Factor | Shared | Pro |
+|--------|--------|-----|
+| Data isolation | Schema | Independent database |
+| Cost | Low (1 VPS) | Medium (1 VPS per tenant) |
+| Scale | Up to ~50 tenants | Unlimited |
+| Backup | Full + schema dump | Full per stack |
+| Upgrade | Single deploy | Per stack (individual rollback) |
+| Provisioning | `CREATE SCHEMA` | `docker compose up` |
+
+**Status:** Design defined. Pending implementation (`ActiveDatabaseRouter` + `TenantMiddleware`).
 
 ## CI/CD
 

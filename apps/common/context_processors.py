@@ -1,3 +1,4 @@
+from django.http import HttpRequest
 from django.utils import timezone
 
 from apps.tasks.models.tasks import Task, TaskStatus
@@ -5,7 +6,7 @@ from apps.usuarios.models import Role
 from apps.usuarios.utils import get_user_role
 
 
-def pending_tasks(request):
+def pending_tasks(request: HttpRequest) -> dict:
     if not request.user.is_authenticated:
         return {
             "pending_tasks_count": 0,
