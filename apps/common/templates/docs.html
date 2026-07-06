@@ -3,16 +3,19 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8 max-w-4xl">
-  <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-      <h1 class="text-lg font-bold text-gray-900">
-        <i class="fas fa-book mr-2 text-indigo-600"></i>Documentación
+  <div class="rounded-lg border border-gray-700 shadow-sm" style="background-color: #0d1117;">
+    <div class="px-6 py-3 border-b border-gray-700 flex items-center justify-between">
+      <h1 class="text-base font-semibold" style="color: #e6edf3;">
+        <i class="fas fa-book mr-2" style="color: #58a6ff;"></i>README.md
       </h1>
-      <a href="{% url 'home' %}" class="text-sm text-indigo-600 hover:text-indigo-800">
-        <i class="fas fa-arrow-left mr-1"></i>Volver al dashboard
-      </a>
+      <div class="flex items-center gap-3">
+        <span class="text-xs" style="color: #8b949e;"><i class="far fa-file-alt mr-1"></i>EIT App</span>
+        <a href="{% url 'home' %}" class="text-xs no-underline hover:underline" style="color: #58a6ff;">
+          <i class="fas fa-arrow-left mr-1"></i>Dashboard
+        </a>
+      </div>
     </div>
-    <div class="px-6 py-6 docs-content">
+    <div class="px-8 py-6 markdown-body">
       {{ content }}
     </div>
   </div>
