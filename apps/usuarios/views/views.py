@@ -39,13 +39,27 @@ def home(request: HttpRequest) -> HttpResponse:
         "databases": {k: v for k, v in settings.DATABASES.items() if k != "default"},
     }
     if request.user.is_authenticated:
+        from django.db.models import Count
+
         from apps.mandantes.models import Mandante
         from apps.proyectos.models.proyecto import Proyecto
+        from apps.red_vial.models.arco import Arco
+        from apps.red_vial.models.calle import Calle
+        from apps.red_vial.models.nodo import Nodo
+        from apps.red_vial.models.periodo import Periodo
         from apps.red_vial.models.punto_control import PuntoControl
 
         context["proyectos_count"] = Proyecto.objects.filter(is_completed=False).count()
+        context["proyectos_total"] = Proyecto.objects.count()
         context["mandantes_count"] = Mandante.objects.count()
         context["puntos_control_count"] = PuntoControl.objects.count()
+        context["calles_count"] = Calle.objects.count()
+        context["nodos_count"] = Nodo.objects.count()
+        context["arcos_count"] = Arco.objects.count()
+        context["periodos_count"] = Periodo.objects.count()
+        context["proyecto_arcos_stats"] = list(
+            Proyecto.objects.annotate(total_arcos=Count("arcos")).order_by("-total_arcos")[:3]
+        )
         context["recent_projects"] = (
             Proyecto.objects.all().select_related("mandante").order_by("-created_at")[:5]
         )

@@ -278,3 +278,23 @@ AWS_STORAGE_BUCKET_NAME=
 ## Licencia
 
 MIT
+
+---
+
+## Índice
+
+| # | Sección |
+|---|---------|
+| 1 | [Características](#características) |
+| 2 | [Stack Tecnológico](#stack-tecnológico) |
+| 3 | [Tooling](#tooling) |
+| 4 | [Estructura de Apps](#estructura-de-apps) |
+| 5 | [Flujo de Trabajo](#flujo-de-trabajo-mini-manual) |
+| 6 | [URLs Principales](#urls-principales) |
+| 7 | [Branches](#branches) |
+| 8 | [Ambientes](#ambientes) |
+| 9 | [Arquitectura Multi-DB](#arquitectura-multi-db) |
+| 10 | [Multi-tenancy](#multi-tenancy-futuro) |
+| 11 | [CI/CD](#cicd) |
+| 12 | [Inicio Rápido](#inicio-rápido) |
+| 13 | [Variables de Entorno](#variables-de-entorno) |
