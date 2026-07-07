@@ -25,7 +25,7 @@ def get_image_from_request(request):
 
             return file
 
-        except Exception:
+        except ValueError:
             raise ValueError("Error procesando imagen pegada")
     else:
         pass

@@ -3,7 +3,7 @@ from typing import Any
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, OperationalError, transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -61,7 +61,7 @@ def _nodo_handle_file_delete(request: HttpRequest, item_id: str, delete_fn: Any)
                 "calles": nodo.proyecto.calles.all(),
             },
         )
-    except Exception as e:
+    except (OSError, IntegrityError, OperationalError) as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 

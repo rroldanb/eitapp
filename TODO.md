@@ -71,10 +71,51 @@
 
 - [ ] 7.1 — Optimizar N+1 queries en `generador_dat.py` (cards_31, cards_32, validate)
 - [ ] 7.2 — Eliminar dead code: `trafico_service.py`, `red_vial_service.py`, `red_vial_views.py`
-- [ ] 7.3 — Reemplazar `except Exception` genéricos (24 lugares) con excepciones específicas
+- [ ] 7.3 — Reemplazar `except Exception` genéricos con excepciones específicas
 - [ ] 7.4 — Optimizar N+1 en nodo/arco update views (`.proyecto.calles.all()` pattern)
 - [ ] 7.5 — Optimizar `proyecto_resumen_view` usando `prefetch_related`
 - [ ] 7.6 — Integrar app `tasks/` con proyectos
+
+### 7.3 — Detalle de `except Exception` (28 items auditados, 15 resueltos, 11 pendientes + 2 intencionales)
+
+**✅ Resueltos (15):**
+| # | Archivo | Línea | Qué hace | Excepción nueva |
+|---|---|---|---|---|
+| #7 | `mandantes_views.py` | form.save | Crear mandante sin `is_valid()` | Eliminado — validar antes de guardar |
+| #8 | `mandantes_views.py` | contacto create | Crear contacto | `IntegrityError, ValidationError` |
+| #9 | `storage_service.py` | upload/delete | Subir/borrar imagen en storage | `FileNotFoundError, UnidentifiedImageError, OSError` → `ValueError` |
+| #10 | `image_processor.py` | procesamiento | Procesar imagen (PIL) | `ValueError` |
+| #11 | `import_service.py:329` | validate_sheet | Duplicate check con filtros inválidos | `FieldError, ValueError, OperationalError, DatabaseError, ValidationError` |
+| #12 | `import_service.py:698` | _resolve_fk | Resolver FK entre sheets | `FieldError, ValueError, OperationalError` |
+| #13 | `import_service.py:758` | _resolve_sentinel_arco | Crear arco centinela | `IntegrityError, OperationalError` |
+| #14 | `import_service.py:818` | _auto_create_pc | Crear punto de control | `IntegrityError, OperationalError` |
+| #15 | `import_service.py:834` | _safe_create_task | Crear tarea asociada | `IntegrityError, OperationalError, DatabaseError, FieldError` |
+| #17 | `proyectos_views.py:84` | proyecto_update | Actualizar proyecto | `ValueError, IntegrityError, OperationalError, OSError` |
+| #19 | `proyectos_views.py:109` | proyecto_create | Crear proyecto (POST) | `ProtectedError, IntegrityError, OperationalError` |
+| #19b | `proyectos_views.py:144` | proyecto_delete_image | Borrar imagen de proyecto | `OSError, IntegrityError, OperationalError` |
+| #20 | `proyectos_views.py:157` | proyecto_delete | Eliminar proyecto | `ProtectedError, IntegrityError, OperationalError` |
+| #22 | `nodo_views_cbv.py:64` | _nodo_handle_file_delete | Borrar archivo de nodo | `OSError, IntegrityError, OperationalError` |
+| #24 | `import_views.py:319` | config_project | Crear/configurar proyecto en import | `IntegrityError, OperationalError` |
+| #27 | `usuarios/views/views.py:81` | healthcheck | Healthcheck multi-DB | ❌ **Revertido a `Exception`** (intencional — catch-all necesario) |
+
+**⏳ Pendientes (6):**
+| # | Archivo | Línea | Qué hace | Prioridad |
+|---|---|---|---|---|
+| #1 | `nodo_views_cbv.py:47` | _nodo_imagen_create | Crear imagen de nodo | Baja (staff-only) |
+| #2 | `tests/transyt/test_generador_dat.py` | — | Tests de generación .dat | Baja (tests) |
+| #3 | `admin_views.py:82` | admin action | Acción de admin | Baja (staff-only) |
+| #4 | `admin_views.py:200` | admin action | Acción de admin | Baja (staff-only) |
+| #6 | `nodo_views_cbv.py` | varios | Otros handlers nodo | Baja (staff-only) |
+| #23 | `admin_views.py:349` | admin view | Vista de admin | Baja (staff-only) |
+
+**ℹ️ Intencionales (quedan como `Exception`):**
+| # | Archivo | Línea | Razón |
+|---|---|---|---|
+| #5 | `import_service.py:1363` | execute_import row processing | Catch-all para reportar errores de fila al usuario |
+| — | `import_views.py:212` | _restore_validation parse_excel | OpenPyXL exceptions impredecibles, es user-facing |
+| #25 | `import_views.py:492` | execute_import auto | Operación crítica, no debe fallar silenciosamente |
+| #26 | `import_views.py:548` | execute_import manual | Operación crítica, no debe fallar silenciosamente |
+| #27 | `usuarios/views/views.py:81` | healthcheck | Catch-all necesario para reportar cualquier DB caída |
 
 ## ✅ Fase 8: DX y CI
 
@@ -100,4 +141,4 @@
 
 ---
 
-**Estado actual:** 470 tests pasan ✅ | Fase 6 completada (sin multi-tenant) ✅ | Seguridad auditada ✅ | Type hints ✅ | PostgreSQL default ✅ | Supabase removed ✅
+**Estado actual:** 470 tests pasan ✅ | Fase 6 completada ✅ | Seguridad auditada ✅ | Type hints ✅ | `except Exception`: 15/28 resueltos ✅, 11 pendientes ⏳, 2 intencionales ℹ️

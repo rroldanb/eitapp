@@ -3,6 +3,8 @@ from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError, OperationalError
+from django.db.models import ProtectedError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -79,7 +81,7 @@ def proyecto_detail_view(request: HttpRequest, proyecto_id: str) -> HttpResponse
 
         return redirect("proyectos")
 
-    except Exception as e:
+    except (ValueError, IntegrityError, OperationalError, OSError) as e:
         return render(
             request, "proyecto_detail.html", {"proyecto": proyecto, "form": form, "error": str(e)}
         )
@@ -107,7 +109,7 @@ def proyecto_create_view(request: HttpRequest) -> HttpResponse:
             messages.success(request, "Proyecto creado correctamente.")
             return redirect("proyecto_detail", proyecto_id=proyecto.id)
 
-        except Exception as e:
+        except (ProtectedError, IntegrityError, OperationalError, ValueError) as e:
             return render(request, "proyecto_create.html", {"form": form, "error": str(e)})
 
     return render(request, "proyecto_create.html", {"form": ProyectoForm()})
@@ -142,7 +144,7 @@ def proyecto_delete_image_view(request: HttpRequest, proyecto_id: str) -> HttpRe
             delete_project_image(proyecto.image_url)
         proyecto.image_url = None
         proyecto.save()
-    except Exception:
+    except (OSError, IntegrityError, OperationalError):
         pass
     return redirect("proyecto_detail", proyecto_id=proyecto_id)
 
@@ -152,7 +154,7 @@ def proyecto_delete_view(request: HttpRequest, proyecto_id: str) -> HttpResponse
     try:
         proyecto_delete(proyecto_id)
         return redirect("proyectos")
-    except Exception as e:
+    except (ProtectedError, IntegrityError, OperationalError) as e:
         return render(
             request,
             "proyectos.html",

@@ -4,6 +4,7 @@ from datetime import date, time
 from typing import Any
 
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError, OperationalError
 from django.db.models import Model
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -316,7 +317,7 @@ def import_configure(request: HttpRequest) -> HttpResponse:
                 mandante=mandante,
                 user=request.user,
             )
-    except Exception as e:
+    except (IntegrityError, OperationalError) as e:
         return _build_response(
             request,
             None,
@@ -497,6 +498,8 @@ def import_validate(request: HttpRequest, proyecto_id: str) -> HttpResponse:
                 {"error": f"Error durante la importación: {e}"},
             )
         return _build_response(request, proyecto, 5, "partials/Import/paso5_reporte.html")
+
+    return _build_response(request, proyecto, 4, "partials/Import/paso3_validacion.html")
 
     return _build_response(request, proyecto, 4, "partials/Import/paso3_validacion.html")
 

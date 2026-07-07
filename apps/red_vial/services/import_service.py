@@ -2,7 +2,8 @@ from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Any
 
-from django.db import transaction
+from django.core.exceptions import FieldError, ValidationError
+from django.db import DatabaseError, IntegrityError, OperationalError, transaction
 from openpyxl import load_workbook
 
 from apps.mandantes.models import Contacto, Mandante
@@ -325,7 +326,7 @@ def validate_sheet(
                 if model.objects.filter(**filters).exists():
                     duplicates.append(row_data)
                     continue
-            except Exception:
+            except (FieldError, ValueError, OperationalError, DatabaseError, ValidationError):
                 pass
         new_rows.append(row_data)
 
@@ -694,7 +695,7 @@ def _resolve_fk(sheet_name, field, value, ctx):
         if obj:
             ctx["resolved"][cache_key] = obj
             return obj
-    except Exception:
+    except (FieldError, ValueError, OperationalError):
         pass
 
     # check shared_cache (cross-sheet validation)
@@ -754,7 +755,7 @@ def _resolve_sentinel_arco(proyecto):
             defaults={"longitud": 1},
         )
         return arco
-    except Exception:
+    except (IntegrityError, OperationalError):
         return None
 
 
@@ -814,7 +815,7 @@ def _auto_create_pc(proyecto, pc_name, movement):
             },
         )
         return pc, created
-    except Exception:
+    except (IntegrityError, OperationalError):
         return None, False
 
 
@@ -830,7 +831,7 @@ def _safe_create_task(title, description, proyecto, created_by):
                 proyecto=proyecto,
                 created_by=created_by,
             )
-    except Exception:
+    except (IntegrityError, OperationalError, DatabaseError, FieldError):
         pass
 
 

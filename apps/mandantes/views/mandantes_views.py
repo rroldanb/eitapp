@@ -1,4 +1,6 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, OperationalError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -83,7 +85,7 @@ def contacto_detail_view(request: HttpRequest, contacto_id: str) -> HttpResponse
             if form.is_valid():
                 form.save()
                 return redirect("mandantes")
-        except Exception as e:
+        except (ValidationError, IntegrityError, OperationalError) as e:
             return render(
                 request,
                 "contacto_detail.html",
