@@ -7,8 +7,8 @@ MAX_SIZE = 5 * 1024 * 1024  # 5MB
 
 def get_image_from_request(request):
     """
-    Retorna un archivo listo para subir a Supabase
-    desde base64 (paste) o request.FILES
+    Retorna un archivo procesado desde base64 (paste) o request.FILES
+    listo para almacenar localmente en el volumen de imágenes
     """
 
     image_data = request.POST.get("image_file")

@@ -1,33 +1,53 @@
+# Python
 __pycache__/
 *.pyc
-.git/
-.gitignore
-.env
-.env.*
+venv/
+
+# Database
 *.sqlite3
 db.sqlite3
-staticfiles/
-README.md
-.DS_Store
-benchmark_js.py
 
-db.sqlite3
-venv
-__pycache__
+# Environment
 .env
-context
+.env.*
+
+# Static build output
+staticfiles/
+
+# Media (images served at runtime via volume)
+media/
+
+# Project files
 data.json
+context/
+plantilla_importacion_eitapp.xlsx
+benchmark_js.py
+deployment_result*
+
+# Logs & temp
 *.log
 *basurero*
-.opencode
 *copy.*
 *RR_Temp*
+
+# Docs
+README.md
 DESIGN.md
 PRODUCT.md
-skills*
+AGENTS*
+TODO.md
+
+# Node
+node_modules/
+
+# VCS & tools
+.git/
 .gitignore
+.dockerignore
+.opencode/
 .impeccable
 audit_report.md
-plantilla_importacion_eitapp.xlsx
-media/
-.dockerignore
+skills*
+
+# OS
+.DS_Store

@@ -19,13 +19,15 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
 ## Stack Tecnológico
 
 - **Python 3.11** + **Django 5.2**
-- **PostgreSQL** (multi-DB: default + ORA para VPS)
+- **PostgreSQL 16** (multi-DB: default + ORA para VPS)
+- **Docker** + **Docker Compose** para dev y prod
+- **Coolify** para orquestación en VPS (2 contenedores: `db` + `web`)
 - HTMX 2.x para interactividad (CRUD inline)
 - Tailwind CSS v4 (modo desarrollo con `python manage.py tailwind.dev`)
-- WhiteNoise para archivos estáticos
+- Gunicorn + WhiteNoise para producción
 - Chart.js 4.x para gráficos de análisis
 - Font Awesome 6 (CDN) para iconografía
-- Filesystem local para imágenes (Sin Supabase)
+- Volumen Docker persistente para imágenes
 
 ## Tooling
 
@@ -127,38 +129,47 @@ Backend Django para gestión de proyectos de ingeniería de transporte, modelado
 
 ## Branches
 
-| Rama | Propósito | Protegida | CI |
-|------|-----------|-----------|----|
-| `main` | Producción | Sí (PR + checks) | Solo manual (workflow_dispatch) |
-| `staging` | Pre-producción | Sí (PR + checks) | Auto-deploy al push |
-| `feature/*` | Desarrollo | No | lint + test en PR |
-| `fix/*` | Hotfix | No | lint + test en PR |
+| Rama | Propósito | Protegida | CI | Deploy |
+|------|-----------|-----------|----|--------|
+| `main` | Producción | Sí (PR + checks) | lint + test + build | Automático (webhook Coolify) |
+| `staging` | Pre-producción | Sí (PR + checks) | lint + test + build | Manual vía Coolify si está configurado |
+| `feature/*` | Desarrollo | No | lint + test en PR | — |
+| `fix/*` | Hotfix | No | lint + test en PR | — |
 
 ## Ambientes
 
 | Ambiente | DB | URL | Deploy |
 |----------|----|-----|--------|
-| local | PostgreSQL local (eitapp) | localhost:8000 | `python manage.py runserver` |
-| staging | PostgreSQL (VPS ORA) | — | Automático al merge a `staging` |
-| production | PostgreSQL (VPS ORA) | — | Manual via GitHub Actions |
+| local (nativo) | PostgreSQL local (eitapp) | localhost:8000 | `python manage.py runserver` |
+| local (Docker) | PostgreSQL en contenedor (eit_app) | localhost:8000 | `docker compose up` |
+| production | PostgreSQL en contenedor (VPS) | eitapp.161.153.14.37.sslip.io | `git push origin main` → CI → webhook Coolify |
 
 ### Arquitectura Multi-DB
 
 ```
-                    ┌──────────────────────────────┐
-                    │      Django (settings.py)      │
-                    │  default: DATABASE_URL cascade   │
-                    │  ORA: DATABASE_URL_ORA (VPS)    │
-                    │  pg_local: DATABASE_URL_LOCAL   │
-                    └──────┬───────────────┬─────────┘
-                           │               │
-              ┌────────────┘               └────────────┐
-              ▼                                          ▼
-   ┌──────────────────┐                    ┌──────────────────────┐
-   │  localhost:5432   │                    │  161.153.14.37:5432  │
-   │  eitapp (default) │                    │  eitapp (ORA)       │
-   │  PG nativo        │                    │  Coolify / Docker   │
-   └──────────────────┘                    └──────────────────────┘
+                    ┌──────────────────────────────────────┐
+                    │       Django (settings.py)            │
+                    │  default: DATABASE_URL → ORA → local  │
+                    │  ORA:    DATABASE_URL_ORA (VPS)       │
+                    │  pg_local: DATABASE_URL_LOCAL          │
+                    └──────┬───────────────────┬────────────┘
+                           │                   │
+              ┌────────────┘                   └────────────┐
+              ▼                                              ▼
+   ┌──────────────────────┐                  ┌──────────────────────────┐
+   │  Local               │                  │  VPS (Oracle Cloud)      │
+   │  ─────               │                  │  ────────                │
+   │  Opción 1 (Docker):  │                  │  Docker Compose:         │
+   │  postgres:16-alpine  │                  │  db: postgres:16-alpine  │
+   │  puerto 5432         │                  │  web: Django + Gunicorn  │
+   │  eit_app             │                  │  puerto 8000             │
+   │                      │                  │  eitapp (ORA)            │
+   │  Opción 2 (nativo):  │                  │  Coolify orquesta        │
+   │  PG local instalado  │                  │                          │
+   │  puerto 5432         │                  │  Volúmenes persistentes: │
+   │  eitapp              │                  │  ├── postgres_data       │
+   └──────────────────────┘                  │  └── media_data (imgs)   │
+                                             └──────────────────────────┘
 ```
 
 ### Resolución de `default`
@@ -171,20 +182,41 @@ DATABASE_URL_ORA=postgresql://user:pass@161.153.14.37:5432/eitapp    ← VPS
 postgresql://postgres:1234@localhost:5432/eitapp    ← fallback local
 ```
 
-- **Local**: `DATABASE_URL` apunta a PostgreSQL local (`eitapp`). `ORA` disponible para switchear.
-- **VPS (Coolify)**: Solo `DATABASE_URL_ORA` está definido → `default` cae a ORA automáticamente. Sin configuración extra.
+- **Local (nativo)**: `DATABASE_URL` apunta a PostgreSQL local (`eitapp`). `ORA` disponible para switchear.
+- **Local (Docker)**: `docker compose up` levanta PostgreSQL + Django. `DATABASE_URL` apunta al contenedor `db:5432/eit_app`.
+- **VPS (Coolify)**: `DATABASE_URL` la setea Coolify automáticamente apuntando al contenedor `db`. Si no está definida, cae a `DATABASE_URL_ORA`.
 
 ## CI/CD
 
-Los pipelines de GitHub Actions corren en cada PR/push a `staging`:
+Los pipelines de GitHub Actions corren en cada PR/push a `staging` y `main`:
 
 1. **Lint** — ruff (Python) + ESLint + Prettier (JS)
 2. **Test** — pytest + coverage (umbral 80%)
 3. **Build** — collectstatic
-4. **Deploy Staging** — automático al push a `staging`
-5. **Deploy Production** — manual via `workflow_dispatch`
+4. **Deploy** — si CI pasa en `main`, se dispara webhook a Coolify que rebuild y deploy automático
+
+> Los workflows legacy (`deploy-prod.yml`, `deploy-staging.yml`, `deploy.yml`) existen como fallback manual por SSH, no se usan en el día a día.
 
 ## Inicio Rápido
+
+### Opción A: Docker Compose (PostgreSQL + Django, recomendado)
+
+```bash
+# Clonar
+git clone https://github.com/rroldanb/eitapp.git
+cd eitapp
+
+# Configurar entorno
+cp .env.example .env
+
+# Levantar PostgreSQL + Django
+docker compose up
+
+# En otra terminal, compilar Tailwind (HMR):
+python manage.py tailwind.dev
+```
+
+### Opción B: Nativo (PostgreSQL instalado localmente)
 
 ```bash
 # Clonar y crear entorno virtual
@@ -204,10 +236,10 @@ python manage.py migrate
 # Crear superuser
 python manage.py createsuperuser
 
-# Ejecutar
+# Terminal 1 — Django
 python manage.py runserver
 
-# Modo desarrollo (Tailwind):
+# Terminal 2 — Tailwind (HMR)
 python manage.py tailwind.dev
 ```
 
@@ -223,23 +255,16 @@ pre-commit run --all-files            # Todo junto
 
 ## Variables de Entorno
 
+Ver `.env.example` para la lista completa. Las principales:
+
 ```
-# Django
-SECRET_KEY=...
-DEBUG=True
-DATABASE_URL=postgresql://postgres:1234@localhost:5432/eitapp  # default DB
+DJANGO_SECRET_KEY=...        # Django secret key
+DJANGO_DEBUG=True            # False en producción
+DJANGO_ALLOWED_HOSTS=...     # Hosts permitidos
 
-# ORA (VPS / Coolify)
-DATABASE_URL_ORA=postgresql://user:pass@161.153.14.37:5432/eitapp
-CONN_MAX_AGE=600
-
-# Local second DB (opcional, para switchear)
-DATABASE_URL_LOCAL=postgresql://postgres:1234@localhost:5432/eitapp
-
-# Cloud storage (local filesystem, no Supabase)
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_STORAGE_BUCKET_NAME=
+DATABASE_URL=postgresql://...                   # DB por defecto
+DATABASE_URL_ORA=postgresql://...               # VPS Oracle (multi-DB)
+DATABASE_URL_LOCAL=postgresql://...             # Local secundaria
 ```
 
 ## Licencia
@@ -261,7 +286,6 @@ MIT
 | 7 | [Branches](#branches) |
 | 8 | [Ambientes](#ambientes) |
 | 9 | [Arquitectura Multi-DB](#arquitectura-multi-db) |
-| 10 | [Multi-tenancy](#multi-tenancy-futuro) |
-| 11 | [CI/CD](#cicd) |
-| 12 | [Inicio Rápido](#inicio-rápido) |
-| 13 | [Variables de Entorno](#variables-de-entorno) |
+| 10 | [CI/CD](#cicd) |
+| 11 | [Inicio Rápido](#inicio-rápido) |
+| 12 | [Variables de Entorno](#variables-de-entorno) |

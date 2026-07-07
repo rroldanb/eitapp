@@ -1,4 +1,4 @@
-name: Deploy Staging
+name: Deploy Staging (fallback manual)
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
             set -e
             cd /app/
             git pull origin staging
-            docker compose build
-            docker compose down
-            docker compose up -d
+            docker compose -f docker-compose.prod.yml build
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
             docker image prune -f

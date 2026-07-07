@@ -1,4 +1,4 @@
-name: Deploy Production
+name: Deploy Production (manual fallback)
 
 on:
   workflow_dispatch:

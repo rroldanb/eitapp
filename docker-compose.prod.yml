@@ -4,13 +4,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=eit_app
-      - POSTGRES_USER=eit_user
-      - POSTGRES_PASSWORD=eit_password
-    ports:
-      - "5432:5432"
+      - POSTGRES_DB=${POSTGRES_DB:-eit_app}
+      - POSTGRES_USER=${POSTGRES_USER:-eit_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U eit_user -d eit_app"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-eit_user} -d ${POSTGRES_DB:-eit_app}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -19,11 +17,11 @@ services:
   web:
     build: .
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:8000"
     env_file: .env
     environment:
-      - DJANGO_DEBUG=True
-      - DATABASE_URL=postgresql://eit_user:eit_password@db:5432/eit_app
+      - DJANGO_DEBUG=False
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-eit_user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-eit_app}
     volumes:
       - media_data:/app/media
     depends_on:

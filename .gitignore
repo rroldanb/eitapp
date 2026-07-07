@@ -1,26 +1,49 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Database
 db.sqlite3
-venv
-__pycache__
-.env*
-context
-_migration_backups
+*.sqlite3
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Project files
 data.json
+plantilla_importacion_eitapp.xlsx
+_operations*
+_migration_backups
+context/
+staticfiles/
+media/
+DESIGN.md
+PRODUCT.md
+
+# Logs & temp
 *.log
 *basurero*
 *copy.*
 *RR_Temp*
-DESIGN.md
-PRODUCT.md
-skills*
-.gitignore
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+
+# IDE / tools
+.opencode/
 .impeccable
 audit_report.md
-plantilla_importacion_eitapp.xlsx
-AGENTS*
-
-*pencod*
-node_modules/
-tui.json
-media/
+benchmark_js.py
 deployment_result*
-.DS_Store
+tui.json
+pencod
+skills*
+
+# Ignore AGENTS template (but not AGENTS.md)
+AGENTS_Template.md
