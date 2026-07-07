@@ -75,7 +75,6 @@
 - [ ] 7.4 — Optimizar N+1 en nodo/arco update views (`.proyecto.calles.all()` pattern)
 - [ ] 7.5 — Optimizar `proyecto_resumen_view` usando `prefetch_related`
 - [ ] 7.6 — Integrar app `tasks/` con proyectos
-- [ ] 7.7 — Periodización: migrar a CBVs built-in + click-to-activate (re-evaluar si aplica)
 
 ## ✅ Fase 8: DX y CI
 
