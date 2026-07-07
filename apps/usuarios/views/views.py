@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Any
 
 from django.conf import settings
@@ -55,8 +56,6 @@ def healthcheck_view(request: HttpRequest) -> JsonResponse:
     healthy/degraded status.  Intended for monitoring (load-balancer,
     docker healthcheck, uptime robot, etc.).
     """
-    import time
-
     overall = "healthy"
     status: dict[str, Any] = {}
 

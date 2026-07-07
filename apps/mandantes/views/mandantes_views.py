@@ -13,11 +13,10 @@ def mandantes_view(request: HttpRequest) -> HttpResponse:
     return render(request, "mandantes.html", {"mandantes": mandantes, "list_title": "Mandantes"})
 
 
+@login_required
 def mandante_detail_view(request: HttpRequest, mandante_id: str) -> HttpResponse:
-    # task = Task.objects.get(id=task_id)
     mandante = get_object_or_404(Mandante, id=mandante_id)
     if request.method == "GET":
-        # task = get_object_or_404(Task, id=task_id)
         form = MandanteForm(instance=mandante)
         return render(
             request,
@@ -25,19 +24,18 @@ def mandante_detail_view(request: HttpRequest, mandante_id: str) -> HttpResponse
             {"mandante": mandante, "contactos": mandante.contactos.all(), "form": form},
         )
     else:
-        try:
-            form = MandanteForm(request.POST, instance=mandante)
-            if form.is_valid():
-                form.save()
-                return redirect("mandantes")
-        except Exception as e:
-            return render(
-                request,
-                "mandante_detail.html",
-                {"mandante": mandante, "form": form, "error": str(e)},
-            )
+        form = MandanteForm(request.POST, instance=mandante)
+        if form.is_valid():
+            form.save()
+            return redirect("mandantes")
+        return render(
+            request,
+            "mandante_detail.html",
+            {"mandante": mandante, "form": form},
+        )
 
 
+@login_required
 def mandante_create_view(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         return render(request, "mandante_create.html", {"form": MandanteForm})
@@ -51,12 +49,14 @@ def mandante_create_view(request: HttpRequest) -> HttpResponse:
             return render(request, "mandante_create.html", {"form": form, "error": str(e)})
 
 
+@login_required
 def mandante_delete_view(request: HttpRequest, mandante_id: str) -> HttpResponse:
     if request.method == "POST":
         mandante_delete(mandante_id)
     return redirect("mandantes")
 
 
+@login_required
 def contactos_view(request: HttpRequest, mandante_id: str) -> HttpResponse:
     contactos = get_contactos_by_mandante(mandante_id)
     mandante = get_object_or_404(Mandante, id=mandante_id)
@@ -67,11 +67,13 @@ def contactos_view(request: HttpRequest, mandante_id: str) -> HttpResponse:
     )
 
 
+@login_required
 def contacto_detail_view_base(request: HttpRequest, contacto_id: str) -> HttpResponse:
     contacto = get_contacto_by_id(contacto_id)
     return render(request, "contacto_detail.html", {"contacto": contacto})
 
 
+@login_required
 def contacto_detail_view(request: HttpRequest, contacto_id: str) -> HttpResponse:
     contacto = get_object_or_404(Contacto, id=contacto_id)
     if request.method == "GET":
@@ -91,6 +93,7 @@ def contacto_detail_view(request: HttpRequest, contacto_id: str) -> HttpResponse
             )
 
 
+@login_required
 def contacto_delete_view(request: HttpRequest, contacto_id: str) -> HttpResponse:
     if request.method == "POST":
         contacto = get_contacto_by_id(contacto_id)
@@ -98,6 +101,7 @@ def contacto_delete_view(request: HttpRequest, contacto_id: str) -> HttpResponse
     return redirect("mandantes")
 
 
+@login_required
 def contacto_create_view(request: HttpRequest, mandante_id: str) -> HttpResponse:
     mandante = get_object_or_404(Mandante, id=mandante_id)
 

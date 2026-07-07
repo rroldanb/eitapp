@@ -90,15 +90,15 @@ class PuntoControlCreateView(View):
             try:
                 with transaction.atomic():
                     item = create_punto_control(proyecto, form.cleaned_data)
-                response = render(
-                    request,
-                    "partials/PuntosControl/punto_control_row.html",
-                    {
-                        "pc": item,
-                        "proyecto": proyecto,
-                    },
-                )
-                response["HX-Trigger"] = "punto-control-created"
+                    response = render(
+                        request,
+                        "partials/PuntosControl/punto_control_row.html",
+                        {
+                            "item": item,
+                            "proyecto": proyecto,
+                        },
+                    )
+                    response["HX-Trigger"] = "punto-control-created"
                 return response
             except (ValidationError, IntegrityError) as e:
                 form.add_error(None, str(e))
@@ -140,7 +140,7 @@ class PuntoControlUpdateView(View):
                 request,
                 "partials/PuntosControl/punto_control_row.html",
                 {
-                    "pc": pc,
+                    "item": pc,
                     "proyecto": pc.proyecto,
                 },
             )

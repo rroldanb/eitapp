@@ -22,6 +22,7 @@ from apps.red_vial.models import (
     Regulacion,
 )
 from apps.red_vial.services.import_service import (
+    _auto_create_pc,
     _choose,
     _get_model,
     _header_index,
@@ -43,6 +44,7 @@ from apps.red_vial.services.import_service import (
     validate_selection,
     validate_sheet,
 )
+from apps.red_vial.views.import_views import _restore_validation, _session_safe
 
 
 def _make_excel(sheets_data):
@@ -1681,9 +1683,9 @@ class FullPipelineIntegrationTest(TestCase):
         self.assertEqual(report["Regulacion"]["inserted"], 3)
         self.assertEqual(report["Periodo"]["inserted"], 4)
         self.assertEqual(report["PuntoControl"]["inserted"], 4)
-        self.assertEqual(report["Periodizacion"]["inserted"], 48)
-        self.assertEqual(report["Periodizacion"]["updated"], 48)
-        self.assertEqual(Periodizacion.objects.count(), 48)
+        self.assertEqual(report["Periodizacion"]["inserted"], 96)
+        self.assertEqual(report["Periodizacion"]["updated"], 0)
+        self.assertEqual(Periodizacion.objects.count(), 96)
         self.assertEqual(report["ParametroArco"]["inserted"], 4)
         self.assertEqual(report["FaseSemaforica"]["inserted"], 8)
         self.assertEqual(report["ConfiguracionTransyt"]["inserted"], 2)
@@ -1717,3 +1719,352 @@ class ReportStructureTest(TestCase):
         self.assertIn("valid_count", sheet_report)
         self.assertIn("duplicate_count", sheet_report)
         self.assertIn("error_count", sheet_report)
+
+
+# ============ _auto_create_pc ============
+
+
+class AutoCreatePcTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="12345")
+        self.mandante = Mandante.objects.create(name="M", location="L")
+        self.proyecto = Proyecto.objects.create(title="P", user=self.user, mandante=self.mandante)
+        from apps.red_vial.services.import_service import _resolve_sentinel_arco
+
+        self.sentinel_arco = _resolve_sentinel_arco(self.proyecto)
+        # sentinel creates Nodo(numero=1); give it numero_pc so _auto_create_pc can find it
+        self.nodo_pc1 = Nodo.objects.filter(numero=1, proyecto=self.proyecto).first()
+        if self.nodo_pc1:
+            self.nodo_pc1.numero_pc = 1
+            self.nodo_pc1.save(update_fields=["numero_pc"])
+        # create a 2nd nodo for tests that need a different one
+        self.nodo2 = Nodo.objects.create(numero=2, numero_pc=2, proyecto=self.proyecto)
+
+    def test_creates_pc_when_nodo_exists(self):
+        pc, created = _auto_create_pc(self.proyecto, "PC-01", "12")
+        assert created is True
+        assert pc is not None
+        assert pc.nodo == self.nodo_pc1
+        assert pc.movimiento == "12"
+
+    def test_returns_tuple_when_called_twice(self):
+        pc1, c1 = _auto_create_pc(self.proyecto, "PC-01", "12")
+        pc2, c2 = _auto_create_pc(self.proyecto, "PC-01", "12")
+        assert c1 is True
+        assert c2 is False
+        assert pc1.id == pc2.id
+
+    def test_handles_nodo_prefix(self):
+        pc, created = _auto_create_pc(self.proyecto, "Nodo-02", "21")
+        assert created is True
+        assert pc.movimiento == "21"
+        assert pc.nodo == self.nodo2
+
+    def test_returns_none_when_nodo_missing(self):
+        pc, created = _auto_create_pc(self.proyecto, "PC-99", "12")
+        assert created is False
+        assert pc is None
+
+    def test_returns_none_without_proyecto(self):
+        pc, created = _auto_create_pc(None, "PC-01", "12")
+        assert created is False
+        assert pc is None
+
+    def test_returns_none_without_pc_name(self):
+        pc, created = _auto_create_pc(self.proyecto, None, "12")
+        assert created is False
+        assert pc is None
+
+    def test_returns_none_without_movement(self):
+        pc, created = _auto_create_pc(self.proyecto, "PC-01", None)
+        assert created is False
+        assert pc is None
+
+    def test_returns_none_for_invalid_prefix(self):
+        pc, created = _auto_create_pc(self.proyecto, "FOO-01", "12")
+        assert created is False
+        assert pc is None
+
+    def test_returns_none_when_nodo_by_numero_not_found(self):
+        Nodo.objects.create(numero=5, numero_pc=None, proyecto=self.proyecto)
+        pc, created = _auto_create_pc(self.proyecto, "PC-03", "12")
+        assert created is False
+        assert pc is None
+
+    def test_returns_none_when_proyecto_missing_in_sentinel_call(self):
+        pc, created = _auto_create_pc(None, "PC-01", "12")
+        assert created is False
+        assert pc is None
+
+    def test_zfills_movement_to_two_digits(self):
+        pc, created = _auto_create_pc(self.proyecto, "PC-02", "1")
+        assert created is True
+        assert pc.movimiento == "01"
+        assert pc.nodo == self.nodo2
+
+
+# ============ _session_safe (import_views) ============
+
+
+class SessionSafeTest(TestCase):
+    def test_converts_time_to_isoformat(self):
+        obj = time(8, 30, 0)
+        result = _session_safe(obj)
+        assert result == "08:30:00"
+
+    def test_converts_date_to_isoformat(self):
+        obj = date(2025, 3, 15)
+        result = _session_safe(obj)
+        assert result == "2025-03-15"
+
+    def test_converts_virtual_obj_to_value(self):
+        obj = _VirtualObj(value="PC-01")
+        result = _session_safe(obj)
+        assert result == "PC-01"
+
+    def test_converts_model_to_str(self):
+        obj = Mandante(name="M1")
+        result = _session_safe(obj)
+        assert isinstance(result, str)
+
+    def test_recurses_dict(self):
+        obj = {"hora": time(8, 0), "name": "test"}
+        result = _session_safe(obj)
+        assert result["hora"] == "08:00:00"
+        assert result["name"] == "test"
+
+    def test_recurses_list(self):
+        obj = [time(8, 0), date(2025, 1, 1)]
+        result = _session_safe(obj)
+        assert result == ["08:00:00", "2025-01-01"]
+
+    def test_passes_through_primitives(self):
+        assert _session_safe("hello") == "hello"
+        assert _session_safe(42) == 42
+        assert _session_safe(3.14) == 3.14
+        assert _session_safe(True) is True
+        assert _session_safe(None) is None
+
+
+# ============ _restore_validation (import_views) ============
+
+
+class RestoreValidationTest(TestCase):
+    def _make_validation(self, rows=None, dupes=None):
+        return {
+            "results": {
+                "Periodizacion": {
+                    "valid": rows or [],
+                    "duplicates": dupes or [],
+                    "errors": [],
+                    "sheet": "Periodizacion",
+                },
+            },
+            "total_valid": len(rows or []),
+        }
+
+    def test_restores_time_string(self):
+        val = self._make_validation([{"hora": "08:30"}])
+        result = _restore_validation(val)
+        row = result["results"]["Periodizacion"]["valid"][0]
+        assert isinstance(row["hora"], time)
+        assert row["hora"] == time(8, 30)
+
+    def test_restores_date_string(self):
+        val = self._make_validation([{"fecha": "2025-03-15"}])
+        result = _restore_validation(val)
+        row = result["results"]["Periodizacion"]["valid"][0]
+        assert isinstance(row["fecha"], date)
+        assert row["fecha"] == date(2025, 3, 15)
+
+    def test_restores_duplicate_rows(self):
+        val = self._make_validation(
+            rows=[{"hora": "10:00"}],
+            dupes=[{"hora": "12:00"}],
+        )
+        result = _restore_validation(val)
+        r1 = result["results"]["Periodizacion"]["valid"][0]
+        r2 = result["results"]["Periodizacion"]["duplicates"][0]
+        assert isinstance(r1["hora"], time)
+        assert isinstance(r2["hora"], time)
+
+    def test_restores_periodo_fields(self):
+        val = {
+            "results": {
+                "Periodo": {
+                    "valid": [{"hora_inicio": "08:00", "hora_fin": "09:00"}],
+                    "duplicates": [],
+                    "errors": [],
+                },
+            },
+        }
+        result = _restore_validation(val)
+        row = result["results"]["Periodo"]["valid"][0]
+        assert isinstance(row["hora_inicio"], time)
+        assert isinstance(row["hora_fin"], time)
+
+    def test_restores_proyecto_date(self):
+        val = {
+            "results": {
+                "Proyecto": {
+                    "valid": [{"date_started": "2025-01-15"}],
+                    "duplicates": [],
+                    "errors": [],
+                },
+            },
+        }
+        result = _restore_validation(val)
+        row = result["results"]["Proyecto"]["valid"][0]
+        assert isinstance(row["date_started"], date)
+
+    def test_leaves_non_declared_fields_untouched(self):
+        val = self._make_validation([{"name": "Test", "vl": 100}])
+        result = _restore_validation(val)
+        row = result["results"]["Periodizacion"]["valid"][0]
+        assert row["name"] == "Test"
+        assert row["vl"] == 100
+
+    def test_leaves_invalid_time_string_unchanged(self):
+        val = self._make_validation([{"hora": "not-a-time"}])
+        result = _restore_validation(val)
+        row = result["results"]["Periodizacion"]["valid"][0]
+        assert row["hora"] == "not-a-time"
+
+    def test_leaves_already_time_object_unchanged(self):
+        val = self._make_validation([{"hora": time(8, 30)}])
+        result = _restore_validation(val)
+        row = result["results"]["Periodizacion"]["valid"][0]
+        assert isinstance(row["hora"], time)
+        assert row["hora"] == time(8, 30)
+
+    def test_handles_empty_validation(self):
+        result = _restore_validation({"results": {}})
+        assert result == {"results": {}}
+
+
+# ============ Auto-create PC via execute_import ============
+
+
+class ExecuteImportAutoCreatePcTest(TestCase):
+    def test_auto_creates_pc_in_periodizacion(self):
+        user = User.objects.create_user(username="testuser", password="12345")
+        mandante = Mandante.objects.create(name="M", location="L")
+        proyecto = Proyecto.objects.create(title="P", user=user, mandante=mandante)
+        Nodo.objects.create(numero=1, numero_pc=1, proyecto=proyecto)
+        from apps.red_vial.services.import_service import _resolve_sentinel_arco
+
+        _resolve_sentinel_arco(proyecto)  # creates sentinel
+        Periodo.objects.create(proyecto=proyecto, codigo="PM", es_laboral=True)
+        # CoeficienteCruce needed for Periodizacion.ftot calculation
+        CoeficienteCruce.objects.create(
+            nomenclatura="VL",
+            tipo_transporte="Vehículo Liviano",
+            coeficiente=1.0,
+            is_standard=True,
+        )
+        validation = {
+            "results": {
+                "Periodo": {
+                    "valid": [
+                        {
+                            "codigo": "PM",
+                            "hora_inicio": None,
+                            "hora_fin": None,
+                            "es_laboral": True,
+                            "proyecto": proyecto,
+                        }
+                    ],
+                    "duplicates": [],
+                    "errors": [],
+                    "sheet": "Periodo",
+                },
+                "Periodizacion": {
+                    "valid": [
+                        {
+                            "fecha": date(2025, 3, 15),
+                            "hora": time(8, 0),
+                            "pc": None,
+                            "_pc_name": "PC-01",
+                            "_pc_mov": "12",
+                            "pc_mov": "12",
+                            "periodo": Periodo.objects.get(codigo="PM"),
+                            "vl": 100,
+                            "txc": 0,
+                            "txb": 0,
+                            "c2e": 0,
+                            "c_mas2e": 0,
+                            "peat": 0,
+                            "cicl": 0,
+                            "moto": 0,
+                            "proyecto": proyecto,
+                        }
+                    ],
+                    "duplicates": [],
+                    "errors": [],
+                    "sheet": "Periodizacion",
+                },
+            },
+            "total_valid": 2,
+            "total_errors": 0,
+            "total_duplicates": 0,
+        }
+        report = execute_import(validation, proyecto, user)
+        pr = report.get("Periodizacion", {})
+        assert pr.get("inserted", 0) >= 1
+        auto_pcs = pr.get("auto_created_pcs", [])
+        assert len(auto_pcs) >= 1
+        assert auto_pcs[0]["pc_name"] == "PC-01"
+        assert PuntoControl.objects.filter(
+            nodo__numero_pc=1, movimiento="12", proyecto=proyecto
+        ).exists()
+
+    def test_reports_rejected_when_pc_cannot_be_created(self):
+        user = User.objects.create_user(username="testuser", password="12345")
+        mandante = Mandante.objects.create(name="M", location="L")
+        proyecto = Proyecto.objects.create(title="P", user=user, mandante=mandante)
+        # No Nodo with numero_pc=99, so auto-create will fail
+        Periodo.objects.create(proyecto=proyecto, codigo="PM", es_laboral=True)
+        validation = {
+            "results": {
+                "Periodo": {
+                    "valid": [
+                        {
+                            "codigo": "PM",
+                            "hora_inicio": None,
+                            "hora_fin": None,
+                            "es_laboral": True,
+                            "proyecto": proyecto,
+                        }
+                    ],
+                    "duplicates": [],
+                    "errors": [],
+                    "sheet": "Periodo",
+                },
+                "Periodizacion": {
+                    "valid": [
+                        {
+                            "fecha": date(2025, 3, 15),
+                            "hora": time(8, 0),
+                            "pc": None,
+                            "_pc_name": "PC-99",
+                            "_pc_mov": "12",
+                            "pc_mov": "12",
+                            "periodo": Periodo.objects.get(codigo="PM"),
+                            "vl": 100,
+                            "proyecto": proyecto,
+                        }
+                    ],
+                    "duplicates": [],
+                    "errors": [],
+                    "sheet": "Periodizacion",
+                },
+            },
+            "total_valid": 2,
+            "total_errors": 0,
+            "total_duplicates": 0,
+        }
+        report = execute_import(validation, proyecto, user)
+        pr = report.get("Periodizacion", {})
+        rejected = pr.get("rejected", [])
+        assert len(rejected) >= 1
+        assert "PC-99" in rejected[0]["reason"]

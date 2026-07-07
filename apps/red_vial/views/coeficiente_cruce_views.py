@@ -88,14 +88,14 @@ class CoeficienteCruceCreateView(View):
             try:
                 with transaction.atomic():
                     item = create_coeficiente_cruce(form.cleaned_data)
-                response = render(
-                    request,
-                    "partials/CoeficientesCruce/coeficiente_cruce_row.html",
-                    {
-                        "item": item,
-                    },
-                )
-                response["HX-Trigger"] = "coeficiente-cruce-created"
+                    response = render(
+                        request,
+                        "partials/CoeficientesCruce/coeficiente_cruce_row.html",
+                        {
+                            "coeficiente": item,
+                        },
+                    )
+                    response["HX-Trigger"] = "coeficiente-cruce-created"
                 return response
             except ValidationError as e:
                 form.add_error(None, str(e))
@@ -143,7 +143,7 @@ class CoeficienteCruceUpdateView(View):
                 request,
                 "partials/CoeficientesCruce/coeficiente_cruce_row.html",
                 {
-                    "item": item,
+                    "coeficiente": item,
                 },
             )
             response["HX-Trigger"] = "item-updated"

@@ -65,20 +65,34 @@
 - [x] 5.4 — Type hints en views (mandantes, proyectos, usuarios) — 31 FBVs tipadas
 - [x] 5.5 — Type hints en services (mandantes, proyectos, imagenes, common) — 5 archivos
 
-## Fase 6: Tests
+## ✅ Fase 6: Tests
 
-- [ ] 6.1 — Tests para CRUD views (no solo services) — probar HTMX partials, HX-Trigger, status codes
-- [ ] 6.2 — Tests para importación Excel
-- [ ] 6.3 — Tests para generación .dat TRANSYT
-- [ ] 6.4 — Tests para periodización (funcionalidad SKIPeada)
-- [ ] 6.5 — Tests para apps mandantes, proyectos, usuarios
-- [ ] 6.6 — Tests multi-tenant: aislamiento entre schemas/DBs
+### Completado
+- [x] 6.1 — Tests CRUD views:
+  - Calle (18), Nodo (17), Arco (15), Regulación (15), PuntoControl (14)
+  - CoeficienteCruce (15), Periodo (16), ParametroArco (15), FaseSemaforica (15), NodoImagen (36)
+- [x] 6.2 — Import Excel: auto-create PC (11), session-safe (7), restore-validation (9), grouped Task (2)
+- [x] 6.3 — TRANSYT .dat: real generation tests (8) + reference validation (7) = 15
+- [x] 6.4 — Periodización CRUD views (15 tests)
+- [x] 6.5 — ConfigTransyt view (8 tests)
+- [x] 6.6 — Tests para apps mandantes (33 tests) + usuarios auth/management (31 tests) = 64
+- [ ] 6.7 — Tests multi-tenant: aislamiento entre schemas/DBs (postergado)
 
-## Fase 7: Funcionalidad Pendiente
+## ✅ Fase 6b: Security Audit
 
-- [ ] 7.1 — Integrar app `tasks/` con proyectos
-- [ ] 7.2 — Periodización: migrar a CBVs built-in + click-to-activate (re-evaluar si aplica)
-- [ ] 7.3 — Planes Compartido vs Pro: billing, provisioning UI, monitoreo
+- [x] 6b.1 — Agregar `@login_required` a 8 views de mandantes que estaban expuestas
+- [x] 6b.2 — Agregar tests anon redirect (8 nuevos) + `force_login` en tests existentes
+
+## Fase 7: Code Health
+
+- [ ] 7.1 — Optimizar N+1 queries en `generador_dat.py` (cards_31, cards_32, validate)
+- [ ] 7.2 — Eliminar dead code: `trafico_service.py`, `red_vial_service.py`, `red_vial_views.py`
+- [ ] 7.3 — Reemplazar `except Exception` genéricos (24 lugares) con excepciones específicas
+- [ ] 7.4 — Optimizar N+1 en nodo/arco update views (`.proyecto.calles.all()` pattern)
+- [ ] 7.5 — Optimizar `proyecto_resumen_view` usando `prefetch_related`
+- [ ] 7.6 — Integrar app `tasks/` con proyectos
+- [ ] 7.7 — Periodización: migrar a CBVs built-in + click-to-activate (re-evaluar si aplica)
+- [ ] 7.8 — Planes Compartido vs Pro: billing, provisioning UI, monitoreo
 
 ## ✅ Fase 8: DX y CI
 
@@ -104,4 +118,4 @@
 
 ---
 
-**Estado actual:** 206 tests pasan ✅ | Fase 5 completada ✅ | Type hints en views + services en todas las apps ✅ | PostgreSQL default ✅ | Supabase removed ✅
+**Estado actual:** 243 tests pasan (apps completas) ✅ | Fase 6 completada (parcial) ✅ | Seguridad auditada ✅ | Type hints ✅ | PostgreSQL default ✅ | Supabase removed ✅
