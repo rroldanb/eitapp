@@ -41,17 +41,6 @@
 ### Pendiente
 - [ ] 0.5 — Dockerizar PostgreSQL + pgAdmin4 en VPS (opcional, para gestión visual)
 
-## Fase 4: Multi-tenancy (Database-per-Tenant)
-
-- [ ] 4.1 — Agregar modelo `Tenant` (nombre, schema, db_alias, plan: shared/pro)
-- [ ] 4.2 — Middleware `TenantMiddleware`: extraer tenant del subdominio/request
-- [ ] 4.3 — `TenantDatabaseRouter`: elegir DB según `request.tenant`
-- [ ] 4.4 — Template database `eit_template` con schema vacío + seed data
-- [ ] 4.5 — Flujo de creación de tenant: `CREATE DATABASE ... TEMPLATE eit_template`
-- [ ] 4.6 — Registrar y exponer tenant en pgAdmin4 automáticamente (API)
-- [ ] 4.7 — Actualizar vistas de login/signup para asociar usuario a tenant
-- [ ] 4.8 — Backup por tenant: script que dumpera cada base/schema por separado
-
 ## ✅ Fase 5: Refactor y Eliminación de Legacy
 - [x] 5.0 — Eliminar `apps/imagenes/utils/supabase_client.py` (legacy)
 - [x] 5.0b — Eliminar management command `migrate_supabase_images.py` (one-time)
@@ -76,8 +65,6 @@
 - [x] 6.4 — Periodización CRUD views (15 tests)
 - [x] 6.5 — ConfigTransyt view (8 tests)
 - [x] 6.6 — Tests para apps mandantes (33 tests) + usuarios auth/management (31 tests) = 64
-- [ ] 6.7 — Tests multi-tenant: aislamiento entre schemas/DBs (postergado)
-
 ## ✅ Fase 6b: Security Audit
 
 - [x] 6b.1 — Agregar `@login_required` a 8 views de mandantes que estaban expuestas
@@ -92,7 +79,6 @@
 - [ ] 7.5 — Optimizar `proyecto_resumen_view` usando `prefetch_related`
 - [ ] 7.6 — Integrar app `tasks/` con proyectos
 - [ ] 7.7 — Periodización: migrar a CBVs built-in + click-to-activate (re-evaluar si aplica)
-- [ ] 7.8 — Planes Compartido vs Pro: billing, provisioning UI, monitoreo
 
 ## ✅ Fase 8: DX y CI
 
@@ -118,4 +104,4 @@
 
 ---
 
-**Estado actual:** 243 tests pasan (apps completas) ✅ | Fase 6 completada (parcial) ✅ | Seguridad auditada ✅ | Type hints ✅ | PostgreSQL default ✅ | Supabase removed ✅
+**Estado actual:** 243 tests pasan ✅ | Fase 6 completada (sin multi-tenant) ✅ | Seguridad auditada ✅ | Type hints ✅ | PostgreSQL default ✅ | Supabase removed ✅

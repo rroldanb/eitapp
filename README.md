@@ -174,39 +174,6 @@ postgresql://postgres:1234@localhost:5432/eitapp    ← fallback local
 - **Local**: `DATABASE_URL` apunta a PostgreSQL local (`eitapp`). `ORA` disponible para switchear.
 - **VPS (Coolify)**: Solo `DATABASE_URL_ORA` está definido → `default` cae a ORA automáticamente. Sin configuración extra.
 
-### Multi-tenancy (futuro)
-
-La aplicación soportará dos modelos de despliegue:
-
-```
-┌───────────────────────────────────────────────────────────────┐
-│                   Balanceador / Proxy                          │
-│                 (nginx + server_name o path)                    │
-└──────┬─────────────────────────┬───────────────────────────────┘
-       │                         │
-       ▼                         ▼
-┌──────────────────┐   ┌───────────────────────────┐
-│  Plan Compartido  │   │    Plan Pro (consultora)  │
-│  DB compartida    │   │  Stack Docker individual:  │
-│  schema: tenant_* │   │  - web (Django)            │
-│  (postgres1)      │   │  - db (PostgreSQL)         │
-│                   │   │  - pgadmin4 (opcional)     │
-│  Un solo pgAdmin  │   │  - redis (futuro)          │
-│  multi-schema     │   │                             │
-└──────────────────┘   └───────────────────────────┘
-```
-
-| Factor | Compartido | Pro |
-|--------|-----------|------|
-| Aislamiento de datos | Schema | Database independiente |
-| Costo | Bajo (1 VPS) | Medio (1 VPS por tenant) |
-| Escala | Hasta ~50 tenants | Ilimitado |
-| Backup | Completo + schema dump | Completo por stack |
-| Upgrade | Un deploy | Por stack (rollback individual) |
-| Aprovisionamiento | `CREATE SCHEMA` | `docker compose up` |
-
-**Estado:** Diseño definido. Pendiente de implementar (`ActiveDatabaseRouter` + `TenantMiddleware`).
-
 ## CI/CD
 
 Los pipelines de GitHub Actions corren en cada PR/push a `staging`:
