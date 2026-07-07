@@ -38,9 +38,11 @@ class AnalisisFlujosView(View):
         periodo_ids = [p for p in periodo_ids if p]
         movimiento_ids = [m for m in movimiento_ids if m]
 
-        available_nodos = Nodo.objects.filter(
-            numero_pc__isnull=False, proyecto=proyecto
-        ).select_related("calle_1", "calle_2")
+        available_nodos = (
+            Nodo.objects.filter(numero_pc__isnull=False, proyecto=proyecto)
+            .select_related("calle_1", "calle_2")
+            .order_by("numero_pc")
+        )
         all_periodos = list(Periodo.objects.filter(proyecto=proyecto))
 
         available_fechas = (
@@ -82,6 +84,15 @@ class AnalisisFlujosView(View):
         comparison = get_comparison(analisis_data, all_periodos)
         chart_data = get_chart_data(analisis_data, all_periodos)
 
+        sort_by_detail = request.GET.get("sort_by_detail", "")
+        sort_order_detail = request.GET.get("sort_order_detail", "asc")
+        sort_by_resumen = request.GET.get("sort_by_resumen", "")
+        sort_order_resumen = request.GET.get("sort_order_resumen", "asc")
+        sort_by_ranking = request.GET.get("sort_by_ranking", "")
+        sort_order_ranking = request.GET.get("sort_order_ranking", "asc")
+        sort_by_comparison = request.GET.get("sort_by_comparison", "")
+        sort_order_comparison = request.GET.get("sort_order_comparison", "asc")
+
         detalle_horario = get_detalle_horario(
             proyecto_id=proyecto_id,
             pc_ids=pc_ids or None,
@@ -90,6 +101,58 @@ class AnalisisFlujosView(View):
             movimiento_ids=movimiento_ids or None,
         )
         detalle_horario_chart = get_detalle_horario_chart_data(detalle_horario)
+
+        # Sort in-memory lists for table display
+        sort_keys_detail = {
+            "hora": lambda r: r["hora"],
+            "flujo_15min": lambda r: r.get("flujo_15min", 0) or 0,
+            "hora_movil": lambda r: r.get("hora_movil", 0) or 0,
+            "es_punta": lambda r: r.get("es_punta", ""),
+        }
+        key_fn = sort_keys_detail.get(sort_by_detail)
+        if key_fn:
+            detalle_horario.sort(key=key_fn, reverse=sort_order_detail == "desc")
+
+        sort_keys_resumen = {
+            "pc_nombre": lambda r: r.get("pc_nombre", ""),
+            "movimiento": lambda r: r.get("movimiento", ""),
+            "periodo_codigo": lambda r: r.get("periodo_codigo", ""),
+            "flujo_total": lambda r: r.get("flujo_total", 0) or 0,
+            "promedio": lambda r: r.get("promedio", 0) or 0,
+            "num_registros": lambda r: r.get("num_registros", 0) or 0,
+        }
+        key_fn = sort_keys_resumen.get(sort_by_resumen)
+        if key_fn:
+            analisis_data.sort(key=key_fn, reverse=sort_order_resumen == "desc")
+
+        sort_keys_ranking = {
+            "rank": lambda r: r.get("rank", 0) or 0,
+            "pc_nombre": lambda r: r.get("pc_nombre", ""),
+            "movimiento": lambda r: r.get("movimiento", ""),
+            "total_flujo": lambda r: r.get("total_flujo", 0) or 0,
+        }
+        key_fn = sort_keys_ranking.get(sort_by_ranking)
+        if key_fn:
+            ranking.sort(key=key_fn, reverse=sort_order_ranking == "desc")
+
+        sort_keys_comparison = {
+            "pc_nombre": lambda r: r.get("pc_nombre", ""),
+            "movimiento": lambda r: r.get("movimiento", ""),
+        }
+        # For period column sorting, dynamic key using period UUID string
+        key_fn = sort_keys_comparison.get(sort_by_comparison)
+        if key_fn:
+            comparison.sort(key=key_fn, reverse=sort_order_comparison == "desc")
+        elif sort_by_comparison:
+            # Try sorting by a period column (UUID string key)
+            try:
+                pid = sort_by_comparison
+                comparison.sort(
+                    key=lambda r: r.get(pid, 0) or 0,
+                    reverse=sort_order_comparison == "desc",
+                )
+            except Exception:
+                pass
 
         per_pc_charts = get_detalle_por_pc_chart_data(
             proyecto_id=proyecto_id,
@@ -119,9 +182,21 @@ class AnalisisFlujosView(View):
             "detalle_horario_chart_json": json.dumps(detalle_horario_chart),
             "per_pc_charts": per_pc_charts,
             "per_pc_charts_json": json.dumps(per_pc_charts),
+            "sort_by_detail": sort_by_detail,
+            "sort_order_detail": sort_order_detail,
+            "sort_by_resumen": sort_by_resumen,
+            "sort_order_resumen": sort_order_resumen,
+            "sort_by_ranking": sort_by_ranking,
+            "sort_order_ranking": sort_order_ranking,
+            "sort_by_comparison": sort_by_comparison,
+            "sort_order_comparison": sort_order_comparison,
         }
 
         if request.headers.get("HX-Request"):
+            if any(k.startswith("sort_by_") for k in request.GET):
+                return render(
+                    request, "partials/analisis_flujos/analisis_flujos_content.html", context
+                )
             return render(request, self.template_container, context)
         return render(request, self.template_full, context)
 

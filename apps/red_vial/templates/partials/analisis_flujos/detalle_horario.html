@@ -17,19 +17,46 @@
 {% endif %}
 
 <!-- == DETALLE HORARIO: FLUJO 15MIN + HORA MÓVIL == -->
-<div class="bg-white rounded-lg shadow overflow-hidden">
-  <div class="bg-cyan-700 text-white px-4 py-3 flex justify-between items-center">
-    <h2 class="mb-0 font-semibold text-base">Detalle Horario (15 min)</h2>
-    <span class="text-xs text-cyan-200">{{ detalle_horario|length }} registros</span>
-  </div>
-  <div class="p-0 overflow-x-auto">
-    <table class="w-full divide-y divide-gray-200 text-sm">
-      <thead class="bg-gray-800 text-white">
+
+  <div class="bg-white rounded-lg shadow overflow-hidden flex flex-col h-150">
+    <div class="bg-cyan-700 text-white px-4 py-3 flex justify-between items-center shrink-0">
+      <h2 class="mb-0 font-semibold text-base">Detalle Horario (15 min)</h2>
+      <span class="text-xs text-cyan-200">{{ detalle_horario|length }} registros</span>
+    </div>
+    <div class="overflow-auto flex-1">
+      <table class="w-full divide-y divide-gray-200">
+        <thead class="bg-gray-800 text-white sticky top-0 z-10">
+
+
         <tr>
-          <th class="px-3 py-2 text-left text-xs font-medium uppercase">Hora</th>
-          <th class="px-3 py-2 text-right text-xs font-medium uppercase">Flujo VEQ/15min</th>
-          <th class="px-3 py-2 text-right text-xs font-medium uppercase">Hora Móvil VEQ/h</th>
-          <th class="px-3 py-2 text-center text-xs font-medium uppercase">Es Punta</th>
+          <th class="px-3 py-2 text-left text-xs font-medium uppercase cursor-pointer select-none hover:text-cyan-200"
+              hx-get="?sort_by_detail=hora&sort_order_detail={% if sort_by_detail == 'hora' and sort_order_detail == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-include="#analisis-flujos-filters"
+              hx-target="#dashboard-content-inner"
+              hx-swap="innerHTML">
+            Hora{% if sort_by_detail == 'hora' %}{% if sort_order_detail == 'asc' %} ↑{% else %} ↓{% endif %}{% endif %}
+          </th>
+          <th class="px-3 py-2 text-right text-xs font-medium uppercase cursor-pointer select-none hover:text-cyan-200"
+              hx-get="?sort_by_detail=flujo_15min&sort_order_detail={% if sort_by_detail == 'flujo_15min' and sort_order_detail == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-include="#analisis-flujos-filters"
+              hx-target="#dashboard-content-inner"
+              hx-swap="innerHTML">
+            Flujo VEQ/15min{% if sort_by_detail == 'flujo_15min' %}{% if sort_order_detail == 'asc' %} ↑{% else %} ↓{% endif %}{% endif %}
+          </th>
+          <th class="px-3 py-2 text-right text-xs font-medium uppercase cursor-pointer select-none hover:text-cyan-200"
+              hx-get="?sort_by_detail=hora_movil&sort_order_detail={% if sort_by_detail == 'hora_movil' and sort_order_detail == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-include="#analisis-flujos-filters"
+              hx-target="#dashboard-content-inner"
+              hx-swap="innerHTML">
+            Hora Móvil VEQ/h{% if sort_by_detail == 'hora_movil' %}{% if sort_order_detail == 'asc' %} ↑{% else %} ↓{% endif %}{% endif %}
+          </th>
+          <th class="px-3 py-2 text-center text-xs font-medium uppercase cursor-pointer select-none hover:text-cyan-200"
+              hx-get="?sort_by_detail=es_punta&sort_order_detail={% if sort_by_detail == 'es_punta' and sort_order_detail == 'asc' %}desc{% else %}asc{% endif %}"
+              hx-include="#analisis-flujos-filters"
+              hx-target="#dashboard-content-inner"
+              hx-swap="innerHTML">
+            Es Punta{% if sort_by_detail == 'es_punta' %}{% if sort_order_detail == 'asc' %} ↑{% else %} ↓{% endif %}{% endif %}
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-200">

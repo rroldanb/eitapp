@@ -291,6 +291,9 @@
   .pointer-events-none {
     pointer-events: none;
   }
+  .visible {
+    visibility: visible;
+  }
   .sr-only {
     position: absolute;
     width: 1px;
@@ -332,6 +335,12 @@
   .top-5 {
     top: calc(var(--spacing) * 5);
   }
+  .top-10 {
+    top: calc(var(--spacing) * 10);
+  }
+  .top-20 {
+    top: calc(var(--spacing) * 20);
+  }
   .top-full {
     top: 100%;
   }
@@ -362,11 +371,17 @@
   .left-16 {
     left: calc(var(--spacing) * 16);
   }
+  .z-0 {
+    z-index: 0;
+  }
   .z-1 {
     z-index: 1;
   }
   .z-10 {
     z-index: 10;
+  }
+  .z-20 {
+    z-index: 20;
   }
   .z-50 {
     z-index: 50;
@@ -566,11 +581,26 @@
   .h-16 {
     height: calc(var(--spacing) * 16);
   }
+  .h-20 {
+    height: calc(var(--spacing) * 20);
+  }
+  .h-100 {
+    height: calc(var(--spacing) * 100);
+  }
+  .h-150 {
+    height: calc(var(--spacing) * 150);
+  }
+  .h-200 {
+    height: calc(var(--spacing) * 200);
+  }
   .h-\[33vh\] {
     height: 33vh;
   }
   .h-full {
     height: 100%;
+  }
+  .h-max {
+    height: max-content;
   }
   .h-px {
     height: 1px;
@@ -731,6 +761,9 @@
   .resize {
     resize: both;
   }
+  .scroll-m-6 {
+    scroll-margin: calc(var(--spacing) * 6);
+  }
   .list-inside {
     list-style-position: inside;
   }
@@ -884,6 +917,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .overflow-auto {
+    overflow: auto;
   }
   .overflow-hidden {
     overflow: hidden;
@@ -1445,6 +1481,9 @@
   .pb-0\.5 {
     padding-bottom: calc(var(--spacing) * 0.5);
   }
+  .pb-3 {
+    padding-bottom: calc(var(--spacing) * 3);
+  }
   .pb-4 {
     padding-bottom: calc(var(--spacing) * 4);
   }
@@ -1572,6 +1611,12 @@
   }
   .text-blue-800 {
     color: var(--color-blue-800);
+  }
+  .text-cyan-50 {
+    color: var(--color-cyan-50);
+  }
+  .text-cyan-100 {
+    color: var(--color-cyan-100);
   }
   .text-cyan-200 {
     color: var(--color-cyan-200);
@@ -2129,6 +2174,13 @@
       }
     }
   }
+  .hover\:text-amber-600 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-amber-600);
+      }
+    }
+  }
   .hover\:text-amber-800 {
     &:hover {
       @media (hover: hover) {
@@ -2143,10 +2195,24 @@
       }
     }
   }
+  .hover\:text-cyan-200 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-cyan-200);
+      }
+    }
+  }
   .hover\:text-cyan-700 {
     &:hover {
       @media (hover: hover) {
         color: var(--color-cyan-700);
+      }
+    }
+  }
+  .hover\:text-emerald-600 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-emerald-600);
       }
     }
   }

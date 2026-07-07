@@ -8,7 +8,19 @@
 
   <div class="flex items-center justify-between px-4 py-2 cursor-pointer select-none border-b border-slate-300"
     _="on click toggle .hidden on #periodizacion-filter-body">
-    <span class="text-sm font-bold text-gray-700">Filtros</span>
+    <span class="text-sm font-bold text-gray-700">
+      Filtros
+      {% with n=selected_nodos|length m=selected_movimientos|length p=selected_periodos|length %}
+      {% with filter_count=n|add:m|add:p %}
+        {% if filter_count > 0 or selected_fecha %}
+          <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">
+            <i class="fas fa-filter"></i>
+            {% if selected_fecha %}{{ filter_count|add:1 }}{% else %}{{ filter_count }}{% endif %} activos
+          </span>
+        {% endif %}
+      {% endwith %}
+      {% endwith %}
+    </span>
     <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform" aria-hidden="true"
       _="on click toggle .rotate-180 on me"></i>
   </div>

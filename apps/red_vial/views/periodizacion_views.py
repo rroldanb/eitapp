@@ -50,9 +50,11 @@ class PeriodizacionListView(View):
             order_param=order_param,
         )
 
-        available_nodos = Nodo.objects.filter(
-            numero_pc__isnull=False, proyecto=proyecto
-        ).select_related("calle_1", "calle_2")
+        available_nodos = (
+            Nodo.objects.filter(numero_pc__isnull=False, proyecto=proyecto)
+            .select_related("calle_1", "calle_2")
+            .order_by("numero_pc")
+        )
         available_periodos = Periodo.objects.filter(proyecto=proyecto)
 
         available_fechas = (

@@ -96,13 +96,21 @@
     },
   };
 
+  function getChartDef(nodoId) {
+    for (var i = 0; i < _chartsData.length; i++) {
+      if (_chartsData[i].nodo_id === nodoId) return _chartsData[i];
+    }
+    return null;
+  }
+
   function renderChart(canvasId, chartDef) {
     var ctx = document.getElementById(canvasId);
     if (!ctx) return;
 
-    if (window._perPcCharts && window._perPcCharts[chartDef.pc_id]) {
-      window._perPcCharts[chartDef.pc_id].destroy();
-      delete window._perPcCharts[chartDef.pc_id];
+    var nodoId = chartDef.nodo_id;
+    if (window._perPcCharts && window._perPcCharts[nodoId]) {
+      window._perPcCharts[nodoId].destroy();
+      delete window._perPcCharts[nodoId];
     }
 
     if (!chartDef.labels || chartDef.labels.length === 0) {
@@ -123,9 +131,45 @@
       plugins: [bandPlugin],
     });
     chart._bandas = chartDef.bandas || [];
-    window._perPcCharts[chartDef.pc_id] = chart;
+    window._perPcCharts[nodoId] = chart;
   }
 
+  // ── Toggle movimiento ──
+  function toggleMovimiento(nodoId, movimientoId, show) {
+    var chart = window._perPcCharts && window._perPcCharts[nodoId];
+    if (!chart) return;
+    var chartDef = getChartDef(nodoId);
+    if (!chartDef) return;
+
+    for (var i = 0; i < chart.data.datasets.length; i++) {
+      var ds = chart.data.datasets[i];
+      var dsDef = chartDef.datasets[i];
+      if (dsDef && dsDef.movimiento_id === movimientoId) {
+        var meta = chart.getDatasetMeta(i);
+        meta.hidden = !show;
+        chart.update();
+        break;
+      }
+    }
+
+    // Update button styling
+    var btn = document.querySelector(
+      '.movimiento-btn[data-nodo-id="' + nodoId + '"][data-movimiento-id="' + movimientoId + '"]'
+    );
+    if (btn) {
+      btn.setAttribute('data-active', show ? 'true' : 'false');
+      var color = btn.style.borderColor;
+      if (show) {
+        btn.style.background = color + '15';
+        btn.style.opacity = '1';
+      } else {
+        btn.style.background = 'transparent';
+        btn.style.opacity = '0.4';
+      }
+    }
+  }
+
+  // ── Modal ──
   function openModal(chartDef) {
     var existing = document.getElementById('pcChartModal');
     if (existing) existing.remove();
@@ -197,10 +241,37 @@
       plugins: [bandPlugin],
     });
     modalChart._bandas = chartDef.bandas || [];
+
+    // Apply toggles to modal chart too
+    if (chartDef.movimientos) {
+      for (var i = 0; i < chartDef.datasets.length; i++) {
+        var dsDef = chartDef.datasets[i];
+        var mov = null;
+        for (var m = 0; m < chartDef.movimientos.length; m++) {
+          if (chartDef.movimientos[m].id === dsDef.movimiento_id) {
+            mov = chartDef.movimientos[m];
+            break;
+          }
+        }
+        if (mov && !mov.visible) {
+          var meta = modalChart.getDatasetMeta(i);
+          meta.hidden = true;
+          modalChart.update();
+        }
+      }
+    }
   }
 
-  // Public render function — call this after each HTMX swap
+  // ── Sequential render guard ──
+  var _renderTimer = null;
+
+  // ── Public render (sequential, one per frame) ──
   window.renderPcCharts = function () {
+    if (_renderTimer) {
+      clearTimeout(_renderTimer);
+      _renderTimer = null;
+    }
+
     var dataEl = document.getElementById('per-pc-chart-data');
     if (!dataEl) return;
     try {
@@ -211,21 +282,50 @@
     }
     if (_chartsData.length === 0) return;
 
-    _chartsData.forEach(function (chartDef) {
-      renderChart('pcChart-' + chartDef.pc_id, chartDef);
-    });
+    var idx = 0;
+    function renderNext() {
+      if (idx >= _chartsData.length) {
+        _renderTimer = null;
+        return;
+      }
+      var chartDef = _chartsData[idx];
+      idx++;
+      renderChart('pcChart-' + chartDef.nodo_id, chartDef);
+      _renderTimer = setTimeout(renderNext, 20);
+    }
+    renderNext();
   };
 
-  // Document-level click delegation — survives HTMX swaps
+  // ── Click: expand modal on chart card ──
   document.addEventListener('click', function (e) {
-    var card = e.target.closest('.chart-card');
+    var expandBtn = e.target.closest('[data-expand-chart]');
+    if (!expandBtn) return;
+    var card = expandBtn.closest('.chart-card');
     if (!card) return;
-    var pcId = card.getAttribute('data-pc-id');
-    if (!pcId) return;
-    for (var i = 0; i < _chartsData.length; i++) {
-      if (_chartsData[i].pc_id === pcId) {
-        openModal(_chartsData[i]);
-        return;
+    var nodoId = card.getAttribute('data-nodo-id');
+    if (!nodoId) return;
+    var chartDef = getChartDef(nodoId);
+    if (chartDef) openModal(chartDef);
+    return;
+  });
+
+  // ── Click: toggle movimiento ──
+  document.addEventListener('click', function (e) {
+    var movBtn = e.target.closest('.movimiento-btn');
+    if (!movBtn) return;
+    var nodoId = movBtn.getAttribute('data-nodo-id');
+    var movimientoId = movBtn.getAttribute('data-movimiento-id');
+    var active = movBtn.getAttribute('data-active') === 'true';
+    toggleMovimiento(nodoId, movimientoId, !active);
+
+    // Update chartDef state
+    var chartDef = getChartDef(nodoId);
+    if (chartDef && chartDef.movimientos) {
+      for (var i = 0; i < chartDef.movimientos.length; i++) {
+        if (chartDef.movimientos[i].id === movimientoId) {
+          chartDef.movimientos[i].visible = !active;
+          break;
+        }
       }
     }
   });
