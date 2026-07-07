@@ -100,4 +100,4 @@
 
 ---
 
-**Estado actual:** 243 tests pasan ✅ | Fase 6 completada (sin multi-tenant) ✅ | Seguridad auditada ✅ | Type hints ✅ | PostgreSQL default ✅ | Supabase removed ✅
+**Estado actual:** 470 tests pasan ✅ | Fase 6 completada (sin multi-tenant) ✅ | Seguridad auditada ✅ | Type hints ✅ | PostgreSQL default ✅ | Supabase removed ✅

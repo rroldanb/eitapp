@@ -3,7 +3,7 @@ import uuid
 from typing import Any
 
 from django.conf import settings
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 
 def _media_path(subdir: str, filename: str) -> str:
@@ -15,8 +15,8 @@ def _media_path(subdir: str, filename: str) -> str:
 def upload_project_image(file: Any) -> str:
     try:
         img = Image.open(file)
-    except Exception as e:
-        raise Exception(f"Error abriendo imagen: {e!s}")
+    except (FileNotFoundError, UnidentifiedImageError, OSError) as e:
+        raise ValueError(f"Error abriendo imagen: {e!s}")
 
     if img.mode in ("RGBA", "LA", "P"):
         img = img.convert("RGBA")

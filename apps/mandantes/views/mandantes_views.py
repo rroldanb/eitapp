@@ -40,13 +40,11 @@ def mandante_create_view(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         return render(request, "mandante_create.html", {"form": MandanteForm})
     else:
-        try:
-            form = MandanteForm(request.POST)
-            new_mandante = form.save(commit=False)
-            new_mandante.save()
+        form = MandanteForm(request.POST)
+        if form.is_valid():
+            form.save()
             return redirect("mandantes")
-        except Exception as e:
-            return render(request, "mandante_create.html", {"form": form, "error": str(e)})
+        return render(request, "mandante_create.html", {"form": form})
 
 
 @login_required
