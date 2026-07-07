@@ -38,9 +38,6 @@
 - Supabase eliminado: paquete, SDK, archivos legacy
 - `default` DB cascade: `DATABASE_URL` → `DATABASE_URL_ORA` → local PG fallback
 
-### Pendiente
-- [ ] 0.5 — Dockerizar PostgreSQL + pgAdmin4 en VPS (opcional, para gestión visual)
-
 ## ✅ Fase 5: Refactor y Eliminación de Legacy
 - [x] 5.0 — Eliminar `apps/imagenes/utils/supabase_client.py` (legacy)
 - [x] 5.0b — Eliminar management command `migrate_supabase_images.py` (one-time)
