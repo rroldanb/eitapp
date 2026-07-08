@@ -101,6 +101,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.common.context_processors.dev_banner",
                 "apps.common.context_processors.pending_tasks",
             ],
         },
@@ -227,11 +228,15 @@ if _use_s3:
             },
         },
     }
-    STORAGES["staticfiles"] = {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    } if not DEBUG else {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    }
+    STORAGES["staticfiles"] = (
+        {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        }
+        if not DEBUG
+        else {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        }
+    )
     MEDIA_URL = f"{OCI_S3_ENDPOINT}/{OCI_BUCKET_NAME}/media/"
 else:
     MEDIA_URL = "/media/"

@@ -37,6 +37,10 @@
 
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
+    {% if is_local_dev %}
+    {% include "dev_banner.html" %}
+    {% endif %}
+
     <header>
 
         {% block mainnavbar %}

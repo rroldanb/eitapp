@@ -1751,6 +1751,12 @@
   .underline {
     text-decoration-line: underline;
   }
+  .decoration-dotted {
+    text-decoration-style: dotted;
+  }
+  .underline-offset-2 {
+    text-underline-offset: 2px;
+  }
   .accent-indigo-600 {
     accent-color: var(--color-indigo-600);
   }

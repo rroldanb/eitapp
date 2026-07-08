@@ -1,9 +1,19 @@
+from django.conf import settings
 from django.http import HttpRequest
 from django.utils import timezone
 
+from apps.common.db_router import get_active_db
 from apps.tasks.models.tasks import Task, TaskStatus
 from apps.usuarios.models import Role
 from apps.usuarios.utils import get_user_role
+
+
+def dev_banner(request: HttpRequest) -> dict:
+    alias = get_active_db() or request.session.get("active_db") or "default"
+    return {
+        "is_local_dev": settings.DEBUG,
+        "active_db_alias": alias,
+    }
 
 
 def pending_tasks(request: HttpRequest) -> dict:
