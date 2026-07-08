@@ -36,11 +36,13 @@ document.addEventListener('DOMContentLoaded', function () {
    * y excepto los que sean ancestros de excludeToggle (submenús padres).
    */
   function closeOthers(excludeId, excludeToggle) {
+    var excludeMenu = document.getElementById(excludeId);
     document.querySelectorAll('[id$="-menu"]').forEach(function (otherMenu) {
-      const isSelf = otherMenu.id === excludeId;
-      const isAncestor = excludeToggle && otherMenu.contains(excludeToggle);
-      if (!isSelf && !isAncestor) {
-        const btn = document.querySelector('[data-dropdown="' + otherMenu.id + '"]');
+      var isSelf = otherMenu.id === excludeId;
+      var isAncestor = excludeToggle && otherMenu.contains(excludeToggle);
+      var isDescendant = excludeMenu && excludeMenu.contains(otherMenu);
+      if (!isSelf && !isAncestor && !isDescendant) {
+        var btn = document.querySelector('[data-dropdown="' + otherMenu.id + '"]');
         if (btn) closeMenu(otherMenu, btn);
       }
     });

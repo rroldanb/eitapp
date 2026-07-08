@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
       /* Cerrar otros dropdowns antes de abrir el actual */
       document.querySelectorAll('[id$="-menu"]').forEach(function (otherMenu) {
         if (otherMenu.id !== dropdownId) {
+          /* No cerrar ancestros (menús que contienen este toggle) */
+          if (toggle.closest('#' + otherMenu.id)) return;
+          /* No cerrar descendientes (menús dentro del menú actual) */
+          if (menu.querySelector('#' + otherMenu.id)) return;
           otherMenu.classList.add('hidden');
           const btn = document.querySelector('[data-dropdown="' + otherMenu.id + '"]');
           if (btn) btn.setAttribute('aria-expanded', 'false');
