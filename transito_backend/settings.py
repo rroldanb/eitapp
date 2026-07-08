@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
+from botocore.config import Config as BotoConfig
 
 load_dotenv()
 
@@ -194,16 +195,49 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# ── Almacenamiento: OCI Object Storage (S3-compatible) o local ──
+OCI_S3_ACCESS_KEY = os.getenv("OCI_S3_ACCESS_KEY", "")
+OCI_S3_SECRET_KEY = os.getenv("OCI_S3_SECRET_KEY", "")
+OCI_BUCKET_NAME = os.getenv("OCI_BUCKET_NAME", "")
+OCI_S3_ENDPOINT = os.getenv("OCI_S3_ENDPOINT", "")
+OCI_REGION = os.getenv("OCI_REGION", "us-phoenix-1")
+
+_use_s3 = all([OCI_S3_ACCESS_KEY, OCI_S3_SECRET_KEY, OCI_BUCKET_NAME, OCI_S3_ENDPOINT])
+
+if _use_s3:
+    THIRD_APPS += ["storages"]
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "access_key": OCI_S3_ACCESS_KEY,
+                "secret_key": OCI_S3_SECRET_KEY,
+                "bucket_name": OCI_BUCKET_NAME,
+                "endpoint_url": OCI_S3_ENDPOINT,
+                "region_name": OCI_REGION,
+                "default_acl": "public-read",
+                "querystring_auth": False,
+                "location": "media",
+                "addressing_style": "path",
+                "client_config": BotoConfig(
+                    s3={"addressing_style": "path"},
+                    signature_version="s3v4",
+                    request_checksum_calculation="when_required",
+                ),
+            },
+        },
+    }
+    STORAGES["staticfiles"] = {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    } if not DEBUG else {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    }
+    MEDIA_URL = f"{OCI_S3_ENDPOINT}/{OCI_BUCKET_NAME}/media/"
+else:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
 LOGIN_URL = "/signin"
-
-
-# Enable the WhiteNoise storage backend in production, which compresses static files
-# to reduce disk use and renames files with unique names for long-term caching
-if not DEBUG:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Default primary key field type

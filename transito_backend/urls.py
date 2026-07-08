@@ -55,4 +55,6 @@ if settings.DEBUG:
         path("__reload__/", include("django_browser_reload.urls")),
     ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Solo servir media local cuando no estamos usando OCI S3
+if settings.MEDIA_URL.startswith("/"):
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

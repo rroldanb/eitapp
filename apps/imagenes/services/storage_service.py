@@ -1,15 +1,12 @@
-import os
+import contextlib
+import io
 import uuid
 from typing import Any
 
 from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from PIL import Image, UnidentifiedImageError
-
-
-def _media_path(subdir: str, filename: str) -> str:
-    path = os.path.join(settings.MEDIA_ROOT, subdir)
-    os.makedirs(path, exist_ok=True)
-    return os.path.join(path, filename)
 
 
 def upload_project_image(file: Any) -> str:
@@ -24,22 +21,24 @@ def upload_project_image(file: Any) -> str:
         img = Image.alpha_composite(background, img)
     img = img.convert("RGB")
 
-    filename = f"{uuid.uuid4()}.webp"
-    file_path = _media_path("proyectos", filename)
-    img.save(file_path, format="WebP", quality=92, method=6)
-
-    return f"{settings.MEDIA_URL}proyectos/{filename}"
+    filename = f"proyectos/{uuid.uuid4()}.webp"
+    buffer = io.BytesIO()
+    img.save(buffer, format="WebP", quality=92, method=6)
+    saved = default_storage.save(filename, ContentFile(buffer.getvalue()))
+    return default_storage.url(saved)
 
 
 def delete_project_image(image_url: str | None) -> None:
     if not image_url:
         return
-    if not image_url.startswith(settings.MEDIA_URL):
+    media_url = settings.MEDIA_URL
+    if media_url not in image_url:
         return
-    rel_path = image_url[len(settings.MEDIA_URL) :].lstrip("/")
-    abs_path = os.path.join(settings.MEDIA_ROOT, rel_path)
-    if os.path.exists(abs_path):
-        os.remove(abs_path)
+    path = image_url.split(media_url, 1)[1].lstrip("/")
+    if not path:
+        return
+    with contextlib.suppress(Exception):
+        default_storage.delete(path)
 
 
 upload_image = upload_project_image

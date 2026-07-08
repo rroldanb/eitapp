@@ -11,6 +11,7 @@ Pillow>=10
 pandas>=2,<3
 requests>=2.30
 python-decouple>=3.8
+django-storages[boto3]>=1.14
 
 # Dev
 pytest>=8
