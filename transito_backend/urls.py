@@ -17,6 +17,7 @@ from apps.usuarios import views as user_views
 handler404 = "apps.usuarios.views.handler404_view"
 
 urlpatterns = [
+    path("api/", include("transito_backend.api_urls")),
     path("health/", user_views.healthcheck_view, name="health"),
     path("admin/generar-planilla/", descargar_plantilla, name="generar_planilla"),
     path("admin/migracion/", migracion_gui, name="migracion_gui"),

@@ -42,6 +42,7 @@ BASE_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
 ]
 
 THIRD_APPS = [
@@ -64,6 +65,11 @@ INSTALLED_APPS = BASE_APPS + THIRD_APPS + MY_APPS
 if DEBUG:
     # Add django_browser_reload only in DEBUG mode
     INSTALLED_APPS += ["django_browser_reload"]
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}
 
 TAILWIND_APP_NAME = "theme"
 TAILWIND_STANDALONE_START_COMMAND_ARGS = (
